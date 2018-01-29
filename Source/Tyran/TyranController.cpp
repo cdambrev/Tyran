@@ -11,4 +11,5 @@ void ATyranController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 ATyranController::ATyranController() {
 	isTyran = false;
+
 }

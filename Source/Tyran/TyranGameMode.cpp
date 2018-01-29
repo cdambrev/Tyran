@@ -4,6 +4,8 @@
 #include "TyranCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 #include "ManagerViewPawn.h"
+#include "EngineUtils.h"
+#include "Runtime/Engine/Classes/GameFramework/PlayerStart.h"
 
 ATyranGameMode::ATyranGameMode()
 {
@@ -34,16 +36,19 @@ ATyranGameMode::ATyranGameMode()
 
 void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 {
-	//AGameModeBase::PostLogin(NewPlayer);
+	
 	ATyranController * player = static_cast<ATyranController *>(NewPlayer);
+	TActorIterator<APlayerStart> spawnPoints(GetWorld());
 	if (!tyranController) {
 		tyranController = player;
 		player->setTyran(true);
-		AManagerViewPawn * tyranPawn = GetWorld()->SpawnActor<AManagerViewPawn>(defaultTyranPawn,FTransform(FVector(200.0f,873.0f,232.0f)));
+		//AManagerViewPawn * tyranPawn = GetWorld()->SpawnActor<AManagerViewPawn>(defaultTyranPawn,FTransform((*spawnPoints)->GetActorLocation()));
+		AManagerViewPawn * tyranPawn = GetWorld()->SpawnActor<AManagerViewPawn>(defaultTyranPawn,FTransform(FVector(-3370.0f, 390.0f, 1220.0f)));
 		player->Possess(tyranPawn);
+		
 	}
 	else {
-		ATyranCharacter * revChar = GetWorld()->SpawnActor<ATyranCharacter>(defaultRebelPawn, FTransform(FVector(200.0f, 873.0f, 232.0f)));
+		ATyranCharacter * revChar = GetWorld()->SpawnActor<ATyranCharacter>(defaultRebelPawn, FTransform((*spawnPoints)->GetActorLocation()));
 		player->Possess(revChar);
 	}
 }

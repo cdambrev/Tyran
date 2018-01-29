@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
 #include "GameFramework/Character.h"
+#include "Net/UnrealNetwork.h"
 #include "TyranCharacter.generated.h"
 
 UCLASS(config=Game)
@@ -28,6 +29,19 @@ public:
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Replicated)
+	bool isVisible;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isAlwaysVisible;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float angleOfVision;
+	float cosAoV;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int timeBeforeDisapear;
 
 protected:
 
@@ -58,6 +72,8 @@ protected:
 	/** Handler for when a touch input stops. */
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 
+	int timeSinceLastView;
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -68,5 +84,21 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+
+	UFUNCTION(BlueprintCallable, Category="Tyran")
+	void setVisible(bool b);
+
+	UFUNCTION(BlueprintCallable, Category="Tyran")
+	void setViewedThisTick();
+
+	UFUNCTION(BlueprintCallable, Category = "Tyran")
+	bool checkVisibility(AActor * actor);
+
+	UFUNCTION(BlueprintCallable, Category = "Tyran")
+	void tryToSee(ATyranCharacter * actor);
+
+	void Tick(float DeltaSeconds) override;
 };
 

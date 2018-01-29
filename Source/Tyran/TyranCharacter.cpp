@@ -8,6 +8,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Runtime/Engine/Classes/Engine/Engine.h"
+#include "TyranController.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -45,6 +47,16 @@ ATyranCharacter::ATyranCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+	isVisible = false;
+
+	isAlwaysVisible = false;
+
+	timeBeforeDisapear = 5;
+
+	angleOfVision = 75.0f;
+	cosAoV = cos( PI*(angleOfVision*2)/360 );
+
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -130,5 +142,67 @@ void ATyranCharacter::MoveRight(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
+	}
+}
+
+void ATyranCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ATyranCharacter, isVisible);
+}
+
+void ATyranCharacter::setVisible(bool b) {
+	isVisible = b;
+	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator) {
+		if (static_cast<ATyranController *>(&**Iterator)->IsLocalPlayerController() && static_cast<ATyranController *>(&**Iterator)->isTyran) {
+			SetActorHiddenInGame(!b);
+		}
+	}
+}
+
+void ATyranCharacter::setViewedThisTick()
+{
+	timeSinceLastView = 0;
+}
+
+bool ATyranCharacter::checkVisibility(AActor * actor)
+{
+	FVector dir = actor->GetActorLocation() - GetActorLocation();
+	dir.Normalize();
+	float cosA = FVector::DotProduct(GetActorForwardVector(),dir);
+	if (cosA > cosAoV) {
+		FCollisionObjectQueryParams objectQueryParams{};
+		FCollisionQueryParams queryParams{};
+		queryParams.AddIgnoredActor(this);
+		FHitResult resultHit{};
+		if (GetWorld()->LineTraceSingleByObjectType(resultHit, GetActorLocation(), actor->GetActorLocation(), objectQueryParams, queryParams)) {
+			if (&(*resultHit.Actor) == actor) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void ATyranCharacter::tryToSee(ATyranCharacter * actor)
+{
+	if (actor->isAlwaysVisible || checkVisibility(actor)) {
+		actor->setViewedThisTick();
+	}
+}
+
+void ATyranCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	if (!isAlwaysVisible) {
+		if (timeSinceLastView < timeBeforeDisapear) {
+			++timeSinceLastView;
+			if (timeSinceLastView >= timeBeforeDisapear) {
+				setVisible(false);
+			}
+			else {
+				setVisible(true);
+			}
+		}
 	}
 }

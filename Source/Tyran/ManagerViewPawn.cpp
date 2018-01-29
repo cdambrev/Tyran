@@ -29,6 +29,6 @@ void AManagerViewPawn::Tick(float DeltaTime)
 void AManagerViewPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	
 }
 
