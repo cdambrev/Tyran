@@ -26,4 +26,6 @@ public:
 	}
 
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+
+	void BeginPlay() override;
 };

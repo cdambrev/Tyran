@@ -10,6 +10,10 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
 #include "TyranController.h"
+#include "ManagerViewPawn.h"
+#include <EngineUtils.h>
+#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "Runtime/Engine/Classes/Components/LightComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -155,7 +159,8 @@ void ATyranCharacter::setVisible(bool b) {
 	isVisible = b;
 	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator) {
 		if (static_cast<ATyranController *>(&**Iterator)->IsLocalPlayerController() && static_cast<ATyranController *>(&**Iterator)->isTyran) {
-			SetActorHiddenInGame(!b);
+			//SetActorHiddenInGame(!b);
+			GetCapsuleComponent()->SetVisibility(b, true);
 		}
 	}
 }
@@ -202,6 +207,32 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 			}
 			else {
 				setVisible(true);
+			}
+		}
+	}
+	if (IsLocallyControlled()) {
+		if (!static_cast<ATyranController *>(GetController())->isTyran) {
+			TArray<AActor *> actors;
+			UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("TyranOnly"), actors);
+			for (AActor * a : actors) {
+				//a->SetActorTransform(FTransform{ FVector{ -10000,-10000,-10000 } });
+				GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Yellow, "TRY R");
+				auto c = static_cast<ULightComponentBase *>(a->GetComponentByClass(TSubclassOf<ULightComponentBase>{}));
+				if (c) {
+					c->SetVisibility(false, true);
+				}
+			}
+		}
+		else {
+			TArray<AActor *> actors;
+			UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("RevOnly"), actors);
+			for (AActor * a : actors) {
+				//a->SetActorTransform(FTransform{ FVector{ -10000,-10000,-10000 } });
+				GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Yellow, "TRY T");
+				auto c = static_cast<ULightComponentBase *>(a->GetComponentByClass(TSubclassOf<ULightComponentBase>{}));
+				if (c) {
+					c->SetVisibility(false, true);
+				}
 			}
 		}
 	}
