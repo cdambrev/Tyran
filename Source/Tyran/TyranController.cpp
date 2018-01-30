@@ -11,13 +11,6 @@ void ATyranController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ATyranController, isTyran);
 }
 
-void ATyranController::BeginPlay()
-{
-	Super::BeginPlay();
-
-}
-
-
 ATyranController::ATyranController() {
 	isTyran = false;
 

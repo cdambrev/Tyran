@@ -210,30 +210,4 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 			}
 		}
 	}
-	if (IsLocallyControlled()) {
-		if (!static_cast<ATyranController *>(GetController())->isTyran) {
-			TArray<AActor *> actors;
-			UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("TyranOnly"), actors);
-			for (AActor * a : actors) {
-				//a->SetActorTransform(FTransform{ FVector{ -10000,-10000,-10000 } });
-				GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Yellow, "TRY R");
-				auto c = static_cast<ULightComponentBase *>(a->GetComponentByClass(TSubclassOf<ULightComponentBase>{}));
-				if (c) {
-					c->SetVisibility(false, true);
-				}
-			}
-		}
-		else {
-			TArray<AActor *> actors;
-			UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("RevOnly"), actors);
-			for (AActor * a : actors) {
-				//a->SetActorTransform(FTransform{ FVector{ -10000,-10000,-10000 } });
-				GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Yellow, "TRY T");
-				auto c = static_cast<ULightComponentBase *>(a->GetComponentByClass(TSubclassOf<ULightComponentBase>{}));
-				if (c) {
-					c->SetVisibility(false, true);
-				}
-			}
-		}
-	}
 }
