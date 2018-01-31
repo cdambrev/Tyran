@@ -12,6 +12,11 @@
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
 
+FName ATyranCharacter::GetWeaponAttachPoint() const
+{
+	return WeaponAttachPoint;
+}
+
 ATyranCharacter::ATyranCharacter()
 {
 	// Set size for collision capsule
@@ -29,7 +34,7 @@ ATyranCharacter::ATyranCharacter()
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
-	GetCharacterMovement()->JumpZVelocity = 600.f;
+	GetCharacterMovement()->JumpZVelocity = 1000.0f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
@@ -54,8 +59,10 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATyranCharacter::JumpPressed);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ATyranCharacter::JumpReleased);
+
+	//PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ACharacter::);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ATyranCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ATyranCharacter::MoveRight);
@@ -90,6 +97,18 @@ void ATyranCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Locati
 void ATyranCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
 {
 		StopJumping();
+}
+
+void ATyranCharacter::JumpPressed()
+{
+	jumpPressed = true;
+	Jump();
+}
+
+void ATyranCharacter::JumpReleased()
+{
+	jumpPressed = false;
+	StopJumping();
 }
 
 void ATyranCharacter::TurnAtRate(float Rate)

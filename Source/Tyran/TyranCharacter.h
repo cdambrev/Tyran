@@ -18,6 +18,7 @@ class ATyranCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
 public:
 	ATyranCharacter();
 
@@ -29,7 +30,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool jumpPressed;
+
 protected:
+	/** socket or bone name for attaching weapon mesh */
+	UPROPERTY(EditDefaultsOnly, Category = Inventory)
+	FName WeaponAttachPoint;
 
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
@@ -58,6 +65,10 @@ protected:
 	/** Handler for when a touch input stops. */
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 
+	void JumpPressed();
+
+	void JumpReleased();
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -68,5 +79,8 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	/** get weapon attach point */
+	FName GetWeaponAttachPoint() const;
 };
 
