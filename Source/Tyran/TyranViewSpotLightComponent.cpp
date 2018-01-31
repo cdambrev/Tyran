@@ -5,7 +5,10 @@
 #include "TyranController.h"
 #include <Engine.h>
 
-
+UTyranViewSpotLightComponent::UTyranViewSpotLightComponent() {
+	angleOfVision = 75.0f;
+	cosAoV = cos(PI*(angleOfVision * 2) / 360);
+}
 
 void UTyranViewSpotLightComponent::BeginPlay()
 {
@@ -17,5 +20,31 @@ void UTyranViewSpotLightComponent::BeginPlay()
 	}
 	if (!tyran) {
 		SetVisibility(false);
+	}
+}
+
+bool UTyranViewSpotLightComponent::checkVisibility(AActor * actor)
+{
+	FVector dir = actor->GetActorLocation() - GetComponentTransform().GetLocation();
+	dir.Normalize();
+	float cosA = FVector::DotProduct(GetOwner()->GetActorForwardVector(), dir);
+	if (cosA > cos(PI*(angleOfVision * 2) / 360)) {
+		FCollisionObjectQueryParams objectQueryParams{};
+		FCollisionQueryParams queryParams{};
+		queryParams.AddIgnoredActor(GetOwner());
+		FHitResult resultHit{};
+		if (GetWorld()->LineTraceSingleByObjectType(resultHit, GetComponentTransform().GetLocation(), actor->GetActorLocation(), objectQueryParams, queryParams)) {
+			if (&(*resultHit.Actor) == actor) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void UTyranViewSpotLightComponent::tryToSee(ATyranCharacter * actor)
+{
+	if (actor->isAlwaysVisible || checkVisibility(actor)) {
+		actor->setViewedThisTick();
 	}
 }

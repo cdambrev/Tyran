@@ -57,9 +57,6 @@ ATyranCharacter::ATyranCharacter()
 
 	timeBeforeDisapear = 5;
 
-	angleOfVision = 75.0f;
-	cosAoV = cos( PI*(angleOfVision*2)/360 );
-
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -168,32 +165,6 @@ void ATyranCharacter::setVisible(bool b) {
 void ATyranCharacter::setViewedThisTick()
 {
 	timeSinceLastView = 0;
-}
-
-bool ATyranCharacter::checkVisibility(AActor * actor)
-{
-	FVector dir = actor->GetActorLocation() - GetActorLocation();
-	dir.Normalize();
-	float cosA = FVector::DotProduct(GetActorForwardVector(),dir);
-	if (cosA > cosAoV) {
-		FCollisionObjectQueryParams objectQueryParams{};
-		FCollisionQueryParams queryParams{};
-		queryParams.AddIgnoredActor(this);
-		FHitResult resultHit{};
-		if (GetWorld()->LineTraceSingleByObjectType(resultHit, GetActorLocation(), actor->GetActorLocation(), objectQueryParams, queryParams)) {
-			if (&(*resultHit.Actor) == actor) {
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-void ATyranCharacter::tryToSee(ATyranCharacter * actor)
-{
-	if (actor->isAlwaysVisible || checkVisibility(actor)) {
-		actor->setViewedThisTick();
-	}
 }
 
 void ATyranCharacter::Tick(float DeltaSeconds)

@@ -37,10 +37,6 @@ public:
 	bool isAlwaysVisible;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float angleOfVision;
-	float cosAoV;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int timeBeforeDisapear;
 
 protected:
@@ -92,12 +88,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Tyran")
 	void setViewedThisTick();
-
-	UFUNCTION(BlueprintCallable, Category = "Tyran")
-	bool checkVisibility(AActor * actor);
-
-	UFUNCTION(BlueprintCallable, Category = "Tyran")
-	void tryToSee(ATyranCharacter * actor);
 
 	void Tick(float DeltaSeconds) override;
 };
