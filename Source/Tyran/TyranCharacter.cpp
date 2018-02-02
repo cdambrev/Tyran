@@ -8,15 +8,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Weapon.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
-
-FName ATyranCharacter::GetWeaponAttachPoint() const
-{
-	return WeaponAttachPoint;
-}
-
 ATyranCharacter::ATyranCharacter()
 {
 	// Set size for collision capsule
@@ -50,6 +45,11 @@ ATyranCharacter::ATyranCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+
+	/* Noms des points d'attache tels que spécifiés dans le squelette du personnage */ 
+	WeaponAttachPoint = TEXT("WeaponSocket"); 
+	PelvisAttachPoint = TEXT("PelvisSocket"); 
+	SpineAttachPoint = TEXT("SpineSocket");
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -83,6 +83,95 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ATyranCharacter::OnResetVR);
 }
 
+
+FName ATyranCharacter::GetInventoryAttachPoint(EInventorySlot Slot) const
+{
+	/* Retourne le nom du socket */ 
+	switch (Slot) {
+	case EInventorySlot::Hands: 
+		return WeaponAttachPoint; 
+	case EInventorySlot::Primary: 
+		return SpineAttachPoint; 
+	case EInventorySlot::Secondary:
+		return PelvisAttachPoint;
+	default: 
+		// pas implémenté. 
+		return ""; 
+	}
+}
+
+void ATyranCharacter::AddWeapon(class AWeapon* Weapon)
+{
+	if (Weapon && Role == ROLE_Authority) { 
+		Weapon->OnEnterInventory(this); 
+		Inventory.AddUnique(Weapon); 
+
+		// Le premier item est équipé – en main
+		if (Inventory.Num() > 0) { 
+			EquipWeapon(Inventory[0]); 
+		} 
+	}
+}
+
+void ATyranCharacter::EquipWeapon(AWeapon * Weapon)
+{
+	if (Weapon) {
+		//if (Role == ROLE_Authority) { 
+			SetCurrentWeapon(Weapon); 
+		//} else { 
+		//	ServerEquipWeapon(Weapon); 
+		//} 
+	}
+}
+
+void ATyranCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents(); 
+	if (Role == ROLE_Authority) { 
+		SpawnDefaultInventory(); 
+	}
+}
+
+void ATyranCharacter::SpawnDefaultInventory()
+{
+	if (Role < ROLE_Authority) { 
+		return;
+	} 
+	
+	for (int32 i = 0; i < DefaultInventoryClasses.Num(); i++) { 
+		if (DefaultInventoryClasses[i]) {
+			FActorSpawnParameters SpawnInfo; 
+			SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn; 
+			AWeapon* NewWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultInventoryClasses[i], SpawnInfo); 
+
+			AddWeapon(NewWeapon); 
+		} 
+	}
+}
+
+void ATyranCharacter::SetCurrentWeapon(AWeapon * NewWeapon, AWeapon * LastWeapon)
+{
+	AWeapon* LocalLastWeapon = nullptr; 
+
+	if (LastWeapon) { 
+		LocalLastWeapon = LastWeapon; 
+	}
+	else if (NewWeapon != CurrentWeapon) { 
+		LocalLastWeapon = CurrentWeapon; 
+	} 
+	
+	// Déséquipper l'arme courante 
+	if (LocalLastWeapon) { 
+		LocalLastWeapon->OnUnEquip(); 
+	}
+	
+	CurrentWeapon = NewWeapon; 
+	
+	if (NewWeapon) { 
+		NewWeapon->SetOwningPawn(this); 
+		NewWeapon->OnEquip(); 
+	}
+}
 
 void ATyranCharacter::OnResetVR()
 {
@@ -151,3 +240,11 @@ void ATyranCharacter::MoveRight(float Value)
 		AddMovementInput(Direction, Value);
 	}
 }
+
+//bool ATyranCharacter::ServerEquipWeapon_Validate(AWeapon* Weapon) { 
+//	return true; 
+//} 
+//
+//void ATyranCharacter::ServerEquipWeapon_Implementation(AWeapon* Weapon) { 
+//	EquipWeapon(Weapon); 
+//}

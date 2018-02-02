@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "TyranTypes.h"
 #include "TyranCharacter.generated.h"
 
 UCLASS(config=Game)
@@ -33,11 +34,35 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool jumpPressed;
 
-protected:
-	/** socket or bone name for attaching weapon mesh */
-	UPROPERTY(EditDefaultsOnly, Category = Inventory)
-	FName WeaponAttachPoint;
+	/* Inventaire des armes */
+	UPROPERTY(Transient)
+	TArray<class AWeapon*> Inventory;
 
+protected:
+	/* Point d'attache pour les items en main et actifs */ 
+	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
+	FName WeaponAttachPoint; 
+	
+	/* Point d'attache pour les items à la ceinture. */ 
+	UPROPERTY(EditDefaultsOnly, Category = "Sockets") 
+	FName PelvisAttachPoint; 
+	
+	/* Point d'attache pour l'arme principale */
+	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
+	FName SpineAttachPoint;
+
+	/* Distance pour lacher un objet d'inventaire. */
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory") 
+	float DropItemDistance; 
+	
+	/* Armes de defaut */ 
+	UPROPERTY(EditDefaultsOnly, Category = Inventory) 
+	TArray<TSubclassOf<class AWeapon>> DefaultInventoryClasses;
+
+	UPROPERTY(Transient/*, ReplicatedUsing = OnRep_CurrentWeapon*/) 
+	class AWeapon* CurrentWeapon;
+
+protected:
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
 
@@ -69,7 +94,6 @@ protected:
 
 	void JumpReleased();
 
-protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
@@ -80,7 +104,24 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	/** get weapon attach point */
-	FName GetWeaponAttachPoint() const;
+	/* Retourne le point d'attache (socket) pour correspondre au socket du squelette */ 
+	FName GetInventoryAttachPoint(EInventorySlot Slot) const;
+
+	void AddWeapon(class AWeapon* Weapon);
+
+	void EquipWeapon(class AWeapon* Weapon);
+
+	virtual void PostInitializeComponents() override;
+
+	void SpawnDefaultInventory();
+
+	void SetCurrentWeapon(class AWeapon* NewWeapon, class AWeapon* LastWeapon = nullptr); 
+	
+	//UFUNCTION(Reliable, Server, WithValidation)
+	//void ServerEquipWeapon(AWeapon* Weapon);
+
+	/* La fonction OnRep utilise un paramètre pour la valeur précédente de la variable */ 
+	//UFUNCTION()
+	//void OnRep_CurrentWeapon(AWeapon* LastWeapon);
 };
 
