@@ -9,6 +9,12 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Weapon.h"
+#include "Runtime/Engine/Classes/Engine/Engine.h"
+#include "TyranController.h"
+#include "ManagerViewPawn.h"
+#include <EngineUtils.h>
+#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "Runtime/Engine/Classes/Components/LightComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -50,6 +56,14 @@ ATyranCharacter::ATyranCharacter()
 	WeaponAttachPoint = TEXT("WeaponSocket"); 
 	PelvisAttachPoint = TEXT("PelvisSocket"); 
 	SpineAttachPoint = TEXT("SpineSocket");
+
+	isVisible = false;
+
+	isAlwaysVisible = false;
+
+	timeBeforeDisapear = 5;
+
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -248,3 +262,40 @@ void ATyranCharacter::MoveRight(float Value)
 //void ATyranCharacter::ServerEquipWeapon_Implementation(AWeapon* Weapon) { 
 //	EquipWeapon(Weapon); 
 //}
+
+void ATyranCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ATyranCharacter, isVisible);
+}
+
+void ATyranCharacter::setVisible(bool b) {
+	isVisible = b;
+	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator) {
+		if (static_cast<ATyranController *>(&**Iterator)->IsLocalPlayerController() && static_cast<ATyranController *>(&**Iterator)->isTyran) {
+			//SetActorHiddenInGame(!b);
+			GetCapsuleComponent()->SetVisibility(b, true);
+		}
+	}
+}
+
+void ATyranCharacter::setViewedThisTick()
+{
+	timeSinceLastView = 0;
+}
+
+void ATyranCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	if (!isAlwaysVisible) {
+		if (timeSinceLastView < timeBeforeDisapear) {
+			++timeSinceLastView;
+			if (timeSinceLastView >= timeBeforeDisapear) {
+				setVisible(false);
+			}
+			else {
+				setVisible(true);
+			}
+		}
+	}
+}

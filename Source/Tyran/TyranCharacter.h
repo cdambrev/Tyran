@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
 #include "GameFramework/Character.h"
 #include "TyranTypes.h"
+#include "Net/UnrealNetwork.h"
 #include "TyranCharacter.generated.h"
 
 UCLASS(config=Game)
@@ -38,6 +39,15 @@ public:
 	UPROPERTY(Transient)
 	TArray<class AWeapon*> Inventory;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Replicated)
+	bool isVisible;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isAlwaysVisible;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int timeBeforeDisapear;
+
 protected:
 	/* Point d'attache pour les items en main et actifs */ 
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
@@ -61,6 +71,8 @@ protected:
 
 	UPROPERTY(Transient/*, ReplicatedUsing = OnRep_CurrentWeapon*/) 
 	class AWeapon* CurrentWeapon;
+
+	int timeSinceLastView;
 
 protected:
 	/** Resets HMD orientation in VR. */
@@ -123,5 +135,15 @@ public:
 	/* La fonction OnRep utilise un paramètre pour la valeur précédente de la variable */ 
 	//UFUNCTION()
 	//void OnRep_CurrentWeapon(AWeapon* LastWeapon);
+
+	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+
+	UFUNCTION(BlueprintCallable, Category="Tyran")
+	void setVisible(bool b);
+
+	UFUNCTION(BlueprintCallable, Category="Tyran")
+	void setViewedThisTick();
+
+	void Tick(float DeltaSeconds) override;
 };
 
