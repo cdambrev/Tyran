@@ -26,7 +26,7 @@ public:
 
 protected:
 	/** Le propriétaire */ 
-	UPROPERTY(Transient) 
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_MyPawn)
 	ATyranCharacter* MyPawn;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
@@ -56,6 +56,27 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Sounds") 
 	USoundCue* EquipSound;
+
+	bool bWantsToFire; 
+	bool bRefiring; 
+	float LastFireTime; 
+	bool bPlayingFireAnim; 
+	FTimerHandle HandleFiringTimerHandle; 
+	
+	UPROPERTY(EditDefaultsOnly) 
+	float TimeBetweenShots; 
+	UPROPERTY(EditDefaultsOnly, Category = "Sounds") 
+	USoundCue* FireSound; 
+	UPROPERTY(EditDefaultsOnly) 
+	UAnimMontage* FireAnim; 
+	UPROPERTY(EditDefaultsOnly) 
+	UParticleSystem* MuzzleFX; 
+	UPROPERTY(Transient) 
+	UParticleSystemComponent* MuzzlePSC; 
+	UPROPERTY(EditDefaultsOnly) 
+	FName MuzzleAttachPoint; 
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_BurstCounter) 
+	int32 BurstCounter;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -107,7 +128,43 @@ public:
 	
 	//UAudioComponent* PlayWeaponSound(USoundCue* SoundToPlay);
 
+	void StartFire(); 
+	void StopFire(); 
+	
+	UFUNCTION(Reliable, Server, WithValidation) 
+	void ServerStartFire(); 
+	UFUNCTION(Reliable, Server, WithValidation) 
+	void ServerStopFire(); 
+	
+	void OnBurstStarted(); 
+	void OnBurstFinished(); 
+	
+	virtual void HandleFiring(); // Pourra être surchargée dans les armes 
+	bool CanFire() const; 
+	
+	virtual void SimulateWeaponFire(); 
+	virtual void StopSimulatingWeaponFire(); 
+	
+	/* Avec PURE_VIRTUAL, nous n'avons pas à implanter la fonction ici, 
+	nous l'implanterons dans les classes dérivées 
+	(dans WeaponInstant.cpp et Flashlight.cpp) */ 
+	virtual void FireWeapon() PURE_VIRTUAL(AWeapon::FireWeapon, ); 
+	
+	UFUNCTION(Reliable, Server, WithValidation) 
+	void ServerHandleFiring(); 
+	
+	UFUNCTION() 
+	void OnRep_BurstCounter(); 
+	
+	FVector GetMuzzleLocation() const; 
+	FVector GetMuzzleDirection() const;
+
 	/** Obtenir le mesh de l'arme */ 
 	UFUNCTION(BlueprintCallable, Category = "Game|Weapon") 
 	USkeletalMeshComponent* GetWeaponMesh() const;
+
+	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+
+	UFUNCTION() 
+	void OnRep_MyPawn();
 };

@@ -57,6 +57,8 @@ ATyranCharacter::ATyranCharacter()
 	PelvisAttachPoint = TEXT("PelvisSocket"); 
 	SpineAttachPoint = TEXT("SpineSocket");
 
+	bWantsToFire = false;
+
 	isVisible = false;
 
 	isAlwaysVisible = false;
@@ -77,6 +79,8 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ATyranCharacter::JumpReleased);
 
 	//PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ACharacter::);
+	InputComponent->BindAction("Fire", IE_Pressed, this, &ATyranCharacter::OnStartFire);
+	InputComponent->BindAction("Fire", IE_Released, this, &ATyranCharacter::OnStopFire);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ATyranCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ATyranCharacter::MoveRight);
@@ -130,11 +134,11 @@ void ATyranCharacter::AddWeapon(class AWeapon* Weapon)
 void ATyranCharacter::EquipWeapon(AWeapon * Weapon)
 {
 	if (Weapon) {
-		//if (Role == ROLE_Authority) { 
+		if (Role == ROLE_Authority) { 
 			SetCurrentWeapon(Weapon); 
-		//} else { 
-		//	ServerEquipWeapon(Weapon); 
-		//} 
+		} else { 
+			ServerEquipWeapon(Weapon); 
+		} 
 	}
 }
 
@@ -185,6 +189,43 @@ void ATyranCharacter::SetCurrentWeapon(AWeapon * NewWeapon, AWeapon * LastWeapon
 		NewWeapon->SetOwningPawn(this); 
 		NewWeapon->OnEquip(); 
 	}
+}
+
+void ATyranCharacter::OnStartFire()
+{
+	StartWeaponFire();
+}
+
+void ATyranCharacter::OnStopFire()
+{
+	StopWeaponFire();
+}
+
+void ATyranCharacter::StartWeaponFire()
+{
+	if (!bWantsToFire) { 
+		bWantsToFire = true; 
+		if (CurrentWeapon) { 
+			CurrentWeapon->StartFire(); 
+		} 
+	}
+}
+
+void ATyranCharacter::StopWeaponFire()
+{
+	if (bWantsToFire) { 
+		bWantsToFire = false; 
+		if (CurrentWeapon) { 
+			CurrentWeapon->StopFire(); 
+		} 
+	}
+}
+
+bool ATyranCharacter::CanFire() const
+{
+	bool result = true; 
+	/* Nous ajouterons ici divers test permettant de déterminer si le personnage peut tirer */ 
+	return result;
 }
 
 void ATyranCharacter::OnResetVR()
@@ -255,18 +296,24 @@ void ATyranCharacter::MoveRight(float Value)
 	}
 }
 
-//bool ATyranCharacter::ServerEquipWeapon_Validate(AWeapon* Weapon) { 
-//	return true; 
-//} 
-//
-//void ATyranCharacter::ServerEquipWeapon_Implementation(AWeapon* Weapon) { 
-//	EquipWeapon(Weapon); 
-//}
+bool ATyranCharacter::ServerEquipWeapon_Validate(AWeapon* Weapon) { 
+	return true; 
+} 
+
+void ATyranCharacter::ServerEquipWeapon_Implementation(AWeapon* Weapon) { 
+	EquipWeapon(Weapon); 
+}
+
+void ATyranCharacter::OnRep_CurrentWeapon(AWeapon* LastWeapon) {
+	SetCurrentWeapon(CurrentWeapon, LastWeapon);
+}
 
 void ATyranCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ATyranCharacter, isVisible);
+	DOREPLIFETIME(ATyranCharacter, Inventory);
+	DOREPLIFETIME(ATyranCharacter, CurrentWeapon);
 }
 
 void ATyranCharacter::setVisible(bool b) {

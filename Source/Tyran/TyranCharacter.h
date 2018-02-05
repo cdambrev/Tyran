@@ -36,7 +36,7 @@ public:
 	bool jumpPressed;
 
 	/* Inventaire des armes */
-	UPROPERTY(Transient)
+	UPROPERTY(Transient, Replicated)
 	TArray<class AWeapon*> Inventory;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Replicated)
@@ -69,10 +69,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = Inventory) 
 	TArray<TSubclassOf<class AWeapon>> DefaultInventoryClasses;
 
-	UPROPERTY(Transient/*, ReplicatedUsing = OnRep_CurrentWeapon*/) 
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_CurrentWeapon) 
 	class AWeapon* CurrentWeapon;
 
 	int timeSinceLastView;
+
+	bool bWantsToFire;
 
 protected:
 	/** Resets HMD orientation in VR. */
@@ -128,13 +130,23 @@ public:
 	void SpawnDefaultInventory();
 
 	void SetCurrentWeapon(class AWeapon* NewWeapon, class AWeapon* LastWeapon = nullptr); 
+
+	void OnStartFire(); 
 	
-	//UFUNCTION(Reliable, Server, WithValidation)
-	//void ServerEquipWeapon(AWeapon* Weapon);
+	void OnStopFire();
+
+	void StartWeaponFire(); 
+	
+	void StopWeaponFire();
+
+	bool CanFire() const;
+	
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerEquipWeapon(AWeapon* Weapon);
 
 	/* La fonction OnRep utilise un paramètre pour la valeur précédente de la variable */ 
-	//UFUNCTION()
-	//void OnRep_CurrentWeapon(AWeapon* LastWeapon);
+	UFUNCTION()
+	void OnRep_CurrentWeapon(AWeapon* LastWeapon);
 
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 
