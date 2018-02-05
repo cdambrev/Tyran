@@ -6,6 +6,7 @@
 #include "ManagerViewPawn.h"
 #include "EngineUtils.h"
 #include "Runtime/Engine/Classes/GameFramework/PlayerStart.h"
+#include "Blueprint/UserWidget.h"
 
 ATyranGameMode::ATyranGameMode()
 {
@@ -52,4 +53,35 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 		ATyranCharacter * revChar = GetWorld()->SpawnActor<ATyranCharacter>(defaultRebelPawn, FTransform((*spawnPoints)->GetActorLocation()));
 		player->Possess(revChar);
 	}
+
+}
+
+void ATyranGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (HUDWidgetClass != nullptr) {
+		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
+		if (CurrentWidget != nullptr) {
+			CurrentWidget->AddToViewport();
+		}
+	}
+	//TimeLeft = GameDuration;
+}
+
+FTimespan  ATyranGameMode::GetTimeLeft() const {
+	return TimeLeft;
+}
+
+void ATyranGameMode::UpdateTimeLeft(const FTimespan& deltat) {
+	if (TimeLeft>0)
+	{
+		TimeLeft -= deltat;
+	}
+}
+
+
+
+void ATyranGameMode::InitTimeLeft(const FTimespan& init) {
+	TimeLeft = init;
 }
