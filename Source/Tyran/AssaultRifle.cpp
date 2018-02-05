@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AssaultRifle.h"
+#include "ImpactEffect.h"
 
 #define COLLISION_WEAPON ECC_GameTraceChannel1
 
@@ -11,6 +12,8 @@ AAssaultRifle::AAssaultRifle()
 	WeaponRange = 10000; 
 	AllowedViewDotHitDir = 0.8f; 
 	ClientSideHitLeeway = 200.0f;
+	MinimumProjectileSpawnDistance = 800; 
+	TracerRoundInterval = 3;
 
 	StorageSlot = EInventorySlot::Secondary; 
 	RifleAttachPoint = TEXT("RifleSocket"); 
@@ -192,11 +195,76 @@ void AAssaultRifle::DealDamage(const FHitResult & Impact, const FVector & ShootD
 	Impact.GetActor()->TakeDamage(PointDmg.Damage, PointDmg, MyPawn->Controller, this);
 }
 
+void AAssaultRifle::SimulateInstantHit(const FVector & Origin)
+{
+	const FVector StartTrace = Origin; 
+	const FVector AimDir = GetAdjustedAim(); 
+	const FVector EndTrace = StartTrace + (AimDir * WeaponRange); 
+	const FHitResult Impact = WeaponTrace(StartTrace, EndTrace); 
+	if (Impact.bBlockingHit) { 
+		SpawnImpactEffects(Impact); 
+		SpawnTrailEffects(Impact.ImpactPoint); 
+	} else { 
+		SpawnTrailEffects(EndTrace); 
+	}
+}
+
+void AAssaultRifle::SpawnImpactEffects(const FHitResult & Impact)
+{
+	if (ImpactTemplate && Impact.bBlockingHit) { 
+		/* Cette prépare un acteur à apparaître (spawn), mais demandera un autre appel pour finir 
+		le processus de création (d'incarnation?). Nous devons manipuler certaines propriétés
+		avant d'entrer dans le niveau */ 
+		AImpactEffect* EffectActor = GetWorld()->SpawnActorDeferred<AImpactEffect>
+			(ImpactTemplate, FTransform(Impact.ImpactPoint.Rotation(), Impact.ImpactPoint), 
+			nullptr, 
+			nullptr, 
+			ESpawnActorCollisionHandlingMethod::AlwaysSpawn); 
+		
+		if (EffectActor) { 
+			EffectActor->SurfaceHit = Impact; 
+			UGameplayStatics::FinishSpawningActor(EffectActor, FTransform(Impact.ImpactNormal.Rotation(), Impact.ImpactPoint)); 
+		} 
+	}
+}
+
+void AAssaultRifle::SpawnTrailEffects(const FVector & EndPoint)
+{
+	// Conserver le compte pour les effets 
+	BulletsShotCount++;
+	
+	const FVector Origin = GetMuzzleLocation();
+	FVector ShootDir = EndPoint - Origin;
+	
+	// Faire apparaître l'effet seulement si une distance minimale est respectée. 
+	if (ShootDir.Size() < MinimumProjectileSpawnDistance) 
+		return; 
+	
+	if (BulletsShotCount % TracerRoundInterval == 0) { 
+		if (TracerFX) { 
+			ShootDir.Normalize();
+			UGameplayStatics::SpawnEmitterAtLocation(this, TracerFX, Origin, ShootDir.Rotation()); 
+		} 
+	} else { 
+		// Ignorer les trainées lorsqu'elles sont créées par nous. 
+		ATyranCharacter* OwningPawn = MyPawn; 
+		if (OwningPawn && OwningPawn->IsLocallyControlled())
+			return;
+		
+		if (TrailFX) { 
+			UParticleSystemComponent* TrailPSC = UGameplayStatics::SpawnEmitterAtLocation(this, TrailFX, Origin); 
+			if (TrailPSC) { 
+				TrailPSC->SetVectorParameter(TrailTargetParam, EndPoint); 
+			}
+		}
+	}
+}
+
 void AAssaultRifle::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps); 
 	DOREPLIFETIME(AAssaultRifle, bIsActive);
-	DOREPLIFETIME_CONDITION(AWeaponInstant, HitOriginNotify, COND_SkipOwner);
+	DOREPLIFETIME_CONDITION(AAssaultRifle, HitOriginNotify, COND_SkipOwner);
 }
 
 void AAssaultRifle::OnEquipFinished()

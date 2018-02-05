@@ -43,6 +43,29 @@ class TYRAN_API AAssaultRifle : public AWeapon
 	
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_IsActive)
 	bool bIsActive;
+
+	/* Effet joué lorsqu'une surface est atteinte. */
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class AImpactEffect> ImpactTemplate; 
+	
+	UPROPERTY(EditDefaultsOnly) 
+	FName TrailTargetParam;
+	
+	UPROPERTY(EditDefaultsOnly)
+	UParticleSystem* TrailFX;
+	
+	UPROPERTY(EditDefaultsOnly) 
+	UParticleSystem* TracerFX; 
+	
+	/* Distance minimale pour faire apparaître les traces de balle. */ 
+	UPROPERTY(EditDefaultsOnly) 
+	float MinimumProjectileSpawnDistance;
+	
+	UPROPERTY(EditDefaultsOnly)
+	int32 TracerRoundInterval; 
+	
+	/* Nous comptons les coups */
+	int32 BulletsShotCount;
 	
 public:
 	AAssaultRifle();	
@@ -50,15 +73,24 @@ public:
 	virtual void FireWeapon() override;
 	FVector GetAdjustedAim() const;
 	FVector GetCameraDamageStartLocation(const FVector& AimDir) const;
+
 	FHitResult WeaponTrace(const FVector& TraceFrom, const FVector& TraceTo) const;
+
 	void ProcessInstantHit(const FHitResult& Impact, const FVector& Origin, const FVector& ShootDir);
+
 	UFUNCTION(Reliable, Server, WithValidation) 
 	void ServerNotifyHit(const FHitResult Impact, FVector_NetQuantizeNormal ShootDir);
 	UFUNCTION(Reliable, Server, WithValidation) 
 	void ServerNotifyMiss(FVector_NetQuantizeNormal ShootDir);
+
 	void ProcessInstantHitConfirmed(const FHitResult& Impact, const FVector& Origin, const FVector& ShootDir);
+
 	bool ShouldDealDamage(AActor* TestActor) const;
 	void DealDamage(const FHitResult& Impact, const FVector& ShootDir);
+
+	void SimulateInstantHit(const FVector& Origin);
+	void SpawnImpactEffects(const FHitResult& Impact);
+	void SpawnTrailEffects(const FVector& EndPoint);
 
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override; 
 	virtual void OnEquipFinished() override; 

@@ -32,8 +32,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool jumpPressed;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mouvement") 
+	bool CrouchButtonDown;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Mouvement")
+	bool JumpButtonDown;
 
 	/* Inventaire des armes */
 	UPROPERTY(Transient, Replicated)
@@ -104,9 +106,12 @@ protected:
 	/** Handler for when a touch input stops. */
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 
-	void JumpPressed();
+	// Quand la barre d'espacement est appuyée ou relâchée 
+	void OnStartJump(); 
+	void OnStopJump();
 
-	void JumpReleased();
+	// Quand la touche Crouch Toggle est appuyée 
+	void OnCrouchToggle();
 
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

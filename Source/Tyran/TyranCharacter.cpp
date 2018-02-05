@@ -28,15 +28,18 @@ ATyranCharacter::ATyranCharacter()
 	BaseLookUpRate = 45.f;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
-	bUseControllerRotationRoll = false;
+	//bUseControllerRotationPitch = false;
+	//bUseControllerRotationYaw = false;
+	//bUseControllerRotationRoll = false;
 
 	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
+	//GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
+	//GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->JumpZVelocity = 400.0f;
 	GetCharacterMovement()->AirControl = 0.2f;
+
+	// Permettre le crouching 
+	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -75,10 +78,11 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATyranCharacter::JumpPressed);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ATyranCharacter::JumpReleased);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATyranCharacter::OnStartJump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ATyranCharacter::OnStopJump);
 
-	//PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ACharacter::);
+	InputComponent->BindAction("CrouchToggle", IE_Released, this, &ATyranCharacter::OnCrouchToggle);
+
 	InputComponent->BindAction("Fire", IE_Pressed, this, &ATyranCharacter::OnStartFire);
 	InputComponent->BindAction("Fire", IE_Released, this, &ATyranCharacter::OnStopFire);
 
@@ -243,16 +247,33 @@ void ATyranCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Locati
 		StopJumping();
 }
 
-void ATyranCharacter::JumpPressed()
+void ATyranCharacter::OnStartJump()
 {
-	jumpPressed = true;
-	Jump();
+	// si le personnage est accroupi, il se relève avant de sauter 
+	if (bIsCrouched) { 
+		CrouchButtonDown = false; 
+		UnCrouch(); 
+	} 
+	bPressedJump = true; 
+	JumpButtonDown = true;
 }
 
-void ATyranCharacter::JumpReleased()
+void ATyranCharacter::OnStopJump()
 {
-	jumpPressed = false;
-	StopJumping();
+	bPressedJump = false;
+	JumpButtonDown = false;
+}
+
+void ATyranCharacter::OnCrouchToggle()
+{
+	// Si nous sommes déjà accroupis, CanCrouch retourne false. 
+	if (CanCrouch()) { 
+		CrouchButtonDown = true; 
+		Crouch();
+	} else { 
+		CrouchButtonDown = false; 
+		UnCrouch(); 
+	}
 }
 
 void ATyranCharacter::TurnAtRate(float Rate)
