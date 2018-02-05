@@ -10,7 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
 #include "TyranController.h"
-#include "ManagerViewPawn.h"
+//#include "ManagerViewPawn.h"
 #include <EngineUtils.h>
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
