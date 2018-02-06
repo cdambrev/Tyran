@@ -7,11 +7,12 @@
 #include "EngineUtils.h"
 #include "Runtime/Engine/Classes/GameFramework/PlayerStart.h"
 #include "Blueprint/UserWidget.h"
+#include "TyranGameState.h"
 
 ATyranGameMode::ATyranGameMode()
 {
-
 	DefaultPawnClass = NULL;
+
 
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPersonCPP/Blueprints/ThirdPersonCharacter"));
@@ -33,6 +34,13 @@ ATyranGameMode::ATyranGameMode()
 	}
 
 	tyranController = nullptr;
+
+	/*GameStateClass = ATyranGameState::StaticClass();*/
+	static ConstructorHelpers::FClassFinder<AGameStateBase> GameStateBPClass(TEXT("/Game/Blueprints/BP_TyranGameState"));
+	if (GameStateBPClass.Class != NULL)
+	{
+		GameStateClass = GameStateBPClass.Class;
+	}
 }
 
 void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
@@ -56,32 +64,3 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 
 }
 
-void ATyranGameMode::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (HUDWidgetClass != nullptr) {
-		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass);
-		if (CurrentWidget != nullptr) {
-			CurrentWidget->AddToViewport();
-		}
-	}
-	//TimeLeft = GameDuration;
-}
-
-FTimespan  ATyranGameMode::GetTimeLeft() const {
-	return TimeLeft;
-}
-
-void ATyranGameMode::UpdateTimeLeft(const FTimespan& deltat) {
-	if (TimeLeft>0)
-	{
-		TimeLeft -= deltat;
-	}
-}
-
-
-
-void ATyranGameMode::InitTimeLeft(const FTimespan& init) {
-	TimeLeft = init;
-}
