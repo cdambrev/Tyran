@@ -16,7 +16,7 @@ ATyranGameState::ATyranGameState(){
 }
 
 FTimespan  ATyranGameState::GetTimeLeft() const {
-	return FTimespan::FromSeconds(GameDuration.GetTotalSeconds()-GetServerWorldTimeSeconds());
+	return FTimespan::FromSeconds(GameDuration-GetServerWorldTimeSeconds());
 }
 
 

@@ -28,8 +28,8 @@ public:
 		class UUserWidget* CurrentWidget;
 
 	/** The duration of the game */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timer")
-		FTimespan GameDuration;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Timer")
+		float GameDuration;
 
 
 	/** Get the time left */
