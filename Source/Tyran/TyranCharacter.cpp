@@ -162,6 +162,10 @@ void ATyranCharacter::setVisible(bool b) {
 	}
 }
 
+EAlignement ATyranCharacter::getAlignement() {
+	return alignement;
+}
+
 void ATyranCharacter::setViewedThisTick()
 {
 	timeSinceLastView = 0;

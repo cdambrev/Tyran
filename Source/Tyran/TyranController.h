@@ -7,6 +7,7 @@
 #include "Net/UnrealNetwork.h"
 #include "TyranController.generated.h"
 
+
 /**
  * 
  */
@@ -23,7 +24,14 @@ public:
 
 	void setTyran(bool b) {
 		isTyran = b;
+		if (b) {
+			bShowMouseCursor = true;
+			bEnableClickEvents = true;
+			//InputComponent->BindAction("MouseLeftClicked", IE_Pressed, this, onLeftClick);
+		}
 	}
 
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+
+	//void onLeftClick();
 };
