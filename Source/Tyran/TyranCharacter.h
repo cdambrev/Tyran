@@ -19,6 +19,10 @@ class ATyranCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
+	//Camera pour capturer la map par dessus et ensuite transfere le resultat sur un affichage 2D
+// 	UPROPERTY()
+// 		ACaptureMiniMap* captureMiniMap;
 public:
 	ATyranCharacter();
 

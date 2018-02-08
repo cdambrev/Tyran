@@ -5,6 +5,7 @@
 #include "Core.h"
 #include "GameFramework/PlayerController.h"
 #include "Net/UnrealNetwork.h"
+#include "CaptureMiniMap.h"
 #include "TyranController.generated.h"
 
 /**
@@ -20,6 +21,7 @@ public:
 
 	UPROPERTY(Transient, Replicated)
 	bool isTyran;
+
 
 	void setTyran(bool b) {
 		isTyran = b;
