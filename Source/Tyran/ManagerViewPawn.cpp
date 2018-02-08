@@ -69,8 +69,8 @@ void AManagerViewPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	//Hook up every-frame handling for our four axes
 	PlayerInputComponent->BindAxis("MoveForward", this, &AManagerViewPawn::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AManagerViewPawn::MoveRight);
-	PlayerInputComponent->BindAxis("CameraPitch", this, &AManagerViewPawn::PitchCamera);
-	PlayerInputComponent->BindAxis("CameraYaw", this, &AManagerViewPawn::YawCamera);
+	//PlayerInputComponent->BindAxis("CameraPitch", this, &AManagerViewPawn::PitchCamera);
+	//PlayerInputComponent->BindAxis("CameraYaw", this, &AManagerViewPawn::YawCamera);
 
 	// double speed (WASD +Shift)
 	PlayerInputComponent->BindAxis("FastMove", this, &AManagerViewPawn::FastMoveInput);
