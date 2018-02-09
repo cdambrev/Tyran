@@ -3,6 +3,9 @@
 #include "ManagerViewPawn.h"
 #include "GameFramework/Controller.h"
 #include "Components/InputComponent.h"
+#include "EngineUtils.h"
+#include "BuildingSlot.h"
+#include "Engine/Engine.h"
 
 
 /***************/
@@ -135,6 +138,28 @@ void AManagerViewPawn::FastMoveInput(float Direction) {
 
 }
 
+void AManagerViewPawn::enterBuildMode(TSubclassOf<ABuilding> building, TSubclassOf<ABuildingHint> buildHint)
+{
+	if (buildMode) {
+		RightClickAction();
+	}
+	currBuild = GetWorld()->SpawnActor<ABuildingHint>(buildHint, GetTransform());
+	buildClass = building;
+	buildMode = true;
+}
+
+void AManagerViewPawn::leftClickAction()
+{
+}
+
+void AManagerViewPawn::RightClickAction()
+{
+	if (buildMode) {
+		buildMode = false;
+		currBuild->Destroy();
+	}
+}
+
 // Called every frame
 void AManagerViewPawn::Tick(float DeltaTime)
 {
@@ -181,5 +206,24 @@ void AManagerViewPawn::Tick(float DeltaTime)
 		}
 
 		
+	}
+
+	if (buildMode) {
+		FCollisionObjectQueryParams objectQueryParams{};
+		FCollisionQueryParams queryParams{};
+		queryParams.AddIgnoredActor(GetOwner());
+		FHitResult resultHit{};
+		FVector mouseLocation;
+		FVector mouseDirection;
+		if (static_cast<APlayerController *>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection)) {
+			if (GetWorld()->LineTraceSingleByObjectType(resultHit, mouseLocation, mouseLocation + 10000*mouseDirection, objectQueryParams, queryParams)) {
+				if (resultHit.Actor.IsValid() && (&*resultHit.Actor)->IsA(ABuildingSlot::StaticClass())) {
+					currBuild->TeleportTo((&*resultHit.Actor)->GetActorLocation(), (&*resultHit.Actor)->GetActorRotation());
+				}
+				else {
+					currBuild->TeleportTo(resultHit.ImpactPoint, FRotator{ 0,0,0 });
+				}
+			}
+		}
 	}
 }

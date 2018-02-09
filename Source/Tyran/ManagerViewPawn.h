@@ -8,6 +8,8 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Building.h"
+#include "BuildingHint.h"
 #include "ManagerViewPawn.generated.h"
 
 UCLASS()
@@ -37,6 +39,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Camera")
 	float SpringArmLength = 400.f;
 
+	bool buildMode = false;
+
+	ABuildingHint * currBuild = nullptr;
+	TSubclassOf<ABuilding> buildClass;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -58,8 +65,14 @@ protected:
 
 	void ZoomOut();
 
-
 	void FastMoveInput(float Direction);
+
+	UFUNCTION(BlueprintCallable)
+	void enterBuildMode(TSubclassOf<ABuilding> building, TSubclassOf<ABuildingHint> buildHint);
+
+	void leftClickAction();
+
+	void RightClickAction();
 
 public:	
 	// Called every frame
