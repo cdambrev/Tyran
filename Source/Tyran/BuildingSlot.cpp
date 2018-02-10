@@ -28,5 +28,7 @@ void ABuildingSlot::build(TSubclassOf<ABuilding> type)
 void ABuildingSlot::BeginPlay()
 {
 	Super::BeginPlay();
-	build(defaultBuilding);
+	if (Role == ROLE_Authority) {
+		build(defaultBuilding);
+	}
 }

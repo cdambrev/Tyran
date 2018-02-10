@@ -28,5 +28,10 @@ public:
 
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 
+	void SetPawn(APawn* InPawn) override;
+
+	UFUNCTION(Reliable, Client)
+	void initOnTyranClient();
+
 	//void onLeftClick();
 };

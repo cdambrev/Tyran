@@ -4,7 +4,6 @@
 #include "GameFramework/Controller.h"
 #include "Components/InputComponent.h"
 #include "EngineUtils.h"
-#include "BuildingSlot.h"
 #include "Engine/Engine.h"
 
 
@@ -48,6 +47,7 @@ void AManagerViewPawn::BeginPlay()
 	//	PC->bEnableClickEvents = true;
 	//	PC->bEnableMouseOverEvents = true;
 	//}
+
 }
 
 /********/
@@ -77,6 +77,9 @@ void AManagerViewPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	// double speed (WASD +Shift)
 	PlayerInputComponent->BindAxis("FastMove", this, &AManagerViewPawn::FastMoveInput);
+
+	PlayerInputComponent->BindAction("TyranSelectAndAct", IE_Pressed, this, &AManagerViewPawn::leftClickAction);
+	PlayerInputComponent->BindAction("TyranOrderAndCancel", IE_Pressed, this, &AManagerViewPawn::RightClickAction);
 
 }
 
@@ -150,6 +153,26 @@ void AManagerViewPawn::enterBuildMode(TSubclassOf<ABuilding> building, TSubclass
 
 void AManagerViewPawn::leftClickAction()
 {
+	if (buildMode) {
+		FCollisionQueryParams queryParams{};
+		queryParams.AddIgnoredActor(GetOwner());
+		FHitResult resultHit{};
+		FVector mouseLocation;
+		FVector mouseDirection;
+		if (static_cast<APlayerController *>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection)) {
+			if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_GameTraceChannel1, queryParams)) {
+				if (resultHit.Actor.IsValid() && (&*resultHit.Actor)->IsA(ABuildingSlot::StaticClass())) {
+					callBuildOnSlot(static_cast<ABuildingSlot *>(&*resultHit.Actor), buildClass);
+					buildMode = false;
+					currBuild->Destroy();
+				}
+				else {
+					currBuild->TeleportTo(resultHit.ImpactPoint, FRotator{ 0,0,0 });
+					currBuild->setValidPosition(false);
+				}
+			}
+		}
+	}
 }
 
 void AManagerViewPawn::RightClickAction()
@@ -158,6 +181,16 @@ void AManagerViewPawn::RightClickAction()
 		buildMode = false;
 		currBuild->Destroy();
 	}
+}
+
+void AManagerViewPawn::callBuildOnSlot_Implementation(ABuildingSlot * slot, TSubclassOf<ABuilding> tBuildClass)
+{
+	slot->build(tBuildClass);
+}
+
+bool AManagerViewPawn::callBuildOnSlot_Validate(ABuildingSlot * slot, TSubclassOf<ABuilding> tBuildClass)
+{
+	return true;
 }
 
 // Called every frame
@@ -209,19 +242,20 @@ void AManagerViewPawn::Tick(float DeltaTime)
 	}
 
 	if (buildMode) {
-		FCollisionObjectQueryParams objectQueryParams{};
 		FCollisionQueryParams queryParams{};
 		queryParams.AddIgnoredActor(GetOwner());
 		FHitResult resultHit{};
 		FVector mouseLocation;
 		FVector mouseDirection;
 		if (static_cast<APlayerController *>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection)) {
-			if (GetWorld()->LineTraceSingleByObjectType(resultHit, mouseLocation, mouseLocation + 10000*mouseDirection, objectQueryParams, queryParams)) {
+			if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000*mouseDirection, ECollisionChannel::ECC_GameTraceChannel1, queryParams)) {
 				if (resultHit.Actor.IsValid() && (&*resultHit.Actor)->IsA(ABuildingSlot::StaticClass())) {
 					currBuild->TeleportTo((&*resultHit.Actor)->GetActorLocation(), (&*resultHit.Actor)->GetActorRotation());
+					currBuild->setValidPosition(true);
 				}
 				else {
 					currBuild->TeleportTo(resultHit.ImpactPoint, FRotator{ 0,0,0 });
+					currBuild->setValidPosition(false);
 				}
 			}
 		}

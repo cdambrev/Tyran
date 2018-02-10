@@ -10,6 +10,7 @@
 #include "Camera/CameraComponent.h"
 #include "Building.h"
 #include "BuildingHint.h"
+#include "BuildingSlot.h"
 #include "ManagerViewPawn.generated.h"
 
 UCLASS()
@@ -73,6 +74,9 @@ protected:
 	void leftClickAction();
 
 	void RightClickAction();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void callBuildOnSlot(ABuildingSlot * slot, TSubclassOf<ABuilding> buildClass);
 
 public:	
 	// Called every frame

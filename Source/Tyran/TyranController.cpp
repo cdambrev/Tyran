@@ -15,18 +15,27 @@ void ATyranController::setTyran(bool b)
 {
 	isTyran = b;
 	if (b) {
-		bShowMouseCursor = true;
-		bEnableClickEvents = true;
-		UUserWidget * managerUI = CreateWidget<UUserWidget>(GetGameInstance(), managerUIClass);
-		managerUI->AddToViewport(9999);
-		//InputComponent->BindAction("MouseLeftClicked", IE_Pressed, this, onLeftClick);
+		initOnTyranClient();
 	}
+}
+
+void ATyranController::initOnTyranClient_Implementation()
+{
+	bShowMouseCursor = true;
+	bEnableClickEvents = true;
+	UUserWidget * managerUI = CreateWidget<UUserWidget>(GetGameInstance(), managerUIClass);
+	managerUI->AddToViewport(9999);
 }
 
 void ATyranController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ATyranController, isTyran);
+}
+
+void ATyranController::SetPawn(APawn * InPawn)
+{
+	Super::SetPawn(InPawn);
 }
 
 ATyranController::ATyranController() {
