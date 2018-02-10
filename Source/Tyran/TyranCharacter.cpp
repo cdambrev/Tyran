@@ -14,6 +14,10 @@
 #include <EngineUtils.h>
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
+#include <UserWidget.h>
+#include <TextureRenderTarget2D.h>
+#include <Texture.h>
+
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -58,6 +62,22 @@ ATyranCharacter::ATyranCharacter()
 	timeBeforeDisapear = 5;
 
 	PrimaryActorTick.bCanEverTick = true;
+
+
+	captureMiniMap = CreateDefaultSubobject<ACaptureMiniMap>(TEXT("MiniMap"));
+	captureMiniMap->SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y, 2000.0));
+}
+
+void ATyranCharacter::BeginPlay() {
+	Super::BeginPlay();
+
+
+	if (widgetMiniMap) {
+		miniMap = CreateWidget<UUserWidget>(reinterpret_cast<APlayerController*>(GetController()), widgetMiniMap);
+		miniMap->SetPositionInViewport(FVector2D(-300, -300));
+		miniMap->AddToViewport(1);
+
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -87,6 +107,8 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ATyranCharacter::OnResetVR);
+
+	
 }
 
 
@@ -181,4 +203,7 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 			}
 		}
 	}
+
+	captureMiniMap->setPosition(FVector(GetActorLocation().X, GetActorLocation().Y, 2000.0));
+	
 }

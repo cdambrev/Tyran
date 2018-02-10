@@ -5,3 +5,6 @@
 
 
 
+void ACaptureMiniMap::setPosition(FVector v) {
+	SetActorLocation(v);
+}

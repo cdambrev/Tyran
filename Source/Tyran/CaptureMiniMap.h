@@ -15,6 +15,7 @@ class TYRAN_API ACaptureMiniMap : public ASceneCapture2D
 	GENERATED_BODY()
 	
 	
+public:
 	
-	
+	void setPosition(FVector v);
 };

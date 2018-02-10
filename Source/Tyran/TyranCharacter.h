@@ -5,7 +5,10 @@
 #include "Core.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
+#include "CaptureMiniMap.h"
+
 #include "TyranCharacter.generated.h"
+
 
 UCLASS(config=Game)
 class ATyranCharacter : public ACharacter
@@ -19,6 +22,11 @@ class ATyranCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
+	UPROPERTY()
+		ACaptureMiniMap* captureMiniMap;
+
+	
 public:
 	ATyranCharacter();
 
@@ -38,6 +46,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int timeBeforeDisapear;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+		TSubclassOf<class UUserWidget> widgetMiniMap;
+
+	UUserWidget * miniMap;
+	UTextureRenderTarget2D* miniMapRenderTarget;
+
+
+	virtual void BeginPlay() override;
 
 protected:
 
