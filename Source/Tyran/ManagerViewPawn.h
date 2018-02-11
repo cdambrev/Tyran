@@ -25,6 +25,9 @@ private :
 	float ZoomFocaleFactor;
 	//float ZoomFactor;
 	bool bZoomingIn;
+
+
+
 public:
 	// Sets default values for this pawn's properties
 	AManagerViewPawn();

@@ -5,6 +5,7 @@
 #include "Components/InputComponent.h"
 #include "EngineUtils.h"
 #include "Engine/Engine.h"
+#include "ManagerPlayerState.h"
 
 
 /***************/
@@ -185,7 +186,9 @@ void AManagerViewPawn::RightClickAction()
 
 void AManagerViewPawn::callBuildOnSlot_Implementation(ABuildingSlot * slot, TSubclassOf<ABuilding> tBuildClass)
 {
-	slot->build(tBuildClass);
+	if (static_cast<AManagerPlayerState *>(GetController()->PlayerState)->spendMoney(static_cast<ABuilding *>(tBuildClass->ClassDefaultObject)->basePrice)) {
+		slot->build(tBuildClass);
+	}
 }
 
 bool AManagerViewPawn::callBuildOnSlot_Validate(ABuildingSlot * slot, TSubclassOf<ABuilding> tBuildClass)

@@ -6,6 +6,7 @@
 #include "ManagerViewPawn.h"
 #include "EngineUtils.h"
 #include "Runtime/Engine/Classes/GameFramework/PlayerStart.h"
+#include "ManagerPlayerState.h"
 
 ATyranGameMode::ATyranGameMode()
 {
@@ -44,11 +45,11 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 		TActorIterator<APlayerStart> spawnPoints(GetWorld());
 		if (!tyranController) {
 			tyranController = player;
+			player->PlayerState = GetWorld()->SpawnActor<AManagerPlayerState>(AManagerPlayerState::StaticClass(), FTransform());
 			player->setTyran(true);
 			//AManagerViewPawn * tyranPawn = GetWorld()->SpawnActor<AManagerViewPawn>(defaultTyranPawn,FTransform((*spawnPoints)->GetActorLocation()));
 			AManagerViewPawn * tyranPawn = GetWorld()->SpawnActor<AManagerViewPawn>(defaultTyranPawn, FTransform(FVector(-3370.0f, 1090.0f, 1220.0f)));
 			player->Possess(tyranPawn);
-
 		}
 		else {
 			player->setTyran(false);
