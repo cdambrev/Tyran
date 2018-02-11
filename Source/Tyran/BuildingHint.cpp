@@ -17,6 +17,7 @@ ABuildingHint::ABuildingHint()
 	validMaterial = validMatFinder.Object;
 	invalidMaterial = invalidMatFinder.Object;
 
+	isColliding = false;
 }
 
 // Called when the game starts or when spawned
@@ -63,4 +64,10 @@ void ABuildingHint::setValidPosition(bool b)
 			}
 		}
 	}
+}
+
+bool ABuildingHint::checkValidPosition()
+{
+	setValidPosition(!isColliding);
+	return !isColliding;
 }

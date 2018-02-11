@@ -4,28 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "BuildingHint.generated.h"
+#include "PlaceableObject.generated.h"
 
 UCLASS()
-class TYRAN_API ABuildingHint : public AActor
+class TYRAN_API APlaceableObject : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ABuildingHint();
-
-	UMaterialInterface * validMaterial;
-	UMaterialInterface * invalidMaterial;
+	APlaceableObject();
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	bool isColliding;
-
-	UPROPERTY(EditAnywhere)
-	bool groundPlaceable;
-
-	UPROPERTY(EditAnywhere)
-	bool wallPlaceable;
+	float basePrice;
 
 protected:
 	// Called when the game starts or when spawned
@@ -34,7 +25,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void setValidPosition(bool b);
-	bool checkValidPosition();
+
+	
 	
 };

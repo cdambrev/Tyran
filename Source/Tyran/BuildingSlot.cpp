@@ -21,7 +21,7 @@ void ABuildingSlot::build(TSubclassOf<ABuilding> type)
 		currBuilding->Destroy();
 	}
 	currBuilding = GetWorld()->SpawnActor<ABuilding>(type,GetActorTransform());
-	currBuilding->SetActorTransform(GetActorTransform());
+	//currBuilding->SetActorTransform(GetActorTransform());
 }
 
 // Called when the game starts or when spawned
