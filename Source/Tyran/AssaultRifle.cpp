@@ -3,7 +3,7 @@
 #include "AssaultRifle.h"
 #include "ImpactEffect.h"
 
-#define COLLISION_WEAPON ECC_GameTraceChannel1
+#define COLLISION_WEAPON ECC_GameTraceChannel3
 
 AAssaultRifle::AAssaultRifle()
 {
