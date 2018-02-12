@@ -261,6 +261,7 @@ void AAssaultRifle::SpawnTrailEffects(const FVector & EndPoint)
 void AAssaultRifle::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps); 
+
 	DOREPLIFETIME_CONDITION(AAssaultRifle, HitOriginNotify, COND_SkipOwner);
 }
 

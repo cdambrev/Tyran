@@ -40,15 +40,15 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 	
 	ATyranController * player = static_cast<ATyranController *>(NewPlayer);
 	TActorIterator<APlayerStart> spawnPoints(GetWorld());
-	/*if (!tyranController) {
-		tyranController = player;
-		player->setTyran(true);
-		//AManagerViewPawn * tyranPawn = GetWorld()->SpawnActor<AManagerViewPawn>(defaultTyranPawn,FTransform((*spawnPoints)->GetActorLocation()));
-		AManagerViewPawn * tyranPawn = GetWorld()->SpawnActor<AManagerViewPawn>(defaultTyranPawn,FTransform(FVector(-3370.0f, 1090.0f, 1220.0f)));
-		player->Possess(tyranPawn);
-		
-	}
-	else {*/
+	//if (!tyranController) {
+	//	tyranController = player;
+	//	player->setTyran(true);
+	//	//AManagerViewPawn * tyranPawn = GetWorld()->SpawnActor<AManagerViewPawn>(defaultTyranPawn,FTransform((*spawnPoints)->GetActorLocation()));
+	//	AManagerViewPawn * tyranPawn = GetWorld()->SpawnActor<AManagerViewPawn>(defaultTyranPawn,FTransform(FVector(-3370.0f, 1090.0f, 1220.0f)));
+	//	player->Possess(tyranPawn);
+	//	
+	//}
+	//else {
 		player->setTyran(false);
 		ATyranCharacter * revChar = GetWorld()->SpawnActor<ATyranCharacter>(defaultRebelPawn, FTransform((*spawnPoints)->GetActorLocation()));
 		player->Possess(revChar);

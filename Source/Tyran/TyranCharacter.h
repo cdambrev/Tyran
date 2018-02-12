@@ -38,7 +38,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mouvement") 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mouvement", ReplicatedUsing = OnRep_CrouchButtonDown)
 	bool CrouchButtonDown;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Mouvement")
 	bool JumpButtonDown;
@@ -58,6 +58,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EAlignement alignement;
+
+	UPROPERTY(EditDefaultsOnly, Category = "PlayerCondition", Replicated)
+	float Health;
 
 protected:
 	/* Point d'attache pour les items en main et actifs */ 
@@ -154,6 +157,16 @@ public:
 	void StopWeaponFire();
 
 	bool CanFire() const;
+
+	void OnNextWeapon(); 
+	void OnPrevWeapon(); 
+
+	void OnEquipPrimaryWeapon(); 
+	void OnEquipSecondaryWeapon();
+
+	// Invocation d'une RPC serveur pour actualiser l'état de crouching
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerCrouchToggle(bool NewCrouching);
 	
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerEquipWeapon(AWeapon* Weapon);
@@ -161,6 +174,9 @@ public:
 	/* La fonction OnRep utilise un paramètre pour la valeur précédente de la variable */ 
 	UFUNCTION()
 	void OnRep_CurrentWeapon(AWeapon* LastWeapon);
+
+	UFUNCTION()
+	void OnRep_CrouchButtonDown();
 
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 
