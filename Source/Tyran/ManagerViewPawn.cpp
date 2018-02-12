@@ -9,6 +9,7 @@
 #include "AIGuardController.h"
 #include "EngineUtils.h"
 #include "Components/InputComponent.h"
+#include <ConstructorHelpers.h>
 
 
 /***************/
@@ -183,16 +184,14 @@ void AManagerViewPawn::onLeftClick() {
 			}
 			else {
 				tyranController->GetHitResultUnderCursor(ECC_WorldStatic, false, hit);
-				AAIGuardController* aiGuardController = Cast<AAIGuardController>(focus);
+				AAIGuardController* aiGuardController = Cast<AAIGuardController>(focus->GetInstigatorController());
 				if (hit.bBlockingHit && focus) {
-					int targetPointNumber = 0;
-					for (TActorIterator<AAIGuardTargetPoint> it(GetWorld()); it; ++it) {
-						// Le targetPoint à traiter
-						AAIGuardTargetPoint* targetPoint = *it;
-						if (targetPointNumber == targetPoint->Position) {
-							targetPoint->SetActorLocation(hit.ImpactPoint);
-						}
-					}
+					AAIGuardTargetPoint* targetPoint = GetWorld()->SpawnActor<AAIGuardTargetPoint>(AAIGuardTargetPoint::StaticClass(), FTransform(hit.ImpactPoint));
+					targetPoint->SetActorLocation(hit.ImpactPoint);
+					targetPoint->Position = 0;
+					TArray<AAIGuardTargetPoint*> patrolPoints;
+					patrolPoints.Add(targetPoint);
+					aiGuardController->setPatrolPoint(patrolPoints);
 				}
 			}
 		}

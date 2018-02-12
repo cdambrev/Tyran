@@ -4,14 +4,13 @@
 #include "EngineUtils.h"
 #include "runtime/AIModule/Classes/BehaviorTree/BlackboardComponent.h" 
 #include "Runtime/AIModule/Classes/BrainComponent.h" 
-#include "AIGuardTargetPoint.h"
 #include "Kismet/KismetSystemLibrary.h" 
 #include "Kismet/GameplayStatics.h" 
 #include "GameFramework/Character.h"
 #include "TyranCharacter.h"
 
 AAIGuardController::AAIGuardController() {
-
+	patrolPoints.Empty();
 }
 
 /** Sera utilisé par la tâche UpdateNextTargetPointBTTaskNode du Behavior Tree pour actualiser le chemin de patrouille */
@@ -32,11 +31,8 @@ void AAIGuardController::UpdateNextTargetPoint() {
 	}
 
 	// Pour tous les AIGuardTargetPoint du niveau
-	for (TActorIterator<AAIGuardTargetPoint> it(GetWorld()); it; ++it)
+	for (AAIGuardTargetPoint* targetPoint : patrolPoints)
 	{
-		// Le targetPoint à traiter
-		AAIGuardTargetPoint* targetPoint = *it;
-
 		// Si la clé targetPointNumber du blackboard est égale à l'attribut Posiiton du point à traiter
 		// Ce sera le point suivant dans le chemin du NPC et nous modifierons la clé TargetPointPosition du blackboard
 		// avec la position de cet acteur
@@ -124,4 +120,18 @@ EPathFollowingRequestResult::Type AAIGuardController::MoveToEnemy() {
 	EPathFollowingRequestResult::Type MoveToActorResult = MoveToActor(HeroCharacterActor, acceptanceRadius);
 
 	return MoveToActorResult;
+}
+
+void AAIGuardController::setPatrolPoint(TArray<AAIGuardTargetPoint*> patrolPoints_) {
+	if (patrolPoints.Num()) {
+		for (AAIGuardTargetPoint* targetPoint : patrolPoints) {
+			targetPoint->Destroy();
+		}
+		patrolPoints.Empty();
+	}
+	patrolPoints = patrolPoints_;
+}
+
+TArray<AAIGuardTargetPoint*> AAIGuardController::getPatrolPoints() {
+	return patrolPoints;
 }
