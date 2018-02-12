@@ -66,18 +66,16 @@ ATyranCharacter::ATyranCharacter()
 
 	captureMiniMap = CreateDefaultSubobject<ACaptureMiniMap>(TEXT("MiniMap"));
 	captureMiniMap->setPosition(FVector(GetActorLocation().X, GetActorLocation().Y, 2500.0));
+
+
 	
-	static ConstructorHelpers::FObjectFinder<UUserWidget> miniMapObj(TEXT("Class'/Game/Blueprints/MiniMapWidget.MiniMapWidget'"));
-	if (miniMapObj.Object != NULL) {
-		miniMap = miniMapObj.Object;
-	}
+	
 }
 
 void ATyranCharacter::BeginPlay() {
 	Super::BeginPlay();
 
-	if(miniMap)
-		miniMap->AddToViewport();
+
 	
 }
 
@@ -205,6 +203,6 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 		}
 	}
 	
-	captureMiniMap->setPosition(FVector(GetActorLocation().X, GetActorLocation().Y, 2000.0));
+	captureMiniMap->setPosition(FVector(GetActorLocation().X, GetActorLocation().Y, 2500));
 	
 }

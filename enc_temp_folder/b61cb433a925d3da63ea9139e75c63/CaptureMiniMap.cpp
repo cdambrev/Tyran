@@ -21,7 +21,7 @@ ACaptureMiniMap::ACaptureMiniMap() {
 	}
 	
 	captureComponent->ProjectionType = ECameraProjectionMode::Orthographic;
-	captureComponent->OrthoWidth = 10000;
+	captureComponent->OrthoWidth = 3500;
 	captureComponent->bAbsoluteLocation = true;
 	captureComponent->SetRelativeRotation(FQuat(FVector(0.0, 1.0, 0.0), 1.5707));
 	captureComponent->SetRelativeLocation(FVector(100,500,0));
