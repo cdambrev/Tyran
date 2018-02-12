@@ -2,6 +2,12 @@
 
 #include "ManagerViewPawn.h"
 #include "GameFramework/Controller.h"
+#include "TyranCharacter.h"
+#include "Runtime/AIModule/Classes/BehaviorTree/BlackboardComponent.h" 
+#include "Runtime/AIModule/Classes/BrainComponent.h" 
+#include "AIGuardTargetPoint.h"
+#include "AIGuardController.h"
+#include "EngineUtils.h"
 #include "Components/InputComponent.h"
 
 
@@ -76,6 +82,9 @@ void AManagerViewPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	// double speed (WASD +Shift)
 	PlayerInputComponent->BindAxis("FastMove", this, &AManagerViewPawn::FastMoveInput);
+	
+	// Clic gauche
+	PlayerInputComponent->BindAction("MouseLeftClicked", IE_Pressed, this, &AManagerViewPawn::onLeftClick);
 
 }
 
@@ -159,6 +168,36 @@ void AManagerViewPawn::ZoomOut()
 }
 
 
+void AManagerViewPawn::onLeftClick() {
+	FHitResult hit;
+	APlayerController* tyranController = Cast<APlayerController>(GetController());
+	if (tyranController != nullptr)
+	{
+		tyranController->GetHitResultUnderCursor(ECC_WorldDynamic, false, hit);
+
+		if (hit.bBlockingHit) {
+			// Clic sur un garde
+			ATyranCharacter *guard = dynamic_cast<ATyranCharacter*>(hit.GetActor());
+			if (guard && guard->getAlignement() == EAlignement::A_TYRAN) {
+				focus = guard;
+			}
+			else {
+				tyranController->GetHitResultUnderCursor(ECC_WorldStatic, false, hit);
+				AAIGuardController* aiGuardController = Cast<AAIGuardController>(focus);
+				if (hit.bBlockingHit && focus) {
+					int targetPointNumber = 0;
+					for (TActorIterator<AAIGuardTargetPoint> it(GetWorld()); it; ++it) {
+						// Le targetPoint à traiter
+						AAIGuardTargetPoint* targetPoint = *it;
+						if (targetPointNumber == targetPoint->Position) {
+							targetPoint->SetActorLocation(hit.ImpactPoint);
+						}
+					}
+				}
+			}
+		}
+	}
+}
 
 void AManagerViewPawn::FastMoveInput(float Direction) {
 

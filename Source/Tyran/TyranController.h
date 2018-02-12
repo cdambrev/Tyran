@@ -22,16 +22,7 @@ public:
 	UPROPERTY(Transient, Replicated)
 	bool isTyran;
 
-	void setTyran(bool b) {
-		isTyran = b;
-		if (b) {
-			bShowMouseCursor = true;
-			bEnableClickEvents = true;
-			//InputComponent->BindAction("MouseLeftClicked", IE_Pressed, this, onLeftClick);
-		}
-	}
+	void setTyran(bool b);
 
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
-
-	//void onLeftClick();
 };

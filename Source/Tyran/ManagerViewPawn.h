@@ -23,6 +23,9 @@ private :
 	//float ZoomFactor;
 	bool bZoomingIn;
 	bool bActivatePitchYawn;
+	// Focus (par le clic)
+	AActor* focus;
+
 public:
 	// Sets default values for this pawn's properties
 	AManagerViewPawn();
@@ -67,6 +70,8 @@ protected:
 
 
 	void FastMoveInput(float Direction);
+	
+	void onLeftClick();
 
 public:	
 	// Called every frame

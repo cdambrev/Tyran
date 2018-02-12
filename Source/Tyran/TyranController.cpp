@@ -4,9 +4,6 @@
 #include <EngineUtils.h>
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
-#include "runtime/AIModule/Classes/BehaviorTree/BlackboardComponent.h" 
-#include "Runtime/AIModule/Classes/BrainComponent.h" 
-#include "AIGuardTargetPoint.h"
 
 void ATyranController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -16,18 +13,8 @@ void ATyranController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 ATyranController::ATyranController() {
 	isTyran = false;
-
 }
 
-//void ATyranController::onLeftClick() {
-//	FHitResult hit;
-//	GetHitResultUnderCursor(ECC_WorldStatic, false, hit);
-//
-//	if (hit.bBlockingHit) {
-//		//UBlackboardComponent* blackboardComponent = BrainComponent->GetBlackboardComponent();
-//		//blackboardComponent->
-//		//
-//		//BlackboardComponent->SetValueAsInt("TargetPointNumber", 0);
-//		//hit.ImpactPoint;
-//	}
-//}
+void ATyranController::setTyran(bool b) {
+	isTyran = b;
+}
