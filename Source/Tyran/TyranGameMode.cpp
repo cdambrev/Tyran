@@ -2,6 +2,7 @@
 
 #include "TyranGameMode.h"
 #include "TyranCharacter.h"
+#include "TyranGameState.h"
 #include "UObject/ConstructorHelpers.h"
 #include "ManagerViewPawn.h"
 #include "EngineUtils.h"
@@ -29,6 +30,12 @@ ATyranGameMode::ATyranGameMode()
 	if (ManagerViewPawnBPClass.Class != NULL)
 	{
 		defaultTyranPawn = ManagerViewPawnBPClass.Class;
+	}
+
+	static ConstructorHelpers::FClassFinder<ATyranGameState> TyranGameStateBPClass(TEXT("/Game/Blueprints/BP_TyranGameState"));
+	if (TyranGameStateBPClass.Class != NULL)
+	{
+		GameStateClass = TyranGameStateBPClass.Class;
 	}
 
 	tyranController = nullptr;
