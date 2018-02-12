@@ -19,7 +19,7 @@ class TYRAN_API ATyranController : public APlayerController
 public:
 	ATyranController();
 
-	UPROPERTY(Transient, Replicated)
+	UPROPERTY(BlueprintReadOnly, Transient, Replicated)
 	bool isTyran;
 
 	void setTyran(bool b) {
