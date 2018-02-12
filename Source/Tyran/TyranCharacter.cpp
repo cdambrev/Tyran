@@ -10,13 +10,13 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
 #include "TyranController.h"
+#include "UObject/ConstructorHelpers.h"
 //#include "ManagerViewPawn.h"
 #include <EngineUtils.h>
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
 #include <UserWidget.h>
-#include <TextureRenderTarget2D.h>
-#include <Texture.h>
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -65,19 +65,20 @@ ATyranCharacter::ATyranCharacter()
 
 
 	captureMiniMap = CreateDefaultSubobject<ACaptureMiniMap>(TEXT("MiniMap"));
-	captureMiniMap->SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y, 2000.0));
+	captureMiniMap->setPosition(FVector(GetActorLocation().X, GetActorLocation().Y, 2500.0));
+	
+	static ConstructorHelpers::FObjectFinder<UUserWidget> miniMapObj(TEXT("Class'/Game/Blueprints/MiniMapWidget.MiniMapWidget'"));
+	if (miniMapObj.Object != NULL) {
+		miniMap = miniMapObj.Object;
+	}
 }
 
 void ATyranCharacter::BeginPlay() {
 	Super::BeginPlay();
 
-
-	if (widgetMiniMap) {
-		miniMap = CreateWidget<UUserWidget>(reinterpret_cast<APlayerController*>(GetController()), widgetMiniMap);
-		miniMap->SetPositionInViewport(FVector2D(-300, -300));
-		miniMap->AddToViewport(1);
-
-	}
+	if(miniMap)
+		miniMap->AddToViewport();
+	
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -203,7 +204,7 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 			}
 		}
 	}
-
+	
 	captureMiniMap->setPosition(FVector(GetActorLocation().X, GetActorLocation().Y, 2000.0));
 	
 }

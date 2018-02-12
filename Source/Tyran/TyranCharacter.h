@@ -23,8 +23,9 @@ class ATyranCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MiniMap, meta = (AllowPrivateAccess = "true"))
 		ACaptureMiniMap* captureMiniMap;
+
 
 	
 public:
@@ -47,11 +48,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int timeBeforeDisapear;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MiniMap")
 		TSubclassOf<class UUserWidget> widgetMiniMap;
 
 	UUserWidget * miniMap;
-	UTextureRenderTarget2D* miniMapRenderTarget;
 
 
 	virtual void BeginPlay() override;
