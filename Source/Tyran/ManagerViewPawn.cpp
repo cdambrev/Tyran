@@ -194,11 +194,11 @@ void AManagerViewPawn::Tick(float DeltaTime)
 		float LocationY;
 		int SizeX;
 		int SizeY;
-		PC->GetMousePosition(LocationX, LocationY);
+		bool onViewPort = PC->GetMousePosition(LocationX, LocationY);
 		PC->GetViewportSize(SizeX, SizeY);
 
 		//edge
-		if (!bActivatePitchYawn) {
+		if (!bActivatePitchYawn && onViewPort) {
 
 			float posX = LocationX / SizeX;
 			float posY = LocationY / SizeY;
@@ -221,7 +221,7 @@ void AManagerViewPawn::Tick(float DeltaTime)
 		}
 		
 		//PitchYawn
-		else{
+		else if (bActivatePitchYawn){
 			PC->SetMouseLocation(SizeX / 2.0, SizeY / 2.0);
 			//Rotate our actor's yaw, which will turn our camera because we're attached to it
 			{
