@@ -19,8 +19,6 @@ AAssaultRifle::AAssaultRifle()
 	RifleAttachPoint = TEXT("RifleSocket"); 
 	
 	//GetWeaponMesh()->AddLocalRotation(FRotator(0, 0, -90)); 
-
-	bIsActive = true;
 }
 
 void AAssaultRifle::FireWeapon()
@@ -263,51 +261,11 @@ void AAssaultRifle::SpawnTrailEffects(const FVector & EndPoint)
 void AAssaultRifle::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps); 
-	DOREPLIFETIME(AAssaultRifle, bIsActive);
 	DOREPLIFETIME_CONDITION(AAssaultRifle, HitOriginNotify, COND_SkipOwner);
-}
-
-void AAssaultRifle::OnEquipFinished()
-{
-	Super::OnEquipFinished();
-	
-	if (Role == ROLE_Authority) { 
-		bIsActive = true;
-		
-		UpdateRifle(bIsActive); 
-	}
-}
-
-void AAssaultRifle::OnUnEquip()
-{
-	Super::OnUnEquip(); 
-	if (Role == ROLE_Authority) { 
-		bIsActive = false; 
-		
-		UpdateRifle(bIsActive); 
-	}
-}
-
-void AAssaultRifle::OnEnterInventory(ATyranCharacter * NewOwner)
-{
-	if (Role == ROLE_Authority) { 
-		bIsActive = false; 
-		
-		UpdateRifle(bIsActive); 
-	}
-}
-
-void AAssaultRifle::UpdateRifle(bool Enabled)
-{
 }
 
 void AAssaultRifle::OnRep_HitLocation()
 {
 	// À jouer sur tous les clients distants
 	SimulateInstantHit(HitOriginNotify);
-}
-
-void AAssaultRifle::OnRep_IsActive()
-{
-	UpdateRifle(bIsActive);
 }

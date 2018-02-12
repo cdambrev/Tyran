@@ -40,9 +40,6 @@ class TYRAN_API AAssaultRifle : public AWeapon
 	
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_HitLocation) 
 	FVector HitOriginNotify;
-	
-	UPROPERTY(Transient, ReplicatedUsing = OnRep_IsActive)
-	bool bIsActive;
 
 	/* Effet joué lorsqu'une surface est atteinte. */
 	UPROPERTY(EditDefaultsOnly)
@@ -93,13 +90,7 @@ public:
 	void SpawnTrailEffects(const FVector& EndPoint);
 
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override; 
-	virtual void OnEquipFinished() override; 
-	virtual void OnUnEquip() override; 
-	virtual void OnEnterInventory(ATyranCharacter* NewOwner) override; 
-	void UpdateRifle(bool Enabled); 
 	
 	UFUNCTION()
 	void OnRep_HitLocation();
-	UFUNCTION() 		
-	void OnRep_IsActive();
 };
