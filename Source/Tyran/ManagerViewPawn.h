@@ -22,6 +22,7 @@ private :
 	float ZoomFocaleFactor;
 	//float ZoomFactor;
 	bool bZoomingIn;
+	bool bActivatePitchYawn;
 public:
 	// Sets default values for this pawn's properties
 	AManagerViewPawn();
@@ -35,7 +36,7 @@ public:
 	UCameraComponent* RTSCamera;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Camera")
-	float SpringArmLength = 400.f;
+	float SpringArmLength = 30.f;
 
 protected:
 	// Called when the game starts or when spawned
@@ -53,6 +54,12 @@ protected:
 	void ZoomInFocale();
 
 	void ZoomOutFocale();
+
+
+	void ActivatePitchYawn();
+
+	void DesactivatePitchYawn();
+	
 
 	void ZoomIn();
 

@@ -37,14 +37,13 @@ AManagerViewPawn::AManagerViewPawn()
 void AManagerViewPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	//APlayerController* PC = Cast<APlayerController>(GetController());
-
-	//if (PC)
-	//{
-	//	PC->bShowMouseCursor = true;
-	//	PC->bEnableClickEvents = true;
-	//	PC->bEnableMouseOverEvents = true;
-	//}
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC)
+	{
+		PC->bShowMouseCursor = true;
+		PC->bEnableClickEvents = true;
+		PC->bEnableMouseOverEvents = true;
+	}
 }
 
 /********/
@@ -63,8 +62,11 @@ void AManagerViewPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("ZoomIn", IE_Pressed, this, &AManagerViewPawn::ZoomIn);
 	PlayerInputComponent->BindAction("ZoomOut", IE_Pressed, this, &AManagerViewPawn::ZoomOut);
 
-	PlayerInputComponent->BindAction("ZoomFocale", IE_Pressed, this, &AManagerViewPawn::ZoomInFocale);
-	PlayerInputComponent->BindAction("ZoomFocale", IE_Released, this, &AManagerViewPawn::ZoomOutFocale);
+	//PlayerInputComponent->BindAction("ZoomFocale", IE_Pressed, this, &AManagerViewPawn::ZoomInFocale);
+	//PlayerInputComponent->BindAction("ZoomFocale", IE_Released, this, &AManagerViewPawn::ZoomOutFocale);
+
+	PlayerInputComponent->BindAction("ActivatePitchYawn", IE_Pressed, this, &AManagerViewPawn::ActivatePitchYawn);
+	PlayerInputComponent->BindAction("ActivatePitchYawn", IE_Released, this, &AManagerViewPawn::DesactivatePitchYawn);
 
 	//Hook up every-frame handling for our four axes
 	PlayerInputComponent->BindAxis("MoveForward", this, &AManagerViewPawn::MoveForward);
@@ -111,6 +113,33 @@ void AManagerViewPawn::ZoomOutFocale()
 {
 	bZoomingIn = false;
 }
+
+void AManagerViewPawn::ActivatePitchYawn()
+{
+	bActivatePitchYawn = true;
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC)
+	{
+		PC->bShowMouseCursor = false;
+		PC->bEnableClickEvents = false;
+		PC->bEnableMouseOverEvents = false;
+		
+		
+	}
+}
+
+void AManagerViewPawn::DesactivatePitchYawn()
+{
+	bActivatePitchYawn = false;
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC)
+	{
+		PC->bShowMouseCursor = true;
+		PC->bEnableClickEvents = true;
+		PC->bEnableMouseOverEvents = true;
+	}
+}
+
 void AManagerViewPawn::ZoomIn()
 {
 	//ZoomFocaleFactor += 0.1f;
@@ -138,6 +167,9 @@ void AManagerViewPawn::FastMoveInput(float Direction) {
 // Called every frame
 void AManagerViewPawn::Tick(float DeltaTime)
 {
+
+
+
 	//Zoom Zoom
 	{
 		if (bZoomingIn)
@@ -148,28 +180,66 @@ void AManagerViewPawn::Tick(float DeltaTime)
 		{
 			ZoomFocaleFactor -= DeltaTime / 0.25f;        //Zoom out over a quarter of a second
 		}
-
-
 		ZoomFocaleFactor = FMath::Clamp<float>(ZoomFocaleFactor, 0.0f, 1.0f);
 		//Blend our camera's FOV and our SpringArm's length based on ZoomFocaleFactor
 		RTSCamera->FieldOfView = FMath::Lerp<float>(90.0f, 60.0f, ZoomFocaleFactor);
 		RTSCameraSpringArm->TargetArmLength = FMath::Lerp<float>(SpringArmLength, 0.75*SpringArmLength, ZoomFocaleFactor);
 	}
-	//Rotate our actor's yaw, which will turn our camera because we're attached to it
-	{
-		FRotator NewRotation = GetActorRotation();
-		NewRotation.Yaw += CameraInput.X;
-		SetActorRotation(NewRotation);
-	}
-	//Rotate our camera's pitch, but limit it so we're always looking downward
-	{
-		FRotator NewRotation = RTSCamera->GetComponentRotation();
-		NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch + CameraInput.Y, -80.0f, -15.0f);
-		RTSCameraSpringArm->SetWorldRotation(NewRotation);
-	}
 
+
+
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC) {
+		float LocationX;
+		float LocationY;
+		int SizeX;
+		int SizeY;
+		PC->GetMousePosition(LocationX, LocationY);
+		PC->GetViewportSize(SizeX, SizeY);
+
+		//edge
+		if (!bActivatePitchYawn) {
+
+			float posX = LocationX / SizeX;
+			float posY = LocationY / SizeY;
+
+			if (posX > 0.95f) {
+				MoveRight(1.0f);
+			}
+			else if (posX < 0.05f) {
+				MoveRight(-1.0f);
+			}
+			if (posY > 0.95f) {
+				MoveForward(-1.0f);
+			}
+			else if (posY < 0.05f) {
+				MoveForward(1.0f);
+			}
+
+
+			
+		}
+		
+		//PitchYawn
+		else{
+			PC->SetMouseLocation(SizeX / 2.0, SizeY / 2.0);
+			//Rotate our actor's yaw, which will turn our camera because we're attached to it
+			{
+				FRotator NewRotation = GetActorRotation();
+				NewRotation.Yaw += CameraInput.X;
+				SetActorRotation(NewRotation);
+			}
+			//Rotate our camera's pitch, but limit it so we're always looking downward
+			{
+				FRotator NewRotation = RTSCamera->GetComponentRotation();
+				NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch + CameraInput.Y, -80.0f, -15.0f);
+				RTSCameraSpringArm->SetWorldRotation(NewRotation);
+			}
+		}
+	}
 	//Check Your Booty (Movement)
 	{
+		//move
 		if (!MovementInput.IsZero())
 		{
 			//Scale our movement input axis values by 3000 units per second
@@ -179,7 +249,5 @@ void AManagerViewPawn::Tick(float DeltaTime)
 			NewLocation += GetActorRightVector() * MovementInput.Y * DeltaTime;
 			SetActorLocation(NewLocation);
 		}
-
-		
 	}
 }
