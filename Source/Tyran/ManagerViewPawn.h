@@ -26,6 +26,7 @@ private :
 	float ZoomFocaleFactor;
 	//float ZoomFactor;
 	bool bZoomingIn;
+	bool bActivatePitchYawn;
 
 public:
 	enum ManagerState {
@@ -47,7 +48,7 @@ public:
 	UCameraComponent* RTSCamera;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Camera")
-	float SpringArmLength = 400.f;
+	float SpringArmLength = 30.f;
 
 	ManagerState currState = NOTHING;
 
@@ -71,6 +72,12 @@ protected:
 	void ZoomInFocale();
 
 	void ZoomOutFocale();
+
+
+	void ActivatePitchYawn();
+
+	void DesactivatePitchYawn();
+	
 
 	void ZoomIn();
 

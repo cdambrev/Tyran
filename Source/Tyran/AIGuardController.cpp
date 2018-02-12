@@ -120,7 +120,8 @@ EPathFollowingRequestResult::Type AAIGuardController::MoveToEnemy() {
 
 	AActor* HeroCharacterActor = Cast<AActor>(blackboardComponent->GetValueAsObject("TargetActorToFollow"));
 
-	EPathFollowingRequestResult::Type MoveToActorResult = MoveToActor(HeroCharacterActor);
+	// attention, il faut vérifier qu'il y ait une line of sight.
+	EPathFollowingRequestResult::Type MoveToActorResult = MoveToActor(HeroCharacterActor, acceptanceRadius);
 
 	return MoveToActorResult;
 }
