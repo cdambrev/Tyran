@@ -11,7 +11,7 @@
 #include "Weapon.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
 #include "TyranController.h"
-#include "ManagerViewPawn.h"
+//#include "ManagerViewPawn.h"
 #include <EngineUtils.h>
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
@@ -346,6 +346,10 @@ void ATyranCharacter::setVisible(bool b) {
 			GetCapsuleComponent()->SetVisibility(b, true);
 		}
 	}
+}
+
+EAlignement ATyranCharacter::getAlignement() {
+	return alignement;
 }
 
 void ATyranCharacter::setViewedThisTick()

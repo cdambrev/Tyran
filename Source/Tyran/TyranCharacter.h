@@ -8,6 +8,12 @@
 #include "Net/UnrealNetwork.h"
 #include "TyranCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EAlignement : uint8 {
+	A_TYRAN UMETA(DisplayName="Tyran"),
+	A_REVOLUTIONNAIRE UMETA(DisplayName="Revolutionnaire")
+};
+
 UCLASS(config=Game)
 class ATyranCharacter : public ACharacter
 {
@@ -49,6 +55,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int timeBeforeDisapear;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EAlignement alignement;
 
 protected:
 	/* Point d'attache pour les items en main et actifs */ 
@@ -160,6 +169,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Tyran")
 	void setViewedThisTick();
+
+	UFUNCTION(BlueprintCallable, Category = "Tyran")
+	EAlignement getAlignement();
 
 	void Tick(float DeltaSeconds) override;
 };
