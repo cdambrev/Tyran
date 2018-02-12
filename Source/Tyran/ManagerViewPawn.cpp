@@ -3,6 +3,9 @@
 #include "ManagerViewPawn.h"
 #include "GameFramework/Controller.h"
 #include "Components/InputComponent.h"
+#include "EngineUtils.h"
+#include "Engine/Engine.h"
+#include "ManagerPlayerState.h"
 
 
 /***************/
@@ -37,13 +40,14 @@ AManagerViewPawn::AManagerViewPawn()
 void AManagerViewPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	APlayerController* PC = Cast<APlayerController>(GetController());
-	if (PC)
-	{
-		PC->bShowMouseCursor = true;
-		PC->bEnableClickEvents = true;
-		PC->bEnableMouseOverEvents = true;
-	}
+	//APlayerController* PC = Cast<APlayerController>(GetController());
+
+	//if (PC)
+	//{
+	//	PC->bShowMouseCursor = true;
+	//	PC->bEnableClickEvents = true;
+	//	PC->bEnableMouseOverEvents = true;
+	//}
 }
 
 /********/
@@ -76,6 +80,9 @@ void AManagerViewPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	// double speed (WASD +Shift)
 	PlayerInputComponent->BindAxis("FastMove", this, &AManagerViewPawn::FastMoveInput);
+
+	PlayerInputComponent->BindAction("TyranSelectAndAct", IE_Pressed, this, &AManagerViewPawn::leftClickAction);
+	PlayerInputComponent->BindAction("TyranOrderAndCancel", IE_Pressed, this, &AManagerViewPawn::RightClickAction);
 
 }
 
@@ -164,6 +171,99 @@ void AManagerViewPawn::FastMoveInput(float Direction) {
 
 }
 
+void AManagerViewPawn::enterBuildMode(TSubclassOf<ABuilding> building, TSubclassOf<ABuildingHint> buildHint)
+{
+	if (currState == BUILDING || currState == PLACINGOBJECT) {
+		RightClickAction();
+	}
+	currBuild = GetWorld()->SpawnActor<ABuildingHint>(buildHint, GetTransform());
+	buildClass = building;
+	currState = BUILDING;
+}
+
+void AManagerViewPawn::enterPlaceMode(TSubclassOf<APlaceableObject> object, TSubclassOf<ABuildingHint> buildHint)
+{
+	if (currState == BUILDING || currState == PLACINGOBJECT) {
+		RightClickAction();
+	}
+	currBuild = GetWorld()->SpawnActor<ABuildingHint>(buildHint, GetTransform());
+	objectClass = object;
+	currState = PLACINGOBJECT;
+}
+
+void AManagerViewPawn::leftClickAction()
+{
+	if (currState == BUILDING) {
+		FCollisionQueryParams queryParams{};
+		queryParams.AddIgnoredActor(GetOwner());
+		FHitResult resultHit{};
+		FVector mouseLocation;
+		FVector mouseDirection;
+		if (static_cast<APlayerController *>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection)) {
+			if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_GameTraceChannel1, queryParams)) {
+				if (resultHit.Actor.IsValid() && (&*resultHit.Actor)->IsA(ABuildingSlot::StaticClass())) {
+					callBuildOnSlot(static_cast<ABuildingSlot *>(&*resultHit.Actor), buildClass);
+					currState = NOTHING;
+					currBuild->Destroy();
+				}
+				else {
+					currBuild->TeleportTo(resultHit.ImpactPoint, FRotator{ 0,0,0 });
+					currBuild->setValidPosition(false);
+				}
+			}
+		}
+	}
+	if (currState == PLACINGOBJECT) {
+		FCollisionQueryParams queryParams{};
+		queryParams.AddIgnoredActor(GetOwner());
+		queryParams.AddIgnoredActor(currBuild);
+		queryParams.bTraceComplex = true;
+		FHitResult resultHit{};
+		FVector mouseLocation;
+		FVector mouseDirection;
+		if (static_cast<APlayerController *>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection)) {
+			if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_Visibility, queryParams)) {
+				currBuild->TeleportTo(resultHit.ImpactPoint, resultHit.Normal.Rotation() - FRotator(90.0f, 0.0f, 0.0f));
+				if (currBuild->checkValidPosition()) {
+					placeObject(FTransform(resultHit.Normal.Rotation() - FRotator(90.0f, 0.0f, 0.0f), resultHit.ImpactPoint), objectClass);
+					currState = NOTHING;
+					currBuild->Destroy();
+				}
+			}
+		}
+	}
+}
+
+void AManagerViewPawn::RightClickAction()
+{
+	if (currState == BUILDING || currState == PLACINGOBJECT) {
+		currState = NOTHING;
+		currBuild->Destroy();
+	}
+}
+
+void AManagerViewPawn::callBuildOnSlot_Implementation(ABuildingSlot * slot, TSubclassOf<ABuilding> tBuildClass)
+{
+	if (static_cast<AManagerPlayerState *>(GetController()->PlayerState)->spendMoney(static_cast<ABuilding *>(tBuildClass->ClassDefaultObject)->basePrice)) {
+		slot->build(tBuildClass);
+	}
+}
+
+bool AManagerViewPawn::callBuildOnSlot_Validate(ABuildingSlot * slot, TSubclassOf<ABuilding> tBuildClass)
+{
+	return true;
+}
+
+void AManagerViewPawn::placeObject_Implementation(FTransform position, TSubclassOf<APlaceableObject> tObjectClass) {
+	if (static_cast<AManagerPlayerState *>(GetController()->PlayerState)->spendMoney(static_cast<APlaceableObject *>(tObjectClass->ClassDefaultObject)->basePrice)) {
+		GetWorld()->SpawnActor<APlaceableObject>(tObjectClass, position);
+	}
+}
+
+bool AManagerViewPawn::placeObject_Validate(FTransform position, TSubclassOf<APlaceableObject> tObjectClass) {
+	return true;
+}
+
 // Called every frame
 void AManagerViewPawn::Tick(float DeltaTime)
 {
@@ -248,6 +348,42 @@ void AManagerViewPawn::Tick(float DeltaTime)
 			NewLocation += GetActorForwardVector() * MovementInput.X * DeltaTime;
 			NewLocation += GetActorRightVector() * MovementInput.Y * DeltaTime;
 			SetActorLocation(NewLocation);
+		}
+	}
+
+	if (currState == BUILDING) {
+		FCollisionQueryParams queryParams{};
+		queryParams.AddIgnoredActor(GetOwner());
+		FHitResult resultHit{};
+		FVector mouseLocation;
+		FVector mouseDirection;
+		if (static_cast<APlayerController *>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection)) {
+			if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000*mouseDirection, ECollisionChannel::ECC_GameTraceChannel1, queryParams)) {
+				if (resultHit.Actor.IsValid() && (&*resultHit.Actor)->IsA(ABuildingSlot::StaticClass())) {
+					currBuild->TeleportTo((&*resultHit.Actor)->GetActorLocation(), (&*resultHit.Actor)->GetActorRotation());
+					currBuild->setValidPosition(true);
+				}
+				else {
+					currBuild->TeleportTo(resultHit.ImpactPoint, FRotator{ 0,0,0 });
+					currBuild->setValidPosition(false);
+				}
+			}
+		}
+	}
+
+	if (currState == PLACINGOBJECT) {
+		FCollisionQueryParams queryParams{};
+		queryParams.AddIgnoredActor(GetOwner());
+		queryParams.AddIgnoredActor(currBuild);
+		queryParams.bTraceComplex = true;
+		FHitResult resultHit{};
+		FVector mouseLocation;
+		FVector mouseDirection;
+		if (static_cast<APlayerController *>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection)) {
+			if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_Visibility, queryParams)) {
+				currBuild->TeleportTo(resultHit.ImpactPoint, resultHit.Normal.Rotation()-FRotator(90.0f,0.0f,0.0f));
+				currBuild->checkValidPosition();
+			}
 		}
 	}
 }

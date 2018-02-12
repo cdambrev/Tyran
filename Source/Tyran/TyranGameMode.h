@@ -12,7 +12,8 @@ class ATyranGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+public:
+	UPROPERTY(BlueprintReadOnly)
 	ATyranController * tyranController;
 
 	UPROPERTY()
@@ -21,7 +22,6 @@ class ATyranGameMode : public AGameModeBase
 	UPROPERTY()
 	TSubclassOf<APawn> defaultTyranPawn;
 
-public:
 	ATyranGameMode();
 	
 	virtual void PostLogin(APlayerController* NewPlayer) override;
