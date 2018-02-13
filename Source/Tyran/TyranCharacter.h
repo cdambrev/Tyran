@@ -62,6 +62,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "PlayerCondition", Replicated)
 	float Health;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Replicated)
+	bool isDead;
+
 protected:
 	/* Point d'attache pour les items en main et actifs */ 
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
@@ -128,6 +131,9 @@ protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
+
+	// AActor
+	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 public:
 	/** Returns CameraBoom subobject **/
