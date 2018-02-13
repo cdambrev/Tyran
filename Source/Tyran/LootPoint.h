@@ -4,20 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Loot.generated.h"
+#include "LootPoint.generated.h"
 
 UCLASS()
-class TYRAN_API ALoot : public AActor
+class TYRAN_API ALootPoint : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ALoot();
+	ALootPoint();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int value;
+	int spawnValue;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float maxFrequency;
+	float spawnZoneRadius;
 
 protected:
 	// Called when the game starts or when spawned
