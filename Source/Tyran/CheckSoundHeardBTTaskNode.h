@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "RoutineBTTaskNode.generated.h"
+#include "CheckSoundHeardBTTaskNode.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TYRAN_API URoutineBTTaskNode : public UBTTaskNode
+class TYRAN_API UCheckSoundHeardBTTaskNode : public UBTTaskNode
 {
 	GENERATED_BODY()
 	

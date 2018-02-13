@@ -3,5 +3,21 @@
 #include "RoutineBTTaskNode.h"
 
 
+EBTNodeResult::Type URoutineBTTaskNode::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
+{
+	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
+	NodeResult = EBTNodeResult::Failed;
+	return NodeResult;
+}
+
+void URoutineBTTaskNode::TickTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory, float DeltaSeconds)
+{
+}
+
+FString URoutineBTTaskNode::GetStaticDescription() const
+{
+	return TEXT("Rechercher d'ou vient un bruit");
+}
+
 
 

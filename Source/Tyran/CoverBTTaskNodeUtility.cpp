@@ -2,6 +2,18 @@
 
 #include "CoverBTTaskNodeUtility.h"
 
+EBTNodeResult::Type UCoverBTTaskNodeUtility::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
+{
+	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
+	NodeResult = EBTNodeResult::Failed;
+	return NodeResult;
+}
 
+void UCoverBTTaskNodeUtility::TickTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory, float DeltaSeconds)
+{
+}
 
-
+FString UCoverBTTaskNodeUtility::GetStaticDescription() const
+{
+	return TEXT("Recherche d'une couverture et positionnement");
+}

@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "RoutineBTTaskNode.generated.h"
+#include "CheckEnemySpottedBTTaskNode.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TYRAN_API URoutineBTTaskNode : public UBTTaskNode
+class TYRAN_API UCheckEnemySpottedBTTaskNode : public UBTTaskNode
 {
 	GENERATED_BODY()
-	
+
 	/* Sera appelée au démarrage de la tâche et devra retourner Succeeded, Failed ou InProgress */
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
@@ -22,6 +22,7 @@ class TYRAN_API URoutineBTTaskNode : public UBTTaskNode
 
 	/** Retourne une chaine de description pour la tâche. Ce texte apparaître dans le BT */
 	virtual FString GetStaticDescription() const override;
+	
 	
 	
 };

@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTTaskNode.h"
-#include "RoutineBTTaskNode.generated.h"
+#include "BTTaskNodeUtility.h"
+#include "FleeBTTaskNodeUtility.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TYRAN_API URoutineBTTaskNode : public UBTTaskNode
+class TYRAN_API UFleeBTTaskNodeUtility : public UBTTaskNodeUtility
 {
 	GENERATED_BODY()
-	
+
 	/* Sera appelée au démarrage de la tâche et devra retourner Succeeded, Failed ou InProgress */
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
@@ -22,6 +22,7 @@ class TYRAN_API URoutineBTTaskNode : public UBTTaskNode
 
 	/** Retourne une chaine de description pour la tâche. Ce texte apparaître dans le BT */
 	virtual FString GetStaticDescription() const override;
+	
 	
 	
 };

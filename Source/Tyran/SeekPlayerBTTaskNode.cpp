@@ -4,4 +4,18 @@
 
 
 
+EBTNodeResult::Type USeekPlayerBTTaskNode::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
+{
+	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
+	NodeResult = EBTNodeResult::Failed;
+	return NodeResult;
+}
 
+void USeekPlayerBTTaskNode::TickTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory, float DeltaSeconds)
+{
+}
+
+FString USeekPlayerBTTaskNode::GetStaticDescription() const
+{
+	return TEXT("Recherche d'un joueur qui s'est enfui");
+}
