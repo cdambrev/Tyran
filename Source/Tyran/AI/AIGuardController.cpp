@@ -8,7 +8,7 @@
 #include "Kismet/KismetSystemLibrary.h" 
 #include "Kismet/GameplayStatics.h" 
 #include "GameFramework/Character.h"
-#include "TyranCharacter.h"
+#include "Basic/TyranCharacter.h"
 
 AAIGuardController::AAIGuardController() {
 

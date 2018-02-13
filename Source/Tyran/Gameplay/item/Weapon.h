@@ -4,7 +4,7 @@
 
 #include "Core.h"
 #include "GameFramework/Actor.h"
-#include "TyranCharacter.h"
+#include "Basic/TyranCharacter.h"
 #include "Sound/SoundCue.h"
 #include "Weapon.generated.h"
 

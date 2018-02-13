@@ -8,9 +8,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Weapon.h"
+#include "Gameplay/item/Weapon.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
-#include "TyranController.h"
+#include "Basic/TyranController.h"
 //#include "ManagerViewPawn.h"
 #include <EngineUtils.h>
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
