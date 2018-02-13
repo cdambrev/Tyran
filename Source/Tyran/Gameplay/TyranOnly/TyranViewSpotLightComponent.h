@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SpotLightComponent.h"
-#include "TyranCharacter.h"
+#include "Basic/TyranCharacter.h"
 #include "TyranViewSpotLightComponent.generated.h"
 
 /**

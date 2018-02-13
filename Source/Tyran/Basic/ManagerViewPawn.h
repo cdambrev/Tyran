@@ -8,10 +8,10 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "Building.h"
-#include "PlaceableObject.h"
-#include "BuildingHint.h"
-#include "BuildingSlot.h"
+#include "Gameplay/TyranOnly/Placeable_Object/Building.h"
+#include "Gameplay/TyranOnly/Placeable_Object/PlaceableObject.h"
+#include "Gameplay/TyranOnly/Placeable_Object/BuildingHint.h"
+#include "Gameplay/TyranOnly/Placeable_Object/BuildingSlot.h"
 #include "ManagerViewPawn.generated.h"
 
 UCLASS()

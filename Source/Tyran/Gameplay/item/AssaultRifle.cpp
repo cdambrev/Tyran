@@ -185,11 +185,11 @@ bool AAssaultRifle::ShouldDealDamage(AActor * TestActor) const
 void AAssaultRifle::DealDamage(const FHitResult & Impact, const FVector & ShootDir)
 {
 	FPointDamageEvent PointDmg;
-	PointDmg.DamageTypeClass = DamageType; 
-	PointDmg.HitInfo = Impact; 
-	PointDmg.ShotDirection = ShootDir; 
-	PointDmg.Damage = HitDamage; 
-	
+	PointDmg.DamageTypeClass = DamageType;
+	PointDmg.HitInfo = Impact;
+	PointDmg.ShotDirection = ShootDir;
+	PointDmg.Damage = HitDamage;
+
 	Impact.GetActor()->TakeDamage(PointDmg.Damage, PointDmg, MyPawn->Controller, this);
 }
 

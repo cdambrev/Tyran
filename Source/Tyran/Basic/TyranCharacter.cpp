@@ -8,9 +8,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Weapon.h"
+#include "Gameplay/item/Weapon.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
-#include "TyranController.h"
+#include "Basic/TyranController.h"
 //#include "ManagerViewPawn.h"
 #include <EngineUtils.h>
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
@@ -70,6 +70,7 @@ ATyranCharacter::ATyranCharacter()
 	timeBeforeDisapear = 5;
 
 	Health = 100;
+	isDead = false;
 
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -112,6 +113,23 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ATyranCharacter::OnResetVR);
+}
+
+float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
+{
+	// Call the base class - this will tell us how much damage to apply  
+	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	if (ActualDamage > 0.f)
+	{
+		Health -= ActualDamage;
+		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
+		if (Health <= 0.f)
+		{
+			OnDeath();
+		}
+	}
+
+	return ActualDamage;
 }
 
 
@@ -342,6 +360,13 @@ void ATyranCharacter::OnCrouchToggle()
 	}
 }
 
+void ATyranCharacter::OnDeath()
+{
+	isDead = true;
+	DetachFromControllerPendingDestroy();
+	SetLifeSpan(10.0f);
+}
+
 void ATyranCharacter::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
@@ -424,6 +449,7 @@ void ATyranCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ATyranCharacter, Inventory);
 	DOREPLIFETIME(ATyranCharacter, CurrentWeapon);
 	DOREPLIFETIME(ATyranCharacter, Health);
+	DOREPLIFETIME(ATyranCharacter, isDead);
 	DOREPLIFETIME_CONDITION(ATyranCharacter, CrouchButtonDown, COND_SkipOwner);
 }
 

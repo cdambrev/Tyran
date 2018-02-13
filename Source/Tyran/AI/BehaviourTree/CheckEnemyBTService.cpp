@@ -22,6 +22,3 @@ void UCheckEnemyBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* No
 	// pour modifier la clé du blackboard en conséquence
 	AIGuardController->CheckNearbyEnemy();
 }
-
-
-
