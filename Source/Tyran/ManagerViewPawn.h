@@ -89,8 +89,6 @@ protected:
 
 	void FastMoveInput(float Direction);
 	
-	void onLeftClick();
-
 	UFUNCTION(BlueprintCallable)
 	void enterBuildMode(TSubclassOf<ABuilding> building, TSubclassOf<ABuildingHint> buildHint);
 
@@ -108,7 +106,7 @@ protected:
 	void placeObject(FTransform position, TSubclassOf<APlaceableObject> objectClass);
 
 	UFUNCTION(Reliable, Server, WithValidation)
-	void orderPatrolPoints(AActor* garde, TArray<FVector> patrolPoints);
+	void orderPatrolPoints(AActor* garde, const TArray<FVector>& patrolPoints);
 
 public:	
 	// Called every frame

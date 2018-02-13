@@ -12,6 +12,7 @@
 #include "EngineUtils.h"
 #include "Engine/Engine.h"
 #include "ManagerPlayerState.h"
+#include "GuardCharacter.h"
 
 
 /***************/
@@ -87,9 +88,6 @@ void AManagerViewPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// double speed (WASD +Shift)
 	PlayerInputComponent->BindAxis("FastMove", this, &AManagerViewPawn::FastMoveInput);
 	
-	// Clic gauche
-	PlayerInputComponent->BindAction("MouseLeftClicked", IE_Pressed, this, &AManagerViewPawn::onLeftClick);
-
 	PlayerInputComponent->BindAction("TyranSelectAndAct", IE_Pressed, this, &AManagerViewPawn::leftClickAction);
 	PlayerInputComponent->BindAction("TyranOrderAndCancel", IE_Pressed, this, &AManagerViewPawn::RightClickAction);
 
@@ -174,64 +172,6 @@ void AManagerViewPawn::ZoomOut()
 	SetActorLocation(NewLocation);
 }
 
-
-void AManagerViewPawn::onLeftClick() {
-	FCollisionQueryParams queryParams{};
-	queryParams.AddIgnoredActor(GetOwner());
-	FHitResult resultHit{};
-	FVector mouseLocation;
-	FVector mouseDirection;
-	if (static_cast<APlayerController *>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection)) {
-		if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_GameTraceChannel1, queryParams)) {
-			if (resultHit.Actor.IsValid() && (&*resultHit.Actor)->IsA(ABuildingSlot::StaticClass())) {
-				callBuildOnSlot(static_cast<ABuildingSlot *>(&*resultHit.Actor), buildClass);
-				currState = NOTHING;
-				currBuild->Destroy();
-			}
-			else {
-				currBuild->TeleportTo(resultHit.ImpactPoint, FRotator{ 0,0,0 });
-				currBuild->setValidPosition(false);
-			}
-		}
-	}
-	FCollisionQueryParams queryParams{};
-	queryParams.AddIgnoredActor(GetOwner());
-	FHitResult resultHit{};
-	FVector mouseLocation;
-	FVector mouseDirection;
-	if (static_cast<APlayerController*>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection)) {
-		if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_GameTraceChannel3, queryParams)) {
-			if (resultHit.Actor.IsValid() && (&*resultHit.Actor)->IsA())
-			{
-			}
-		}
-	}
-
-	FHitResult hit;
-	APlayerController* tyranController = Cast<APlayerController>(GetController());
-	if (tyranController != nullptr)
-	{
-		tyranController->GetHitResultUnderCursor(ECC_WorldDynamic, false, hit);
-
-		if (hit.bBlockingHit) {
-			// Clic sur un garde
-			ATyranCharacter *guard = dynamic_cast<ATyranCharacter*>(hit.GetActor());
-			if (guard && guard->getAlignement() == EAlignement::A_TYRAN) {
-				currState = FOCUSGARDE;
-				focus = guard;
-			}
-			else if (currState == FOCUSGARDE) {
-				tyranController->GetHitResultUnderCursor(ECC_WorldStatic, false, hit);
-				if (hit.bBlockingHit && focus) {
-					TArray<FVector> targetPointPos;
-					targetPointPos.Add(hit.ImpactPoint);
-					orderPatrolPoints(focus, targetPointPos);
-				}
-			}
-		}
-	}
-}
-
 void AManagerViewPawn::FastMoveInput(float Direction) {
 
 }
@@ -258,7 +198,26 @@ void AManagerViewPawn::enterPlaceMode(TSubclassOf<APlaceableObject> object, TSub
 
 void AManagerViewPawn::leftClickAction()
 {
-	if (currState == BUILDING) {
+	if (currState == FOCUSGARDE) {
+		FCollisionQueryParams queryParams{};
+		queryParams.AddIgnoredActor(GetOwner());
+		FHitResult resultHit{};
+		FVector mouseLocation;
+		FVector mouseDirection;
+		if (static_cast<APlayerController*>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection)) {
+			if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_GameTraceChannel3, queryParams)) {
+				if (resultHit.Actor.IsValid() && resultHit.GetActor()->IsA(AGuardCharacter::StaticClass())) {
+					AGuardCharacter* guard = dynamic_cast<AGuardCharacter*>(resultHit.GetActor());
+					focus = guard;
+				}
+				else {
+					TArray<FVector> targetPointPos;
+					targetPointPos.Add(resultHit.ImpactPoint);
+					orderPatrolPoints(focus, targetPointPos);
+				}
+			}
+		}
+	} else if (currState == BUILDING) {
 		FCollisionQueryParams queryParams{};
 		queryParams.AddIgnoredActor(GetOwner());
 		FHitResult resultHit{};
@@ -277,8 +236,7 @@ void AManagerViewPawn::leftClickAction()
 				}
 			}
 		}
-	}
-	if (currState == PLACINGOBJECT) {
+	} else if (currState == PLACINGOBJECT) {
 		FCollisionQueryParams queryParams{};
 		queryParams.AddIgnoredActor(GetOwner());
 		queryParams.AddIgnoredActor(currBuild);
@@ -297,6 +255,22 @@ void AManagerViewPawn::leftClickAction()
 			}
 		}
 	}
+	else {
+		FCollisionQueryParams queryParams{};
+		queryParams.AddIgnoredActor(GetOwner());
+		FHitResult resultHit{};
+		FVector mouseLocation;
+		FVector mouseDirection;
+		if (static_cast<APlayerController*>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection)) {
+			if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_GameTraceChannel3, queryParams)) {
+				if (resultHit.Actor.IsValid() && resultHit.GetActor()->IsA(AGuardCharacter::StaticClass())) {
+					AGuardCharacter* guard = dynamic_cast<AGuardCharacter*>(resultHit.GetActor());
+					currState = FOCUSGARDE;
+					focus = guard;
+				}
+			}
+		}
+	}
 }
 
 void AManagerViewPawn::RightClickAction()
@@ -305,7 +279,12 @@ void AManagerViewPawn::RightClickAction()
 		currState = NOTHING;
 		currBuild->Destroy();
 	} else if (currState == PLACINGTARGETPOINT) {
+		// pas oublier de détruire ce qui a été targeté
+		currState = FOCUSGARDE;
+	}
+	else if (currState == FOCUSGARDE) {
 		currState = NOTHING;
+		focus->Destroy();
 	}
 }
 
@@ -331,11 +310,7 @@ bool AManagerViewPawn::placeObject_Validate(FTransform position, TSubclassOf<APl
 	return true;
 }
 
-bool AManagerViewPawn::orderPatrolPoints_Validate(AActor* garde, TArray<FVector> patrolPoints) {
-	return true;
-}
-
-void AManagerViewPawn::orderPatrolPoints_Implementation(AActor* garde, TArray<FVector> patrolPointsPos) {
+void AManagerViewPawn::orderPatrolPoints_Implementation(AActor* garde, const TArray<FVector>& patrolPointsPos) {
 	AAIGuardController* aiGuardController = Cast<AAIGuardController>(garde->GetInstigatorController());
 	if (garde) {
 		TArray<AAIGuardTargetPoint*> patrolPoints;
@@ -348,6 +323,10 @@ void AManagerViewPawn::orderPatrolPoints_Implementation(AActor* garde, TArray<FV
 		}
 		aiGuardController->setPatrolPoint(patrolPoints);
 	}
+}
+
+bool AManagerViewPawn::orderPatrolPoints_Validate(AActor* garde, const TArray<FVector>& patrolPoints) {
+	return true;
 }
 
 // Called every frame
