@@ -12,6 +12,7 @@ ALootPoint::ALootPoint()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	spawnValue = 0;
+	spawnZoneRadius = 100.0f;
 }
 
 // Called when the game starts or when spawned
@@ -26,8 +27,11 @@ void ALootPoint::BeginPlay()
 			FActorSpawnParameters params;
 			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 			float chanceToSpawn = defaultLoot->maxFrequency * ((1000 - FGenericPlatformMath::Abs(spawnValue - defaultLoot->value))/1000);
+			auto pos = GetActorTransform().GetLocation();
+			pos.X += FMath::RandRange(-spawnZoneRadius, spawnZoneRadius);
+			pos.Y += FMath::RandRange(-spawnZoneRadius, spawnZoneRadius);
 			if (randNum <= chanceToSpawn) {
-				GetWorld()->SpawnActor<ALoot>(loot, GetActorTransform(),params);
+				GetWorld()->SpawnActor<ALoot>(loot, FTransform(GetActorTransform().GetRotation(), pos),params);
 			}
 		}
 	}

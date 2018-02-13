@@ -17,6 +17,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int spawnValue;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float spawnZoneRadius;
 
 protected:
 	// Called when the game starts or when spawned
