@@ -27,7 +27,7 @@ bool UTyranViewSpotLightComponent::checkVisibility(AActor * actor)
 {
 	FVector dir = actor->GetActorLocation() - GetComponentTransform().GetLocation();
 	dir.Normalize();
-	float cosA = FVector::DotProduct(GetOwner()->GetActorForwardVector(), dir);
+	float cosA = FVector::DotProduct(GetComponentTransform().GetRotation().GetForwardVector(), dir);
 	if (cosA > cos(PI*(angleOfVision * 2) / 360)) {
 		FCollisionObjectQueryParams objectQueryParams{};
 		FCollisionQueryParams queryParams{};

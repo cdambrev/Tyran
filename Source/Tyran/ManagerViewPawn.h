@@ -8,6 +8,10 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Building.h"
+#include "PlaceableObject.h"
+#include "BuildingHint.h"
+#include "BuildingSlot.h"
 #include "ManagerViewPawn.generated.h"
 
 UCLASS()
@@ -23,7 +27,15 @@ private :
 	//float ZoomFactor;
 	bool bZoomingIn;
 	bool bActivatePitchYawn;
+
 public:
+	enum ManagerState {
+		NOTHING,
+		BUILDING,
+		PLACINGOBJECT
+	};
+
+
 	// Sets default values for this pawn's properties
 	AManagerViewPawn();
 
@@ -37,6 +49,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Camera")
 	float SpringArmLength = 30.f;
+
+	ManagerState currState = NOTHING;
+
+	ABuildingHint * currBuild = nullptr;
+	TSubclassOf<ABuilding> buildClass;
+	TSubclassOf<APlaceableObject> objectClass;
 
 protected:
 	// Called when the game starts or when spawned
@@ -65,8 +83,23 @@ protected:
 
 	void ZoomOut();
 
-
 	void FastMoveInput(float Direction);
+
+	UFUNCTION(BlueprintCallable)
+	void enterBuildMode(TSubclassOf<ABuilding> building, TSubclassOf<ABuildingHint> buildHint);
+
+	UFUNCTION(BlueprintCallable)
+	void enterPlaceMode(TSubclassOf<APlaceableObject> object, TSubclassOf<ABuildingHint> buildHint);
+
+	void leftClickAction();
+
+	void RightClickAction();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void callBuildOnSlot(ABuildingSlot * slot, TSubclassOf<ABuilding> buildClass);
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void placeObject(FTransform position, TSubclassOf<APlaceableObject> objectClass);
 
 public:	
 	// Called every frame
