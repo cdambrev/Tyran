@@ -40,7 +40,3 @@ ATyranController::ATyranController() {
 	static ConstructorHelpers::FClassFinder<UUserWidget> managerUIHelper(TEXT("/Game/UI/ManagerInterface"));
 	managerUIClass = managerUIHelper.Class;
 }
-
-void ATyranController::setTyran(bool b) {
-	isTyran = b;
-}
