@@ -3,7 +3,7 @@
 #include "AssaultRifle.h"
 #include "ImpactEffect.h"
 
-#define COLLISION_WEAPON ECC_GameTraceChannel1
+#define COLLISION_WEAPON ECC_GameTraceChannel3
 
 AAssaultRifle::AAssaultRifle()
 {
@@ -261,6 +261,7 @@ void AAssaultRifle::SpawnTrailEffects(const FVector & EndPoint)
 void AAssaultRifle::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps); 
+
 	DOREPLIFETIME_CONDITION(AAssaultRifle, HitOriginNotify, COND_SkipOwner);
 }
 
