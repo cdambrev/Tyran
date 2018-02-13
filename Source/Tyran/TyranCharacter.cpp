@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Weapon.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
 #include "TyranController.h"
 //#include "ManagerViewPawn.h"
@@ -17,7 +18,6 @@
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
-
 ATyranCharacter::ATyranCharacter()
 {
 	// Set size for collision capsule
@@ -35,13 +35,17 @@ ATyranCharacter::ATyranCharacter()
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
-	GetCharacterMovement()->JumpZVelocity = 600.f;
+	GetCharacterMovement()->JumpZVelocity = 400.0f;
 	GetCharacterMovement()->AirControl = 0.2f;
+
+	// Permettre le crouching 
+	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
+
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
 	// Create a follow camera
@@ -51,11 +55,21 @@ ATyranCharacter::ATyranCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+
+	/* Noms des points d'attache tels que spécifiés dans le squelette du personnage */ 
+	WeaponAttachPoint = TEXT("WeaponSocket"); 
+	PelvisAttachPoint = TEXT("PelvisSocket"); 
+	SpineAttachPoint = TEXT("SpineSocket");
+
+	bWantsToFire = false;
+
 	isVisible = false;
 
 	isAlwaysVisible = false;
 
 	timeBeforeDisapear = 5;
+
+	Health = 100;
 
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -67,8 +81,19 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATyranCharacter::OnStartJump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ATyranCharacter::OnStopJump);
+
+	InputComponent->BindAction("CrouchToggle", IE_Released, this, &ATyranCharacter::OnCrouchToggle);
+
+	InputComponent->BindAction("Fire", IE_Pressed, this, &ATyranCharacter::OnStartFire);
+	InputComponent->BindAction("Fire", IE_Released, this, &ATyranCharacter::OnStopFire);
+
+	InputComponent->BindAction("EquipPrimaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipPrimaryWeapon);
+	InputComponent->BindAction("EquipSecondaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipSecondaryWeapon);
+
+	InputComponent->BindAction("NextWeapon", IE_Pressed, this, &ATyranCharacter::OnNextWeapon);
+	InputComponent->BindAction("PrevWeapon", IE_Pressed, this, &ATyranCharacter::OnPrevWeapon);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ATyranCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ATyranCharacter::MoveRight);
@@ -90,6 +115,178 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 }
 
 
+FName ATyranCharacter::GetInventoryAttachPoint(EInventorySlot Slot) const
+{
+	/* Retourne le nom du socket */ 
+	switch (Slot) {
+	case EInventorySlot::Hands: 
+		return WeaponAttachPoint; 
+	case EInventorySlot::Primary: 
+		return SpineAttachPoint; 
+	case EInventorySlot::Secondary:
+		return PelvisAttachPoint;
+	default: 
+		// pas implémenté. 
+		return ""; 
+	}
+}
+
+void ATyranCharacter::AddWeapon(class AWeapon* Weapon)
+{
+	if (Weapon && Role == ROLE_Authority) { 
+		Weapon->OnEnterInventory(this); 
+		Inventory.AddUnique(Weapon); 
+
+		// Le premier item est équipé – en main
+		if (Inventory.Num() > 0) { 
+			EquipWeapon(Inventory[0]); 
+		} 
+	}
+}
+
+void ATyranCharacter::EquipWeapon(AWeapon * Weapon)
+{
+	if (Weapon) {
+		if (Role == ROLE_Authority) { 
+			SetCurrentWeapon(Weapon); 
+		} else { 
+			ServerEquipWeapon(Weapon); 
+		} 
+	}
+}
+
+void ATyranCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents(); 
+	if (Role == ROLE_Authority) { 
+		SpawnDefaultInventory(); 
+	}
+}
+
+void ATyranCharacter::SpawnDefaultInventory()
+{
+	if (Role < ROLE_Authority) { 
+		return;
+	} 
+	
+	for (int32 i = 0; i < DefaultInventoryClasses.Num(); i++) { 
+		if (DefaultInventoryClasses[i]) {
+			FActorSpawnParameters SpawnInfo; 
+			SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn; 
+			AWeapon* NewWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultInventoryClasses[i], SpawnInfo); 
+
+			AddWeapon(NewWeapon); 
+		} 
+	}
+}
+
+void ATyranCharacter::SetCurrentWeapon(AWeapon * NewWeapon, AWeapon * LastWeapon)
+{
+	AWeapon* LocalLastWeapon = nullptr; 
+
+	if (LastWeapon) { 
+		LocalLastWeapon = LastWeapon; 
+	}
+	else if (NewWeapon != CurrentWeapon) { 
+		LocalLastWeapon = CurrentWeapon; 
+	} 
+	
+	// Déséquipper l'arme courante 
+	if (LocalLastWeapon) { 
+		LocalLastWeapon->OnUnEquip(); 
+	}
+	
+	CurrentWeapon = NewWeapon; 
+	
+	if (NewWeapon) { 
+		NewWeapon->SetOwningPawn(this); 
+		NewWeapon->OnEquip(); 
+	}
+}
+
+void ATyranCharacter::OnStartFire()
+{
+	StartWeaponFire();
+}
+
+void ATyranCharacter::OnStopFire()
+{
+	StopWeaponFire();
+}
+
+void ATyranCharacter::StartWeaponFire()
+{
+	if (!bWantsToFire) { 
+		bWantsToFire = true; 
+		if (CurrentWeapon) { 
+			CurrentWeapon->StartFire(); 
+		} 
+	}
+}
+
+void ATyranCharacter::StopWeaponFire()
+{
+	if (bWantsToFire) { 
+		bWantsToFire = false; 
+		if (CurrentWeapon) { 
+			CurrentWeapon->StopFire(); 
+		} 
+	}
+}
+
+bool ATyranCharacter::CanFire() const
+{
+	bool result = true; 
+	/* Nous ajouterons ici divers test permettant de déterminer si le personnage peut tirer */ 
+	return result;
+}
+
+void ATyranCharacter::OnNextWeapon()
+{
+	if (Inventory.Num() >= 2) { 
+		const int32 CurrentWeaponIndex = Inventory.IndexOfByKey(CurrentWeapon);
+		AWeapon* NextWeapon = Inventory[(CurrentWeaponIndex + 1) % Inventory.Num()];
+		EquipWeapon(NextWeapon); 
+	}
+}
+
+void ATyranCharacter::OnPrevWeapon()
+{
+	if (Inventory.Num() >= 2) { 
+		const int32 CurrentWeaponIndex = Inventory.IndexOfByKey(CurrentWeapon); 
+		AWeapon* PrevWeapon = Inventory[(CurrentWeaponIndex - 1 + Inventory.Num()) % Inventory.Num()]; 
+		EquipWeapon(PrevWeapon);
+	}
+}
+
+void ATyranCharacter::OnEquipPrimaryWeapon()
+{
+	if (Inventory.Num() >= 1) { 
+		/* Trouver l'arme qui utilise l'emplacement principal */ 
+		for (int32 i = 0; i < Inventory.Num(); i++) { 
+			AWeapon* Weapon = Inventory[i];
+
+			if (Weapon->GetStorageSlot() == EInventorySlot::Primary) { 
+				EquipWeapon(Weapon); 
+			}
+		}
+	}
+}
+
+void ATyranCharacter::OnEquipSecondaryWeapon()
+{
+	if (Inventory.Num() >= 2) { 
+		/* Trouver l'arme qui utilise l'emplacement secondaire. */ 
+		for (int32 i = 0; i < Inventory.Num(); i++) {
+			AWeapon* Weapon = Inventory[i];
+			
+			if (Weapon->GetStorageSlot() == EInventorySlot::Secondary) { 
+				EquipWeapon(Weapon); 
+			}
+		}
+	}
+}
+
 void ATyranCharacter::OnResetVR()
 {
 	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
@@ -103,6 +300,46 @@ void ATyranCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Locati
 void ATyranCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
 {
 		StopJumping();
+}
+
+void ATyranCharacter::OnStartJump()
+{
+	// si le personnage est accroupi, il se relève avant de sauter
+	if (CrouchButtonDown)
+	{
+		OnCrouchToggle();
+	}
+	else
+	{
+		bPressedJump = true;
+		JumpButtonDown = true;
+	}
+}
+
+void ATyranCharacter::OnStopJump()
+{
+	bPressedJump = false;
+	JumpButtonDown = false;
+}
+
+void ATyranCharacter::OnCrouchToggle()
+{
+	// Si nous sommes déjà accroupis, CanCrouch retourne false.
+	if (CrouchButtonDown == false)
+	{
+		CrouchButtonDown = true;
+		Crouch();
+	}
+	else
+	{
+		CrouchButtonDown = false;
+		UnCrouch();
+	}
+	// Si nous sommes sur un client
+	if (Role < ROLE_Authority)
+	{
+		ServerCrouchToggle(true); // le param n'a pas d'importance pour l'instant
+	}
 }
 
 void ATyranCharacter::TurnAtRate(float Rate)
@@ -146,10 +383,48 @@ void ATyranCharacter::MoveRight(float Value)
 	}
 }
 
+bool ATyranCharacter::ServerCrouchToggle_Validate(bool NewCrouching)
+{
+	return true;
+}
+
+void ATyranCharacter::ServerCrouchToggle_Implementation(bool NewCrouching)
+{
+	OnCrouchToggle();
+}
+
+bool ATyranCharacter::ServerEquipWeapon_Validate(AWeapon* Weapon) { 
+	return true; 
+} 
+
+void ATyranCharacter::ServerEquipWeapon_Implementation(AWeapon* Weapon) { 
+	EquipWeapon(Weapon); 
+}
+
+void ATyranCharacter::OnRep_CurrentWeapon(AWeapon* LastWeapon) {
+	SetCurrentWeapon(CurrentWeapon, LastWeapon);
+}
+
+void ATyranCharacter::OnRep_CrouchButtonDown()
+{
+	if (CrouchButtonDown == true)
+	{
+		Crouch();
+	}
+	else
+	{
+		UnCrouch();
+	}
+}
+
 void ATyranCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ATyranCharacter, isVisible);
+	DOREPLIFETIME(ATyranCharacter, Inventory);
+	DOREPLIFETIME(ATyranCharacter, CurrentWeapon);
+	DOREPLIFETIME(ATyranCharacter, Health);
+	DOREPLIFETIME_CONDITION(ATyranCharacter, CrouchButtonDown, COND_SkipOwner);
 }
 
 void ATyranCharacter::setVisible(bool b) {

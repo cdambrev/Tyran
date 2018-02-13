@@ -15,7 +15,9 @@ UCLASS()
 class TYRAN_API ATyranController : public APlayerController
 {
 	GENERATED_BODY()
-	
+public:
+	TSubclassOf<UUserWidget> managerUIClass;
+
 public:
 	ATyranController();
 
@@ -25,4 +27,10 @@ public:
 	void setTyran(bool b);
 
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+
+	void SetPawn(APawn* InPawn) override;
+
+	UFUNCTION(Reliable, Client)
+	void initOnTyranClient();
+
 };

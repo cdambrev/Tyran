@@ -4,6 +4,7 @@
 
 #include "Core.h"
 #include "GameFramework/Character.h"
+#include "TyranTypes.h"
 #include "Net/UnrealNetwork.h"
 #include "TyranCharacter.generated.h"
 
@@ -25,6 +26,7 @@ class ATyranCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
 public:
 	ATyranCharacter();
 
@@ -35,6 +37,15 @@ public:
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mouvement", ReplicatedUsing = OnRep_CrouchButtonDown)
+	bool CrouchButtonDown;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Mouvement")
+	bool JumpButtonDown;
+
+	/* Inventaire des armes */
+	UPROPERTY(Transient, Replicated)
+	TArray<class AWeapon*> Inventory;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Replicated)
 	bool isVisible;
@@ -48,8 +59,38 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EAlignement alignement;
 
-protected:
+	UPROPERTY(EditDefaultsOnly, Category = "PlayerCondition", Replicated)
+	float Health;
 
+protected:
+	/* Point d'attache pour les items en main et actifs */ 
+	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
+	FName WeaponAttachPoint; 
+	
+	/* Point d'attache pour les items à la ceinture. */ 
+	UPROPERTY(EditDefaultsOnly, Category = "Sockets") 
+	FName PelvisAttachPoint; 
+	
+	/* Point d'attache pour l'arme principale */
+	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
+	FName SpineAttachPoint;
+
+	/* Distance pour lacher un objet d'inventaire. */
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory") 
+	float DropItemDistance; 
+	
+	/* Armes de defaut */ 
+	UPROPERTY(EditDefaultsOnly, Category = Inventory) 
+	TArray<TSubclassOf<class AWeapon>> DefaultInventoryClasses;
+
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_CurrentWeapon) 
+	class AWeapon* CurrentWeapon;
+
+	int timeSinceLastView;
+
+	bool bWantsToFire;
+
+protected:
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
 
@@ -77,9 +118,13 @@ protected:
 	/** Handler for when a touch input stops. */
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 
-	int timeSinceLastView;
+	// Quand la barre d'espacement est appuyée ou relâchée 
+	void OnStartJump(); 
+	void OnStopJump();
 
-protected:
+	// Quand la touche Crouch Toggle est appuyée 
+	void OnCrouchToggle();
+
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
@@ -89,6 +134,49 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	/* Retourne le point d'attache (socket) pour correspondre au socket du squelette */ 
+	FName GetInventoryAttachPoint(EInventorySlot Slot) const;
+
+	void AddWeapon(class AWeapon* Weapon);
+
+	void EquipWeapon(class AWeapon* Weapon);
+
+	virtual void PostInitializeComponents() override;
+
+	void SpawnDefaultInventory();
+
+	void SetCurrentWeapon(class AWeapon* NewWeapon, class AWeapon* LastWeapon = nullptr); 
+
+	void OnStartFire(); 
+	
+	void OnStopFire();
+
+	void StartWeaponFire(); 
+	
+	void StopWeaponFire();
+
+	bool CanFire() const;
+
+	void OnNextWeapon(); 
+	void OnPrevWeapon(); 
+
+	void OnEquipPrimaryWeapon(); 
+	void OnEquipSecondaryWeapon();
+
+	// Invocation d'une RPC serveur pour actualiser l'état de crouching
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerCrouchToggle(bool NewCrouching);
+	
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerEquipWeapon(AWeapon* Weapon);
+
+	/* La fonction OnRep utilise un paramètre pour la valeur précédente de la variable */ 
+	UFUNCTION()
+	void OnRep_CurrentWeapon(AWeapon* LastWeapon);
+
+	UFUNCTION()
+	void OnRep_CrouchButtonDown();
 
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 
