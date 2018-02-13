@@ -34,7 +34,9 @@ public:
 	enum ManagerState {
 		NOTHING,
 		BUILDING,
-		PLACINGOBJECT
+		PLACINGOBJECT,
+		PLACINGTARGETPOINT,
+		FOCUSGARDE
 	};
 
 
@@ -104,6 +106,9 @@ protected:
 
 	UFUNCTION(Reliable, Server, WithValidation)
 	void placeObject(FTransform position, TSubclassOf<APlaceableObject> objectClass);
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void orderPatrolPoints(AActor* garde, TArray<FVector> patrolPoints);
 
 public:	
 	// Called every frame
