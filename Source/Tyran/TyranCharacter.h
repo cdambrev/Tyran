@@ -62,7 +62,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "PlayerCondition", Replicated)
 	float Health;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Replicated)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	bool isDead;
 
 protected:
@@ -127,6 +127,9 @@ protected:
 
 	// Quand la touche Crouch Toggle est appuyée 
 	void OnCrouchToggle();
+
+	// "Et là IL MEUUUUUUUURT !"
+	void OnDeath();
 
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

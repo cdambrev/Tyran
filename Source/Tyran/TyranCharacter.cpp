@@ -125,9 +125,7 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
 		if (Health <= 0.f)
 		{
-			isDead = true;
-			GetCharacterMovement()->Deactivate();
-			SetLifeSpan(10.0f);
+			OnDeath();
 		}
 	}
 
@@ -360,6 +358,13 @@ void ATyranCharacter::OnCrouchToggle()
 	{
 		ServerCrouchToggle(true); // le param n'a pas d'importance pour l'instant
 	}
+}
+
+void ATyranCharacter::OnDeath()
+{
+	isDead = true;
+	DetachFromControllerPendingDestroy();
+	SetLifeSpan(10.0f);
 }
 
 void ATyranCharacter::TurnAtRate(float Rate)
