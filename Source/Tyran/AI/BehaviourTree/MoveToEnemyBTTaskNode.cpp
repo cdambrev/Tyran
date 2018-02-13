@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MoveToEnemyBTTaskNode.h"
-#include "AIGuardController.h" 
+#include "AI/AIGuardController.h" 
 
 UMoveToEnemyBTTaskNode::UMoveToEnemyBTTaskNode() { 
 	// Le nom que prendra le noeud dans le BT 

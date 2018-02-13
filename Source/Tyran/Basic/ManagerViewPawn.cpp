@@ -5,14 +5,14 @@
 #include "TyranCharacter.h"
 #include "Runtime/AIModule/Classes/BehaviorTree/BlackboardComponent.h" 
 #include "Runtime/AIModule/Classes/BrainComponent.h" 
-#include "AIGuardTargetPoint.h"
-#include "AIGuardController.h"
+#include "AI/AIGuardController.h"
 #include "EngineUtils.h"
 #include "Components/InputComponent.h"
 #include "EngineUtils.h"
 #include "Engine/Engine.h"
 #include "GuardCharacter.h"
 #include "Basic/ManagerPlayerState.h"
+#include "AI/AIGuardTargetPoint.h"
 
 
 /***************/
