@@ -4,9 +4,11 @@
 
 #include "Core.h"
 #include "GameFramework/Character.h"
-#include "TyranTypes.h"
+#include "Basic/Enum/TyranTypes.h"
 #include "Net/UnrealNetwork.h"
+//#include "Basic/Enum/Alignement.h"
 #include "TyranCharacter.generated.h"
+
 
 UENUM(BlueprintType)
 enum class EAlignement : uint8 {

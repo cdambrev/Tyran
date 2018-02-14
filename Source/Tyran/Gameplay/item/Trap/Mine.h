@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Gameplay/item/pieges/Piege.h"
-#include "WolfTrap.generated.h"
+#include "Gameplay/item/Trap/Trap.h"
+#include "Mine.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TYRAN_API AWolfTrap : public APiege
+class TYRAN_API AMine : public ATrap
 {
 	GENERATED_BODY()
 	

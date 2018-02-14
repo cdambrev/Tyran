@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Piege.generated.h"
+#include "Trap.generated.h"
 
 UCLASS()
-class TYRAN_API APiege : public AActor
+class TYRAN_API ATrap : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	APiege();
+	ATrap();
 
 protected:
 	// Called when the game starts or when spawned
