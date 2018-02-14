@@ -33,5 +33,4 @@ public:
 	UFUNCTION(Reliable, Client)
 	void initOnTyranClient();
 
-	//void onLeftClick();
 };

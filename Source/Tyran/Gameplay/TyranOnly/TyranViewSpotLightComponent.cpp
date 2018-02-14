@@ -2,7 +2,7 @@
 
 #include "TyranViewSpotLightComponent.h"
 #include <EngineUtils.h>
-#include "TyranController.h"
+#include "Basic/TyranController.h"
 #include <Engine.h>
 
 UTyranViewSpotLightComponent::UTyranViewSpotLightComponent() {

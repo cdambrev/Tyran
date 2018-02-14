@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MaxPopulationIncreaser.h"
-#include "TyranGameMode.h"
+#include "Basic/TyranGameMode.h"
 #include "EngineUtils.h"
-#include "ManagerPlayerState.h"
+#include "Basic/ManagerPlayerState.h"
 
 
 // Sets default values for this component's properties

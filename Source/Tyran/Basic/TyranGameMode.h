@@ -4,8 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+<<<<<<< HEAD:Source/Tyran/Basic/TyranGameMode.h
 #include "TyranController.h"
 #include "Loot.h"
+=======
+#include "Basic/TyranController.h"
+>>>>>>> debug:Source/Tyran/Basic/TyranGameMode.h
 #include "TyranGameMode.generated.h"
 
 UCLASS(minimalapi)

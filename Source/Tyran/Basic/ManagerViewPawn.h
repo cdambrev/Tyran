@@ -8,10 +8,10 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "Building.h"
-#include "PlaceableObject.h"
-#include "BuildingHint.h"
-#include "BuildingSlot.h"
+#include "Gameplay/TyranOnly/Placeable_Object/Building.h"
+#include "Gameplay/TyranOnly/Placeable_Object/PlaceableObject.h"
+#include "Gameplay/TyranOnly/Placeable_Object/BuildingHint.h"
+#include "Gameplay/TyranOnly/Placeable_Object/BuildingSlot.h"
 #include "ManagerViewPawn.generated.h"
 
 UCLASS()
@@ -27,12 +27,16 @@ private :
 	//float ZoomFactor;
 	bool bZoomingIn;
 	bool bActivatePitchYawn;
+	// Focus (par le clic)
+	AActor* focus;
 
 public:
 	enum ManagerState {
 		NOTHING,
 		BUILDING,
-		PLACINGOBJECT
+		PLACINGOBJECT,
+		PLACINGTARGETPOINT,
+		FOCUSGARDE
 	};
 
 
@@ -84,7 +88,7 @@ protected:
 	void ZoomOut();
 
 	void FastMoveInput(float Direction);
-
+	
 	UFUNCTION(BlueprintCallable)
 	void enterBuildMode(TSubclassOf<ABuilding> building, TSubclassOf<ABuildingHint> buildHint);
 
@@ -100,6 +104,9 @@ protected:
 
 	UFUNCTION(Reliable, Server, WithValidation)
 	void placeObject(FTransform position, TSubclassOf<APlaceableObject> objectClass);
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void orderPatrolPoints(AActor* garde, const TArray<FVector>& patrolPoints);
 
 public:	
 	// Called every frame
