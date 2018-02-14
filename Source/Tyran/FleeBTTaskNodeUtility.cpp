@@ -19,3 +19,8 @@ FString UFleeBTTaskNodeUtility::GetStaticDescription() const
 	return TEXT("Si c'était pas assez clair c'est la fuite");
 }
 
+void UFleeBTTaskNodeUtility::CalculUtility()
+{
+	utility = 0.0f;
+}
+

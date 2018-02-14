@@ -17,3 +17,8 @@ FString UCoverBTTaskNodeUtility::GetStaticDescription() const
 {
 	return TEXT("Recherche d'une couverture et positionnement");
 }
+
+void UCoverBTTaskNodeUtility::CalculUtility()
+{
+	utility = 0.0f;
+}

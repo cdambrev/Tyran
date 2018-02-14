@@ -22,6 +22,6 @@ class TYRAN_API UCoverBTTaskNodeUtility : public UBTTaskNodeUtility
 
 	/** Retourne une chaine de description pour la tâche. Ce texte apparaître dans le BT */
 	virtual FString GetStaticDescription() const override;
-	
+	void CalculUtility();
 	
 };

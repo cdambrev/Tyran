@@ -22,6 +22,8 @@ class TYRAN_API UFleeBTTaskNodeUtility : public UBTTaskNodeUtility
 
 	/** Retourne une chaine de description pour la tâche. Ce texte apparaître dans le BT */
 	virtual FString GetStaticDescription() const override;
+
+	virtual void CalculUtility() override;
 	
 	
 	

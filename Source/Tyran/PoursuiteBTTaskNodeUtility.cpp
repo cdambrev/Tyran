@@ -19,3 +19,7 @@ FString UPoursuiteBTTaskNodeUtility::GetStaticDescription() const
 	return TEXT("Poursuivre sa cible");
 }
 
+void UPoursuiteBTTaskNodeUtility::CalculUtility()
+{
+	utility = 0.0f;
+}
