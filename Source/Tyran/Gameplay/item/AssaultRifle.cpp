@@ -15,7 +15,7 @@ AAssaultRifle::AAssaultRifle()
 	MinimumProjectileSpawnDistance = 800; 
 	TracerRoundInterval = 3;
 
-	StorageSlot = EInventorySlot::Secondary; 
+	StorageSlot = EInventorySlot::Primary; 
 	RifleAttachPoint = TEXT("RifleSocket"); 
 	
 	//GetWeaponMesh()->AddLocalRotation(FRotator(0, 0, -90)); 

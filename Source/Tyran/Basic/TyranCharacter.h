@@ -93,6 +93,13 @@ protected:
 
 	bool bWantsToFire;
 
+	bool bHasNewFocus; // Seulement vrai lors de la première image avec un nouveau focus.
+	class ALoot* FocusedLoot;
+
+	// Distance maximale de focus sur les objets.
+	UPROPERTY(EditDefaultsOnly, Category = "ObjectInteraction") 
+	float MaxUseDistance;
+
 protected:
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
@@ -128,6 +135,9 @@ protected:
 	// Quand la touche Crouch Toggle est appuyée 
 	void OnCrouchToggle();
 
+	// Quand la touche Use est appuyée 
+	void Use();
+
 	// "Et là IL MEUUUUUUUURT !"
 	void OnDeath();
 
@@ -137,6 +147,8 @@ protected:
 
 	// AActor
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	class ALoot* GetLootInView();
 
 public:
 	/** Returns CameraBoom subobject **/
@@ -197,6 +209,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Tyran")
 	EAlignement getAlignement();
+
+	/* Vérifier si l'emplacement est libre */
+	bool WeaponSlotAvailable(EInventorySlot CheckSlot);
 
 	void Tick(float DeltaSeconds) override;
 };

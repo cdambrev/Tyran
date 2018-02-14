@@ -18,6 +18,7 @@ AWeapon::AWeapon()
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Mesh->SetCollisionResponseToAllChannels(ECR_Ignore);
 	Mesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	Mesh->SetSimulatePhysics(true);
 	RootComponent = Mesh;
 
 	StorageSlot = EInventorySlot::Primary;
@@ -27,6 +28,7 @@ AWeapon::AWeapon()
 
 	// Pour multi-joueurs 
 	bReplicates = true;
+	bReplicateMovement = true;
 	bNetUseOwnerRelevancy = true;
 
 	MuzzleAttachPoint = TEXT("MuzzleFlashSocket");
@@ -369,6 +371,42 @@ void AWeapon::OnRep_MyPawn() {
 		OnLeaveInventory();
 	}
 }
+
+//void AWeapon::OnBeginFocus()
+//{
+//	Super::OnBeginFocus();
+//
+//	// Utilisé par notre PostProcess pour le rendu d'un «surlignage»
+//	Mesh->SetRenderCustomDepth(true);
+//}
+//
+//void AWeapon::OnEndFocus()
+//{
+//	Super::OnEndFocus();
+//
+//	Mesh->SetRenderCustomDepth(false);
+//}
+//
+//void AWeapon::OnUsed(APawn* InstigatorPawn)
+//{
+//	Super::OnUsed(InstigatorPawn);
+//
+//	ATyranCharacter* MyPawn = Cast<ATyranCharacter>(InstigatorPawn); 
+//	if (MyPawn) { 
+//		/* CHoisir le bon type d'objet à prendre et ajouter à l'inventaire */ 
+//		if (MyPawn->WeaponSlotAvailable(GetStorageSlot())) {
+//			FActorSpawnParameters SpawnInfo;
+//			SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn; 
+//			AWeapon* NewWeapon = GetWorld()->SpawnActor<AWeapon>(this->GetClass(), SpawnInfo); 
+//			MyPawn->AddWeapon(NewWeapon); 
+//			Destroy(); 
+//		} 
+//		{ 
+//			if (GEngine)
+//				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, "Emplacement d'arme déjà pris!");
+//		} 
+//	}
+//}
 
 void AWeapon::OnRep_BurstCounter() {
 	if (BurstCounter > 0) { 

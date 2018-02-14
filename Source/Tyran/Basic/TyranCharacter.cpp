@@ -15,6 +15,7 @@
 #include <EngineUtils.h>
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
+#include <DrawDebugHelpers.h>
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -45,6 +46,8 @@ ATyranCharacter::ATyranCharacter()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
+	CameraBoom->SocketOffset = FVector(0, 35, 0);
+	CameraBoom->TargetOffset = FVector(0, 0, 55);
 
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
@@ -71,6 +74,8 @@ ATyranCharacter::ATyranCharacter()
 
 	Health = 100;
 	isDead = false;
+
+	MaxUseDistance = 500;
 
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -130,6 +135,39 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 	}
 
 	return ActualDamage;
+}
+
+ALoot * ATyranCharacter::GetLootInView()
+{
+	FVector CamLoc;
+	FRotator CamRot; 
+	
+	if (Controller == NULL) 
+		return NULL;
+	
+	Controller->GetPlayerViewPoint(CamLoc, CamRot); 
+	const FVector TraceStart = CamLoc; 
+	const FVector Direction = CamRot.Vector(); 
+	const FVector TraceEnd = TraceStart + (Direction * MaxUseDistance); 
+	
+	//FCollisionObjectQueryParams objectQueryParams{};
+	//objectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	FCollisionQueryParams TraceParams(FName(TEXT("TraceLoot")), true, this); 
+	TraceParams.bTraceAsyncScene = true; 
+	//TraceParams.bReturnPhysicalMaterial = false; 
+	TraceParams.bTraceComplex = true; 
+	TraceParams.AddIgnoredActor(this);
+	
+	FHitResult Hit(ForceInit);
+	bool succes = GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Camera, TraceParams);
+	//bool succes = GetWorld()->LineTraceSingleByObjectType(Hit, TraceStart, TraceEnd, objectQueryParams, TraceParams);
+	if (succes)
+		bool b = true;
+	
+	// Cette ligne sera en commentaire plus tard 
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f); 
+	
+	return Cast<ALoot>(Hit.GetActor());
 }
 
 
@@ -360,6 +398,14 @@ void ATyranCharacter::OnCrouchToggle()
 	}
 }
 
+void ATyranCharacter::Use()
+{
+		ALoot* Loot = GetLootInView(); 
+		if (Loot) {
+			Loot->OnUsed(this);
+		}
+}
+
 void ATyranCharacter::OnDeath()
 {
 	isDead = true;
@@ -472,6 +518,14 @@ void ATyranCharacter::setViewedThisTick()
 	timeSinceLastView = 0;
 }
 
+bool ATyranCharacter::WeaponSlotAvailable(EInventorySlot CheckSlot)
+{
+	/* Fonction de recherche spéciale qui nous évite de tester chaque élément de l'inventaire. */ 
+	return nullptr == Inventory.FindByPredicate([=](AWeapon* W) { 
+		return W->GetStorageSlot() == CheckSlot;
+	});
+}
+
 void ATyranCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -484,6 +538,33 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 			else {
 				setVisible(true);
 			}
+		}
+	}
+
+	if (Controller && Controller->IsLocalController()) {
+		ALoot* Loot = GetLootInView();
+		
+		// Terminer le focus sur l'objet précédent 
+		if (FocusedLoot != Loot) {
+			if (FocusedLoot) {
+				FocusedLoot->OnEndFocus();
+			} 
+
+			bHasNewFocus = true; 
+		} 
+		
+		// Assigner le nouveau focus (peut être nul ) 
+		FocusedLoot = Loot;
+		
+		// Démarrer un nouveau focus si Usable != null; 
+		if (Loot) {
+			if (bHasNewFocus) { 
+				Loot->OnBeginFocus();
+				bHasNewFocus = false; 
+				
+				// Pour débogage, vous pourrez l'oter par la suite 
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Focus")); 
+			} 
 		}
 	}
 }

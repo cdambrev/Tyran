@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "TyranCharacter.h"
 #include "Sound/SoundCue.h"
+#include "Loot.h"
 #include "Weapon.generated.h"
 
 UENUM() enum class EWeaponState {
@@ -167,4 +168,9 @@ public:
 
 	UFUNCTION() 
 	void OnRep_MyPawn();
+
+	/* LOOT */
+	/*void OnBeginFocus() override;
+	void OnEndFocus() override;
+	void OnUsed(APawn* InstigatorPawn) override;*/
 };
