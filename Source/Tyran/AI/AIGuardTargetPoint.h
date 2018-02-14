@@ -21,5 +21,4 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables custom")
 		int32 Position;
 
-	
 };
