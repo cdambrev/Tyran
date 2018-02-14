@@ -16,6 +16,8 @@
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
 #include <DrawDebugHelpers.h>
+#include "Gameplay/item/WeaponLoot.h"
+#include "Components/StaticMeshComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -97,6 +99,8 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 
 	InputComponent->BindAction("EquipPrimaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipPrimaryWeapon);
 	InputComponent->BindAction("EquipSecondaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipSecondaryWeapon);
+
+	InputComponent->BindAction("Use", IE_Pressed, this, &ATyranCharacter::Use);
 
 	InputComponent->BindAction("NextWeapon", IE_Pressed, this, &ATyranCharacter::OnNextWeapon);
 	InputComponent->BindAction("PrevWeapon", IE_Pressed, this, &ATyranCharacter::OnPrevWeapon);
@@ -343,6 +347,74 @@ void ATyranCharacter::OnEquipSecondaryWeapon()
 	}
 }
 
+void ATyranCharacter::DropWeapon()
+{
+	if (Role < ROLE_Authority) { 
+		ServerDropWeapon(); 
+		return; 
+	} 
+	
+	if (CurrentWeapon) { 
+		FVector CamLoc; 
+		FRotator CamRot; 
+		if (Controller == nullptr) 
+			return; 
+		
+		/* Déterminer un emplacement pour lacher l'arme, un peu en avant du joueur. */ 
+		Controller->GetPlayerViewPoint(CamLoc, CamRot); 
+		const FVector Direction = CamRot.Vector(); 
+		const FVector SpawnLocation = GetActorLocation() + (Direction * DropItemDistance); 
+		FActorSpawnParameters SpawnInfo; 
+		SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn; 
+		
+		AWeaponLoot* NewWeaponLoot = GetWorld()->SpawnActor<AWeaponLoot>(CurrentWeapon->WeaponLootClass, SpawnLocation, FRotator::ZeroRotator, SpawnInfo); 
+		
+		/* Lui appliquer une petite force pour que l'arme tourne un peu lorsque lachee. */ 
+		UStaticMeshComponent* MeshComp = NewWeaponLoot->GetMeshComponent();
+		if (MeshComp) { 
+			MeshComp->AddTorque(FVector(1, 1, 1) * 4000000); 
+		} 
+		
+		RemoveWeapon(CurrentWeapon); 
+	}
+}
+
+void ATyranCharacter::RemoveWeapon(AWeapon * Weapon)
+{
+	if (Weapon && Role == ROLE_Authority) { 
+		bool bIsCurrent = CurrentWeapon == Weapon; 
+		
+		if (Inventory.Contains(Weapon)) { 
+			Weapon->OnLeaveInventory();
+		} 
+		Inventory.RemoveSingle(Weapon); 
+		
+		/* Replacer l'arme dans l'inventaire s'il s'agit de l'arme en main */ 
+		if (bIsCurrent && Inventory.Num() > 0) 
+			SetCurrentWeapon(Inventory[0]); 
+		
+		/* Eliminer la référence à l'objet si nous avons un inventaire vide */ 
+		if (Inventory.Num() == 0) 
+			SetCurrentWeapon(nullptr); 
+	}
+}
+
+bool ATyranCharacter::ServerUse_Validate() { 
+	return true; 
+}
+
+void ATyranCharacter::ServerUse_Implementation() { 
+	Use(); 
+}
+
+bool ATyranCharacter::ServerDropWeapon_Validate() {
+	return true;
+}
+
+void ATyranCharacter::ServerDropWeapon_Implementation() { 
+	DropWeapon(); 
+}
+
 void ATyranCharacter::OnResetVR()
 {
 	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
@@ -400,10 +472,16 @@ void ATyranCharacter::OnCrouchToggle()
 
 void ATyranCharacter::Use()
 {
-		ALoot* Loot = GetLootInView(); 
+	if (Role == ROLE_Authority) {
+		ALoot* Loot = GetLootInView();
 		if (Loot) {
 			Loot->OnUsed(this);
 		}
+	}
+	else
+	{
+		ServerUse();
+	}
 }
 
 void ATyranCharacter::OnDeath()

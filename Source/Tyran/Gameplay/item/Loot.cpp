@@ -13,6 +13,12 @@ ALoot::ALoot()
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh")); 
 	RootComponent = MeshComp;
+
+	// Tous les objets qui peuvent être ramassés sont simulés 
+	// et peuvent être disséminés sur tout le niveau
+	MeshComp->SetSimulatePhysics(true); 
+	bReplicates = true; 
+	bReplicateMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -20,6 +26,17 @@ void ALoot::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ALoot::OnBeginFocus() {
+	// Utilisé par notre PostProcess pour le rendu d'un «surlignage» 
+	MeshComp->SetRenderCustomDepth(true);
+}
+
+void ALoot::OnEndFocus()
+{
+	// Utilisé par notre PostProcess pour le rendu d'un «surlignage» 
+	MeshComp->SetRenderCustomDepth(false);
 }
 
 // Called every frame

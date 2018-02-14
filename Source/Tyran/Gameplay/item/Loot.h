@@ -30,12 +30,17 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	/* Le joueur regarde l'objet */ 
-	virtual void OnBeginFocus(){}
+	virtual void OnBeginFocus();
 	
 	/* Le joueur arrête de regarder l'objet */ 
-	virtual void OnEndFocus(){}
+	virtual void OnEndFocus();
 
 	/* Appelé quand le joueur interagit avec l'objet */ 
 	virtual void OnUsed(APawn* InstigatorPawn){}
+
+	/* Accesseur public au composant! */ 
+	FORCEINLINE UStaticMeshComponent* GetMeshComponent() const { 
+		return MeshComp; 
+	}
 	
 };

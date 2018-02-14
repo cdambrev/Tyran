@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "Core.h"
+#include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Basic/TyranCharacter.h"
 #include "Sound/SoundCue.h"
-#include "Loot.h"
+#include "ParticleDefinitions.h"
 #include "Weapon.generated.h"
 
 UENUM() enum class EWeaponState {
@@ -24,6 +24,10 @@ class TYRAN_API AWeapon : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AWeapon();
+
+	/* Classe a faire apparaître lorsque l'objet est lache */
+	UPROPERTY(EditDefaultsOnly, Category = "Game|Weapon")
+	TSubclassOf<class AWeaponLoot> WeaponLootClass;
 
 protected:
 	/** Le propriétaire */ 
@@ -147,8 +151,7 @@ public:
 	virtual void StopSimulatingWeaponFire(); 
 	
 	/* Avec PURE_VIRTUAL, nous n'avons pas à implanter la fonction ici, 
-	nous l'implanterons dans les classes dérivées 
-	(dans WeaponInstant.cpp et Flashlight.cpp) */ 
+	nous l'implanterons dans les classes dérivées */ 
 	virtual void FireWeapon() PURE_VIRTUAL(AWeapon::FireWeapon, ); 
 	
 	UFUNCTION(Reliable, Server, WithValidation) 

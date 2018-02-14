@@ -187,6 +187,15 @@ public:
 	void OnEquipPrimaryWeapon(); 
 	void OnEquipSecondaryWeapon();
 
+	void DropWeapon();
+	void RemoveWeapon(class AWeapon* Weapon);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerUse();
+
+	UFUNCTION(Reliable, Server, WithValidation) 
+	void ServerDropWeapon();
+
 	// Invocation d'une RPC serveur pour actualiser l'état de crouching
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerCrouchToggle(bool NewCrouching);

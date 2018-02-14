@@ -18,7 +18,7 @@ AWeapon::AWeapon()
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Mesh->SetCollisionResponseToAllChannels(ECR_Ignore);
 	Mesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-	Mesh->SetSimulatePhysics(true);
+	Mesh->SetSimulatePhysics(false);
 	RootComponent = Mesh;
 
 	StorageSlot = EInventorySlot::Primary;
