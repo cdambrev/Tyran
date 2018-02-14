@@ -2,7 +2,7 @@
 
 #include "LootPoint.h"
 #include <EngineUtils.h>
-#include "TyranGameMode.h"
+#include "Basic/TyranGameMode.h"
 #include "Runtime/Core/Public/GenericPlatform/GenericPlatformMath.h"
 #include "Runtime/Core/Public/Math/UnrealMathUtility.h"
 
