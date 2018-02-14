@@ -13,6 +13,7 @@ UMoveToEnemyBTTaskNode::UMoveToEnemyBTTaskNode() {
 /* Sera appelée au démarrage de la tâche et devra retourner Succeeded, Failed ou InProgress */ 
 EBTNodeResult::Type UMoveToEnemyBTTaskNode::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) { 
 	
+	
 	// Obtenir un pointeur sur notre AIEnemyController 
 	AAIGuardController* AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner()); 
 	

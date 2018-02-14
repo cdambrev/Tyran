@@ -5,8 +5,9 @@
 
 EBTNodeResult::Type UCheckActionZoneBTTaskNode::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("CheckActionZone"));
 	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
-	NodeResult = EBTNodeResult::Failed;
+	NodeResult = EBTNodeResult::Succeeded;
 	return NodeResult;
 }
 

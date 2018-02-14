@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
 #include "BTTaskNodeUtility.h"
 #include "PoursuiteBTTaskNodeUtility.generated.h"
 

@@ -4,6 +4,7 @@
 
 EBTNodeResult::Type UCheckSoundHeardBTTaskNode::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("CheckSoundHeard"));
 	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
 	NodeResult = EBTNodeResult::Failed;
 	return NodeResult;

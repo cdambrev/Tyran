@@ -4,8 +4,9 @@
 
 EBTNodeResult::Type UCoverBTTaskNodeUtility::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Cover"));
 	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
-	NodeResult = EBTNodeResult::Failed;
+	NodeResult = EBTNodeResult::Succeeded;
 	return NodeResult;
 }
 
@@ -20,5 +21,5 @@ FString UCoverBTTaskNodeUtility::GetStaticDescription() const
 
 void UCoverBTTaskNodeUtility::CalculUtility()
 {
-	utility = 0.0f;
+	utility = 0.5f;
 }

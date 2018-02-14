@@ -5,8 +5,9 @@
 
 EBTNodeResult::Type UFleeBTTaskNodeUtility::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Flee"));
 	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
-	NodeResult = EBTNodeResult::Failed;
+	NodeResult = EBTNodeResult::Succeeded;
 	return NodeResult;
 }
 
@@ -16,7 +17,7 @@ void UFleeBTTaskNodeUtility::TickTask(UBehaviorTreeComponent & OwnerComp, uint8 
 
 FString UFleeBTTaskNodeUtility::GetStaticDescription() const
 {
-	return TEXT("Si c'était pas assez clair c'est la fuite");
+	return TEXT("C'est la fuite");
 }
 
 void UFleeBTTaskNodeUtility::CalculUtility()

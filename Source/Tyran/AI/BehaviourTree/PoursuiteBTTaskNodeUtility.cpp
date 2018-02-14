@@ -5,8 +5,9 @@
 
 EBTNodeResult::Type UPoursuiteBTTaskNodeUtility::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Pursue"));
 	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
-	NodeResult = EBTNodeResult::Failed;
+	NodeResult = EBTNodeResult::Succeeded;
 	return NodeResult;
 }
 

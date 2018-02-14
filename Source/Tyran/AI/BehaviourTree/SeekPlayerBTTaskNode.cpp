@@ -6,6 +6,7 @@
 
 EBTNodeResult::Type USeekPlayerBTTaskNode::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
+	UE_LOG(LogTemp, Warning, TEXT("SeekPlayer"));
 	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
 	NodeResult = EBTNodeResult::Failed;
 	return NodeResult;

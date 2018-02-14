@@ -5,6 +5,7 @@
 
 EBTNodeResult::Type URoutineBTTaskNode::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Routine"));
 	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
 	NodeResult = EBTNodeResult::Failed;
 	return NodeResult;
