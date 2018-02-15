@@ -14,12 +14,14 @@ class TYRAN_API ALoot : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ALoot();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int value;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float maxFrequency;
 	UPROPERTY(EditDefaultsOnly, Category = "Mesh") 
 	UStaticMeshComponent* MeshComp;
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -28,6 +30,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
 
 	/* Le joueur regarde l'objet */ 
 	virtual void OnBeginFocus();
@@ -42,5 +45,6 @@ public:
 	FORCEINLINE UStaticMeshComponent* GetMeshComponent() const { 
 		return MeshComp; 
 	}
+
 	
 };

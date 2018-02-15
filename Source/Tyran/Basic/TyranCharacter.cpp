@@ -77,6 +77,7 @@ ATyranCharacter::ATyranCharacter()
 	Health = 100;
 	isDead = false;
 
+
 	MaxUseDistance = 600;
 	DropItemDistance = 100;
 
@@ -103,6 +104,7 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 
 	InputComponent->BindAction("EquipPrimaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipPrimaryWeapon);
 	InputComponent->BindAction("EquipSecondaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipSecondaryWeapon);
+
 
 	InputComponent->BindAction("Use", IE_Pressed, this, &ATyranCharacter::Use);
 
@@ -144,6 +146,7 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 
 	return ActualDamage;
 }
+
 
 ALoot * ATyranCharacter::GetLootInView()
 {
@@ -345,6 +348,7 @@ void ATyranCharacter::OnEquipSecondaryWeapon()
 	}
 }
 
+
 void ATyranCharacter::DropWeapon()
 {
 	if (Role < ROLE_Authority) { 
@@ -413,6 +417,7 @@ void ATyranCharacter::ServerDropWeapon_Implementation() {
 	DropWeapon(); 
 }
 
+
 void ATyranCharacter::OnResetVR()
 {
 	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
@@ -455,6 +460,18 @@ void ATyranCharacter::OnCrouchToggle()
 	{
 		CrouchButtonDown = true;
 		Crouch();
+
+	}
+	else
+	{
+		CrouchButtonDown = false;
+		UnCrouch();
+	}
+	// Si nous sommes sur un client
+	if (Role < ROLE_Authority)
+	{
+		ServerCrouchToggle(true); // le param n'a pas d'importance pour l'instant
+
 	}
 	else
 	{

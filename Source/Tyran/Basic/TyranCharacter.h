@@ -149,6 +149,7 @@ protected:
 	// Quand la touche Use est appuyée 
 	void Use();
 
+
 	// "Et là IL MEUUUUUUUURT !"
 	void OnDeath();
 
@@ -158,6 +159,7 @@ protected:
 
 	// AActor
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
 
 	class ALoot* GetLootInView();
 
@@ -195,6 +197,7 @@ public:
 
 	void OnEquipPrimaryWeapon(); 
 	void OnEquipSecondaryWeapon();
+
 
 	void DropWeapon();
 	void RemoveWeapon(class AWeapon* Weapon);
