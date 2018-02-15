@@ -78,7 +78,8 @@ ATyranCharacter::ATyranCharacter()
 	isDead = false;
 
 
-	MaxUseDistance = 500;
+	MaxUseDistance = 600;
+	DropItemDistance = 100;
 
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -157,22 +158,16 @@ ALoot * ATyranCharacter::GetLootInView()
 	const FVector Direction = CamRot.Vector(); 
 	const FVector TraceEnd = TraceStart + (Direction * MaxUseDistance); 
 	
-	//FCollisionObjectQueryParams objectQueryParams{};
-	//objectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 	FCollisionQueryParams TraceParams(FName(TEXT("TraceLoot")), true, this); 
 	TraceParams.bTraceAsyncScene = true; 
-	//TraceParams.bReturnPhysicalMaterial = false; 
-	TraceParams.bTraceComplex = true; 
-	TraceParams.AddIgnoredActor(this);
+	TraceParams.bReturnPhysicalMaterial = false; 
+	TraceParams.bTraceComplex = false; 
+	//TraceParams.AddIgnoredActor(this);
 	
 	FHitResult Hit(ForceInit);
-	bool succes = GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Camera, TraceParams);
-	//bool succes = GetWorld()->LineTraceSingleByObjectType(Hit, TraceStart, TraceEnd, objectQueryParams, TraceParams);
-	if (succes)
-		bool b = true;
+	bool succes = GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, TraceParams);
 	
-	// Cette ligne sera en commentaire plus tard 
-	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f); 
+	//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f); 
 	
 	return Cast<ALoot>(Hit.GetActor());
 }
