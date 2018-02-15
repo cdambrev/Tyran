@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "TyranController.h"
+#include "Gameplay/item/Loot.h"
+#include "Basic/TyranController.h"
 #include "TyranGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -13,6 +14,9 @@ class ATyranGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditAnywhere)
+	TSet<TSubclassOf<ALoot>> availableLoot;
+
 	UPROPERTY(BlueprintReadOnly)
 	ATyranController * tyranController;
 

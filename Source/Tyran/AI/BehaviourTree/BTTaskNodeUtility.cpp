@@ -7,7 +7,7 @@ float UBTTaskNodeUtility::GetUtility() const {
 	return utility;
 }
 
-void UBTTaskNodeUtility::CalculUtility() {
+void UBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerComp) {
 	utility = 0.0f;
 }
 

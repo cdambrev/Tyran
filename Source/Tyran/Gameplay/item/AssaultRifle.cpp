@@ -3,7 +3,7 @@
 #include "AssaultRifle.h"
 #include "ImpactEffect.h"
 
-#define COLLISION_WEAPON ECC_GameTraceChannel1
+#define COLLISION_WEAPON ECC_GameTraceChannel3
 
 AAssaultRifle::AAssaultRifle()
 {
@@ -15,7 +15,7 @@ AAssaultRifle::AAssaultRifle()
 	MinimumProjectileSpawnDistance = 800; 
 	TracerRoundInterval = 3;
 
-	StorageSlot = EInventorySlot::Secondary; 
+	StorageSlot = EInventorySlot::Primary; 
 	RifleAttachPoint = TEXT("RifleSocket"); 
 	
 	//GetWeaponMesh()->AddLocalRotation(FRotator(0, 0, -90)); 
@@ -185,11 +185,11 @@ bool AAssaultRifle::ShouldDealDamage(AActor * TestActor) const
 void AAssaultRifle::DealDamage(const FHitResult & Impact, const FVector & ShootDir)
 {
 	FPointDamageEvent PointDmg;
-	PointDmg.DamageTypeClass = DamageType; 
-	PointDmg.HitInfo = Impact; 
-	PointDmg.ShotDirection = ShootDir; 
-	PointDmg.Damage = HitDamage; 
-	
+	PointDmg.DamageTypeClass = DamageType;
+	PointDmg.HitInfo = Impact;
+	PointDmg.ShotDirection = ShootDir;
+	PointDmg.Damage = HitDamage;
+
 	Impact.GetActor()->TakeDamage(PointDmg.Damage, PointDmg, MyPawn->Controller, this);
 }
 
@@ -261,6 +261,7 @@ void AAssaultRifle::SpawnTrailEffects(const FVector & EndPoint)
 void AAssaultRifle::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps); 
+
 	DOREPLIFETIME_CONDITION(AAssaultRifle, HitOriginNotify, COND_SkipOwner);
 }
 

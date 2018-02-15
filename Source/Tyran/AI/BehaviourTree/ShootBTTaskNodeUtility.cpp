@@ -20,9 +20,8 @@ FString UShootBTTaskNodeUtility::GetStaticDescription() const
 	return TEXT("Vise et tire sur un joueur");
 }
 
-void UShootBTTaskNodeUtility::CalculUtility()
+void UShootBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerComp)
 {
 	utility = 0.0f;
 }
-
 

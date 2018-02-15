@@ -2,8 +2,6 @@
 
 #include "SeekPlayerBTTaskNode.h"
 
-
-
 EBTNodeResult::Type USeekPlayerBTTaskNode::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
 	UE_LOG(LogTemp, Warning, TEXT("SeekPlayer"));
@@ -20,3 +18,5 @@ FString USeekPlayerBTTaskNode::GetStaticDescription() const
 {
 	return TEXT("Recherche d'un joueur qui s'est enfui");
 }
+
+

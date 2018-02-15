@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Core.h"
+#include "CoreMinimal.h"
 #include "BTTaskNodeUtility.h"
 #include "PoursuiteBTTaskNodeUtility.generated.h"
 
@@ -23,8 +23,7 @@ class TYRAN_API UPoursuiteBTTaskNodeUtility : public UBTTaskNodeUtility
 	/** Retourne une chaine de description pour la tâche. Ce texte apparaître dans le BT */
 	virtual FString GetStaticDescription() const override;
 
-	virtual void CalculUtility() override;
-
+	virtual void CalculUtility(UBehaviorTreeComponent & OwnerComp) override;
 	
 	
 };

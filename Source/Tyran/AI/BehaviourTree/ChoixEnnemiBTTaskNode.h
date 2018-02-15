@@ -22,7 +22,6 @@ class TYRAN_API UChoixEnnemiBTTaskNode : public UBTTaskNode
 
 	/** Retourne une chaine de description pour la tâche. Ce texte apparaître dans le BT */
 	virtual FString GetStaticDescription() const override;
-
 	
 	
 };

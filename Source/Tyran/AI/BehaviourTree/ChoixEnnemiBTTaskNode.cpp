@@ -20,4 +20,3 @@ FString UChoixEnnemiBTTaskNode::GetStaticDescription() const
 	return TEXT("Choisi quel ennemi prendre en focus pour la prochaine action");
 }
 
-

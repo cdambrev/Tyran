@@ -17,8 +17,6 @@ void URoutineBTTaskNode::TickTask(UBehaviorTreeComponent & OwnerComp, uint8 * No
 
 FString URoutineBTTaskNode::GetStaticDescription() const
 {
-	return TEXT("Rechercher d'ou vient un bruit");
+	return TEXT("Routine du garde");
 }
-
-
 

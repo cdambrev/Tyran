@@ -14,9 +14,11 @@ UCLASS()
 class TYRAN_API USelectorUtility : public UBTComposite_Selector
 {
 	GENERATED_BODY()
-		USelectorUtility();
+		
+	
 		
 public:
-	void sortChildren();
+	USelectorUtility();
+	void sortChildren(UBehaviorTreeComponent & OwnerComp);
 
 };

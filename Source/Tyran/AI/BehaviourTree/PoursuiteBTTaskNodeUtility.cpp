@@ -2,7 +2,6 @@
 
 #include "PoursuiteBTTaskNodeUtility.h"
 
-
 EBTNodeResult::Type UPoursuiteBTTaskNodeUtility::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Pursue"));
@@ -20,7 +19,9 @@ FString UPoursuiteBTTaskNodeUtility::GetStaticDescription() const
 	return TEXT("Poursuivre sa cible");
 }
 
-void UPoursuiteBTTaskNodeUtility::CalculUtility()
+void UPoursuiteBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerComp)
 {
 	utility = 0.0f;
 }
+
+

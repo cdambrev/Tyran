@@ -20,7 +20,7 @@ FString UFleeBTTaskNodeUtility::GetStaticDescription() const
 	return TEXT("C'est la fuite");
 }
 
-void UFleeBTTaskNodeUtility::CalculUtility()
+void UFleeBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerComp)
 {
 	utility = 0.0f;
 }

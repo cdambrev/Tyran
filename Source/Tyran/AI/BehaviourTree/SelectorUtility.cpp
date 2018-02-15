@@ -9,10 +9,10 @@ USelectorUtility::USelectorUtility() {
 	UE_LOG(LogTemp, Warning, TEXT("Services Size : %d"), Services.Num());
 }
 
-void USelectorUtility::sortChildren()
+void USelectorUtility::sortChildren(UBehaviorTreeComponent & OwnerComp)
 {
 	for (FBTCompositeChild c : Children) {
-		dynamic_cast<UBTTaskNodeUtility *>(c.ChildTask)->CalculUtility();
+		dynamic_cast<UBTTaskNodeUtility *>(c.ChildTask)->CalculUtility(OwnerComp);
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Sorting, Children Size : %d"), Children.Num());
 	Children.Sort([](const FBTCompositeChild& a, const FBTCompositeChild& b) {
@@ -22,9 +22,6 @@ void USelectorUtility::sortChildren()
 		UE_LOG(LogTemp, Error, TEXT("%s  - Utility : %f"), *(c.ChildTask->GetStaticDescription()), static_cast<UBTTaskNodeUtility *>(c.ChildTask)->GetUtility());
 	}
 }
-
-
-
 
 
 

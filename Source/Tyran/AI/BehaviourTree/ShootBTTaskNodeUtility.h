@@ -13,7 +13,7 @@ UCLASS()
 class TYRAN_API UShootBTTaskNodeUtility : public UBTTaskNodeUtility
 {
 	GENERATED_BODY()
-	
+
 	/* Sera appelée au démarrage de la tâche et devra retourner Succeeded, Failed ou InProgress */
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
@@ -23,6 +23,8 @@ class TYRAN_API UShootBTTaskNodeUtility : public UBTTaskNodeUtility
 	/** Retourne une chaine de description pour la tâche. Ce texte apparaître dans le BT */
 	virtual FString GetStaticDescription() const override;
 
-	virtual void CalculUtility() override;
+	virtual void CalculUtility(UBehaviorTreeComponent & OwnerComp) override;
+	
+	
 	
 };

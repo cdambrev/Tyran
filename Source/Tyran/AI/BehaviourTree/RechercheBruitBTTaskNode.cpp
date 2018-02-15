@@ -2,7 +2,6 @@
 
 #include "RechercheBruitBTTaskNode.h"
 
-
 EBTNodeResult::Type URechercheBruitBTTaskNode::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
 	UE_LOG(LogTemp, Warning, TEXT("SeekSound"));
@@ -19,6 +18,5 @@ FString URechercheBruitBTTaskNode::GetStaticDescription() const
 {
 	return TEXT("Rechercher d'ou vient un bruit");
 }
-
 
 

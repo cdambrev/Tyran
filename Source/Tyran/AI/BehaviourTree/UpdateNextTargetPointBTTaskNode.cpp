@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UpdateNextTargetPointBTTaskNode.h"
-#include "AIGuardController.h"
+#include "AI/AIGuardController.h"
 
 //Constructeur de la classe
 UUpdateNextTargetPointBTTaskNode::UUpdateNextTargetPointBTTaskNode() {

@@ -14,6 +14,7 @@ class TYRAN_API URechercheBruitBTTaskNode : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
+
 	/* Sera appelée au démarrage de la tâche et devra retourner Succeeded, Failed ou InProgress */
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
