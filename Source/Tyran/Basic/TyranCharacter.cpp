@@ -77,7 +77,8 @@ ATyranCharacter::ATyranCharacter()
 	Health = 100;
 	isDead = false;
 
-	MaxUseDistance = 500;
+	MaxUseDistance = 600;
+	DropItemDistance = 100;
 
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -158,9 +159,9 @@ ALoot * ATyranCharacter::GetLootInView()
 	//objectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 	FCollisionQueryParams TraceParams(FName(TEXT("TraceLoot")), true, this); 
 	TraceParams.bTraceAsyncScene = true; 
-	//TraceParams.bReturnPhysicalMaterial = false; 
-	TraceParams.bTraceComplex = true; 
-	TraceParams.AddIgnoredActor(this);
+	TraceParams.bReturnPhysicalMaterial = false; 
+	TraceParams.bTraceComplex = false; 
+	//TraceParams.AddIgnoredActor(this);
 	
 	FHitResult Hit(ForceInit);
 	bool succes = GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Camera, TraceParams);

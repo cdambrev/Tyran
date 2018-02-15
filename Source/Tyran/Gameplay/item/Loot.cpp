@@ -14,9 +14,6 @@ ALoot::ALoot()
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh")); 
 	RootComponent = MeshComp;
 
-	// Tous les objets qui peuvent être ramassés sont simulés 
-	// et peuvent être disséminés sur tout le niveau
-	MeshComp->SetSimulatePhysics(true); 
 	bReplicates = true; 
 	bReplicateMovement = true;
 }
@@ -26,6 +23,10 @@ void ALoot::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Tous les objets qui peuvent être ramassés sont simulés 
+	// et peuvent être disséminés sur tout le niveau
+	MeshComp->SetSimulatePhysics(true);
+	MeshComp->WakeRigidBody();
 }
 
 void ALoot::OnBeginFocus() {
