@@ -211,6 +211,12 @@ public:
 	// Invocation d'une RPC serveur pour actualiser l'état de crouching
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerCrouchToggle(bool NewCrouching);
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerOnStartAim();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerOnStopAim();
 	
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerEquipWeapon(AWeapon* Weapon);

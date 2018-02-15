@@ -455,7 +455,6 @@ void ATyranCharacter::OnStopJump()
 
 void ATyranCharacter::OnCrouchToggle()
 {
-	// Si nous sommes déjà accroupis, CanCrouch retourne false.
 	if (CrouchButtonDown == false)
 	{
 		CrouchButtonDown = true;
@@ -473,29 +472,24 @@ void ATyranCharacter::OnCrouchToggle()
 		ServerCrouchToggle(true); // le param n'a pas d'importance pour l'instant
 
 	}
-	else
-	{
-		CrouchButtonDown = false;
-		UnCrouch();
-	}
-	// Si nous sommes sur un client
-	if (Role < ROLE_Authority)
-	{
-		ServerCrouchToggle(true); // le param n'a pas d'importance pour l'instant
-	}
 }
 
 void ATyranCharacter::OnStartAim()
 {
-	if (!CrouchButtonDown)
+	isAiming = true;
+	if (Role < ROLE_Authority)
 	{
-		isAiming = true;
+		ServerOnStartAim();
 	}
 }
 
 void ATyranCharacter::OnStopAim()
 {
 	isAiming = false;
+	if (Role < ROLE_Authority)
+	{
+		ServerOnStopAim();
+	}
 }
 
 void ATyranCharacter::Use()
@@ -580,6 +574,26 @@ bool ATyranCharacter::ServerCrouchToggle_Validate(bool NewCrouching)
 void ATyranCharacter::ServerCrouchToggle_Implementation(bool NewCrouching)
 {
 	OnCrouchToggle();
+}
+
+bool ATyranCharacter::ServerOnStartAim_Validate()
+{
+	return true;
+}
+
+void ATyranCharacter::ServerOnStartAim_Implementation()
+{
+	OnStartAim();
+}
+
+bool ATyranCharacter::ServerOnStopAim_Validate()
+{
+	return true;
+}
+
+void ATyranCharacter::ServerOnStopAim_Implementation()
+{
+	OnStopAim();
 }
 
 bool ATyranCharacter::ServerEquipWeapon_Validate(AWeapon* Weapon) { 
