@@ -8,6 +8,16 @@ ATrap::ATrap()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	
+	trapOwner = EAlignement::A_TYRAN;
+	
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	myMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Trap"));
+	myMesh->SetupAttachment(RootComponent);
+	placementCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("PlacementCollision"));
+	placementCollision->SetupAttachment(myMesh);
+	triggerZone = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerZone"));
+	triggerZone->SetupAttachment(myMesh);
 
 }
 
