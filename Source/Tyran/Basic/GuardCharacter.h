@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "TyranCharacter.h"
+#include <UnrealString.h>
 #include "GuardCharacter.generated.h"
 
 /**
@@ -24,5 +25,19 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Utility")
 		bool flee;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
+		bool offensif;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
+		bool deffensif;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
+		bool tenirPosition;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
+		bool fuiteAutorise;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Caractéristics")
+		FString nom;
 };

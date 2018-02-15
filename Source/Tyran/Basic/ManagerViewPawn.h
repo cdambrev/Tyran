@@ -12,6 +12,7 @@
 #include "Gameplay/TyranOnly/Placeable_Object/PlaceableObject.h"
 #include "Gameplay/TyranOnly/Placeable_Object/BuildingHint.h"
 #include "Gameplay/TyranOnly/Placeable_Object/BuildingSlot.h"
+#include "GuardCharacter.h"
 #include "ManagerViewPawn.generated.h"
 
 UCLASS()
@@ -29,6 +30,8 @@ private :
 	bool bActivatePitchYawn;
 	// Focus (par le clic)
 	AActor* focus;
+	TSubclassOf<UUserWidget> guardUIClass;
+	UUserWidget* guardOrderWidget;
 
 public:
 	enum ManagerState {
@@ -107,6 +110,30 @@ protected:
 
 	UFUNCTION(Reliable, Server, WithValidation)
 	void orderPatrolPoints(AActor* garde, const TArray<FVector>& patrolPoints);
+
+	UFUNCTION(Reliable, Client)
+	void guardUI(FVector2D mouseLocation);
+
+	UFUNCTION(BlueprintCallable)
+	void offensifChecked(bool isChecked);
+
+	UFUNCTION(BlueprintCallable)
+	void deffensifChecked(bool isChecked);
+
+	UFUNCTION(BlueprintCallable)
+	void tenirPositionChecked(bool isChecked);
+
+	UFUNCTION(BlueprintCallable)
+	void fuiteAutoriseChecked(bool isChecked);
+
+	UFUNCTION(BlueprintCallable)
+	void enterSetPatrouilleMode(TSubclassOf<AGuardCharacter> guard);
+
+	UFUNCTION(BlueprintCallable)
+	void enterSetZoneSurveillanceMode(TSubclassOf<AGuardCharacter> guard);
+
+	UFUNCTION(BlueprintCallable)
+	void enterPositionAndDirectionSelectionMode(TSubclassOf<AGuardCharacter> guard);
 
 public:	
 	// Called every frame

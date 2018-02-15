@@ -13,6 +13,8 @@
 #include "GuardCharacter.h"
 #include "Basic/ManagerPlayerState.h"
 #include "AI/AIGuardTargetPoint.h"
+#include <ConstructorHelpers.h>
+#include <UserWidget.h>
 
 
 /***************/
@@ -40,6 +42,8 @@ AManagerViewPawn::AManagerViewPawn()
 	RTSCamera->SetupAttachment(RTSCameraSpringArm, USpringArmComponent::SocketName);
 
 	//AutoPossessPlayer = EAutoReceiveInput::Player0;
+	ConstructorHelpers::FClassFinder<UUserWidget> guardOrderUIHelper(TEXT("/Game/UI/GardeOrder"));
+	guardUIClass = guardOrderUIHelper.Class;
 
 }
 
@@ -196,6 +200,34 @@ void AManagerViewPawn::enterPlaceMode(TSubclassOf<APlaceableObject> object, TSub
 	currState = PLACINGOBJECT;
 }
 
+void AManagerViewPawn::offensifChecked(bool isChecked) {
+
+}
+
+void AManagerViewPawn::deffensifChecked(bool isChecked) {
+
+}
+
+void AManagerViewPawn::tenirPositionChecked(bool isChecked) {
+
+}
+
+void AManagerViewPawn::fuiteAutoriseChecked(bool isChecked) {
+
+}
+
+void AManagerViewPawn::enterSetPatrouilleMode(TSubclassOf<AGuardCharacter> guard) {
+
+}
+
+void AManagerViewPawn::enterSetZoneSurveillanceMode(TSubclassOf<AGuardCharacter> guard) {
+
+}
+
+void AManagerViewPawn::enterPositionAndDirectionSelectionMode(TSubclassOf<AGuardCharacter> guard) {
+
+}
+
 void AManagerViewPawn::leftClickAction()
 {
 	if (currState == FOCUSGARDE) {
@@ -209,8 +241,14 @@ void AManagerViewPawn::leftClickAction()
 				if (resultHit.Actor.IsValid() && resultHit.GetActor()->IsA(AGuardCharacter::StaticClass())) {
 					AGuardCharacter* guard = dynamic_cast<AGuardCharacter*>(resultHit.GetActor());
 					focus = guard;
+					float mouseScreenX;
+					float mouseScreenY;
+					static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
+
+					guardUI(FVector2D(mouseScreenX, mouseScreenY));
 				}
 				else {
+					guardOrderWidget->RemoveFromViewport();
 					TArray<FVector> targetPointPos;
 					targetPointPos.Add(resultHit.ImpactPoint);
 					orderPatrolPoints(focus, targetPointPos);
@@ -267,6 +305,11 @@ void AManagerViewPawn::leftClickAction()
 					AGuardCharacter* guard = dynamic_cast<AGuardCharacter*>(resultHit.GetActor());
 					currState = FOCUSGARDE;
 					focus = guard;
+					float mouseScreenX;
+					float mouseScreenY;
+					static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
+
+					guardUI(FVector2D(mouseScreenX, mouseScreenY));
 				}
 			}
 		}
@@ -283,6 +326,7 @@ void AManagerViewPawn::RightClickAction()
 		currState = FOCUSGARDE;
 	}
 	else if (currState == FOCUSGARDE) {
+		guardOrderWidget->RemoveFromViewport();
 		currState = NOTHING;
 		focus->Destroy();
 	}
@@ -327,6 +371,15 @@ void AManagerViewPawn::orderPatrolPoints_Implementation(AActor* garde, const TAr
 
 bool AManagerViewPawn::orderPatrolPoints_Validate(AActor* garde, const TArray<FVector>& patrolPoints) {
 	return true;
+}
+
+void AManagerViewPawn::guardUI_Implementation(FVector2D mouseLocation) {
+	if (guardOrderWidget) {
+		guardOrderWidget->RemoveFromViewport();
+	}
+	guardOrderWidget = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetController()), guardUIClass);
+	guardOrderWidget->AddToViewport(9999);
+	guardOrderWidget->SetPositionInViewport(mouseLocation);
 }
 
 // Called every frame
