@@ -69,6 +69,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	bool isDead;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
+	bool isAiming;
+
 protected:
 	/* Point d'attache pour les items en main et actifs */ 
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
@@ -138,6 +141,10 @@ protected:
 
 	// Quand la touche Crouch Toggle est appuyée 
 	void OnCrouchToggle();
+
+	// Quand la touche Aim est appuyée
+	void OnStartAim();
+	void OnStopAim();
 
 	// Quand la touche Use est appuyée 
 	void Use();

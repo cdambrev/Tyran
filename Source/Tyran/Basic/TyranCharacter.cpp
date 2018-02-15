@@ -98,6 +98,9 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	InputComponent->BindAction("Fire", IE_Pressed, this, &ATyranCharacter::OnStartFire);
 	InputComponent->BindAction("Fire", IE_Released, this, &ATyranCharacter::OnStopFire);
 
+	InputComponent->BindAction("Aim", IE_Pressed, this, &ATyranCharacter::OnStartAim);
+	InputComponent->BindAction("Aim", IE_Released, this, &ATyranCharacter::OnStopAim);
+
 	InputComponent->BindAction("EquipPrimaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipPrimaryWeapon);
 	InputComponent->BindAction("EquipSecondaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipSecondaryWeapon);
 
@@ -465,6 +468,19 @@ void ATyranCharacter::OnCrouchToggle()
 	}
 }
 
+void ATyranCharacter::OnStartAim()
+{
+	if (!CrouchButtonDown)
+	{
+		isAiming = true;
+	}
+}
+
+void ATyranCharacter::OnStopAim()
+{
+	isAiming = false;
+}
+
 void ATyranCharacter::Use()
 {
 	if (Role == ROLE_Authority) {
@@ -482,6 +498,10 @@ void ATyranCharacter::Use()
 void ATyranCharacter::OnDeath()
 {
 	isDead = true;
+	while (Inventory.Num() > 0)
+	{
+		DropWeapon();
+	}
 	DetachFromControllerPendingDestroy();
 	SetLifeSpan(10.0f);
 }
@@ -569,6 +589,7 @@ void ATyranCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ATyranCharacter, CurrentWeapon);
 	DOREPLIFETIME(ATyranCharacter, Health);
 	DOREPLIFETIME(ATyranCharacter, isDead);
+	DOREPLIFETIME(ATyranCharacter, isAiming);
 	DOREPLIFETIME_CONDITION(ATyranCharacter, CrouchButtonDown, COND_SkipOwner);
 }
 
@@ -636,7 +657,7 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 				bHasNewFocus = false; 
 				
 				// Pour débogage, vous pourrez l'oter par la suite 
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Focus")); 
+				// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Focus")); 
 			} 
 		}
 	}
