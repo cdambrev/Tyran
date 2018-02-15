@@ -44,7 +44,6 @@ AManagerViewPawn::AManagerViewPawn()
 	//AutoPossessPlayer = EAutoReceiveInput::Player0;
 	ConstructorHelpers::FClassFinder<UUserWidget> guardOrderUIHelper(TEXT("/Game/UI/GuardOrder"));
 	guardUIClass = guardOrderUIHelper.Class;
-
 }
 
 // Called when the game starts or when spawned
@@ -141,8 +140,6 @@ void AManagerViewPawn::ActivatePitchYawn()
 		PC->bShowMouseCursor = false;
 		PC->bEnableClickEvents = false;
 		PC->bEnableMouseOverEvents = false;
-		
-		
 	}
 }
 
@@ -200,66 +197,76 @@ void AManagerViewPawn::enterPlaceMode(TSubclassOf<APlaceableObject> object, TSub
 	currState = PLACINGOBJECT;
 }
 
-void AManagerViewPawn::offensifChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked) {
-	
+void AManagerViewPawn::offensifChecked() {
+	(static_cast<AGuardCharacter*> (focus))->modeGuard = ModeGuard::OFFENSIF;
 }
 
-void AManagerViewPawn::deffensifChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked) {
-
+void AManagerViewPawn::defensifChecked() {
+	(static_cast<AGuardCharacter*> (focus))->modeGuard = ModeGuard::DEFENSIF;
 }
 
-void AManagerViewPawn::tenirPositionChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked) {
-
+void AManagerViewPawn::tenirPositionChecked() {
+	(static_cast<AGuardCharacter*> (focus))->modeGuard = ModeGuard::TENIRPOSITION;
 }
 
-void AManagerViewPawn::fuiteAutoriseChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked) {
-
+void AManagerViewPawn::fuiteAutoriseChecked(bool isChecked) {
+	(static_cast<AGuardCharacter*> (focus))->fuiteAutorise = isChecked;
 }
 
-void AManagerViewPawn::enterSetPatrouilleMode(TSubclassOf<AGuardCharacter> guard) {
-
-}
-
-void AManagerViewPawn::enterSetZoneSurveillanceMode(TSubclassOf<AGuardCharacter> guard) {
+void AManagerViewPawn::enterSetPatrouilleMode() {
 
 }
 
-void AManagerViewPawn::enterPositionAndDirectionSelectionMode(TSubclassOf<AGuardCharacter> guard) {
+void AManagerViewPawn::enterSetZoneSurveillanceMode() {
+
+}
+
+void AManagerViewPawn::enterPositionAndDirectionSelectionMode() {
 
 }
 
 void AManagerViewPawn::leftClickAction()
 {
 	if (currState == FOCUSGARDE) {
-		FCollisionQueryParams queryParams{};
-		queryParams.AddIgnoredActor(GetOwner());
 		FHitResult resultHit{};
 		FVector mouseLocation;
 		FVector mouseDirection;
-		if (static_cast<APlayerController*>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection)) {
-			if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_GameTraceChannel3, queryParams)) {
-				if (resultHit.Actor.IsValid() && resultHit.GetActor()->IsA(AGuardCharacter::StaticClass())) {
-					AGuardCharacter* guard = dynamic_cast<AGuardCharacter*>(resultHit.GetActor());
-					focus = guard;
-					float mouseScreenX;
-					float mouseScreenY;
-					static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
+		if (clickOnGuard(mouseLocation, mouseDirection, resultHit)) {
+			currState = ORDERMENU;
+			AGuardCharacter* guard = dynamic_cast<AGuardCharacter*>(resultHit.GetActor());
+			focus = guard;
+			float mouseScreenX;
+			float mouseScreenY;
+			static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
 
-					guardUI(FVector2D(mouseScreenX, mouseScreenY));
-				}
-				else {
-					if (GEngine)
-					{
-						FString Lres = guardOrderWidget->GetIsEnabled() ? "is enabled" : "is not enabled";
-						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT(res));
-					}
-					guardOrderWidget->RemoveFromViewport();
-					TArray<FVector> targetPointPos;
-					targetPointPos.Add(resultHit.ImpactPoint);
-					orderPatrolPoints(focus, targetPointPos);
-				}
-			}
+			guardUI(FVector2D(mouseScreenX, mouseScreenY));
+		} else {
+			currState = NOTHING;
+			focus->Destroy();
+			//TArray<FVector> targetPointPos;
+			//targetPointPos.Add(resultHit.ImpactPoint);
+			//orderPatrolPoints(focus, targetPointPos);
 		}
+	} else if (currState == ORDERMENU) {
+		FHitResult resultHit{};
+		FVector mouseLocation;
+		FVector mouseDirection;
+		if (clickOnGuard(mouseLocation, mouseDirection, resultHit)) {
+			AGuardCharacter* guard = dynamic_cast<AGuardCharacter*>(resultHit.GetActor());
+			focus = guard;
+			float mouseScreenX;
+			float mouseScreenY;
+			static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
+
+			guardUI(FVector2D(mouseScreenX, mouseScreenY));
+		} else {
+			guardOrderWidget->RemoveFromViewport();
+			currState = FOCUSGARDE;
+			//TArray<FVector> targetPointPos;
+			//targetPointPos.Add(resultHit.ImpactPoint);
+			//orderPatrolPoints(focus, targetPointPos);
+		}
+
 	} else if (currState == BUILDING) {
 		FCollisionQueryParams queryParams{};
 		queryParams.AddIgnoredActor(GetOwner());
@@ -299,24 +306,18 @@ void AManagerViewPawn::leftClickAction()
 		}
 	}
 	else {
-		FCollisionQueryParams queryParams{};
-		queryParams.AddIgnoredActor(GetOwner());
 		FHitResult resultHit{};
 		FVector mouseLocation;
 		FVector mouseDirection;
-		if (static_cast<APlayerController*>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection)) {
-			if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_GameTraceChannel3, queryParams)) {
-				if (resultHit.Actor.IsValid() && resultHit.GetActor()->IsA(AGuardCharacter::StaticClass())) {
-					AGuardCharacter* guard = dynamic_cast<AGuardCharacter*>(resultHit.GetActor());
-					currState = FOCUSGARDE;
-					focus = guard;
-					float mouseScreenX;
-					float mouseScreenY;
-					static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
+		if (clickOnGuard(mouseLocation, mouseDirection, resultHit)) {
+			AGuardCharacter* guard = dynamic_cast<AGuardCharacter*>(resultHit.GetActor());
+			currState = ORDERMENU;
+			focus = guard;
+			float mouseScreenX;
+			float mouseScreenY;
+			static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
 
-					guardUI(FVector2D(mouseScreenX, mouseScreenY));
-				}
-			}
+			guardUI(FVector2D(mouseScreenX, mouseScreenY));
 		}
 	}
 }
@@ -326,12 +327,16 @@ void AManagerViewPawn::RightClickAction()
 	if (currState == BUILDING || currState == PLACINGOBJECT) {
 		currState = NOTHING;
 		currBuild->Destroy();
-	} else if (currState == PLACINGTARGETPOINT) {
+	} else if (currState == PATROLPOINTS) {
 		// pas oublier de détruire ce qui a été targeté
 		currState = FOCUSGARDE;
 	}
-	else if (currState == FOCUSGARDE) {
+	else if (currState == ORDERMENU) {
 		guardOrderWidget->RemoveFromViewport();
+		currState = NOTHING;
+		focus->Destroy();
+	}
+	else if (currState == FOCUSGARDE) {
 		currState = NOTHING;
 		focus->Destroy();
 	}
@@ -382,7 +387,6 @@ void AManagerViewPawn::guardUI_Implementation(FVector2D mouseLocation) {
 	if (guardOrderWidget) {
 		guardOrderWidget->RemoveFromViewport();
 	}
-	APlayerController* playerController = static_cast<APlayerController*>(GetController());
 	guardOrderWidget = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetController()), guardUIClass);
 	guardOrderWidget->AddToViewport(9999);
 	guardOrderWidget->SetPositionInViewport(mouseLocation);
@@ -393,9 +397,6 @@ void AManagerViewPawn::guardUI_Implementation(FVector2D mouseLocation) {
 // Called every frame
 void AManagerViewPawn::Tick(float DeltaTime)
 {
-
-
-
 	//Zoom Zoom
 	{
 		if (bZoomingIn)
@@ -411,7 +412,6 @@ void AManagerViewPawn::Tick(float DeltaTime)
 		RTSCamera->FieldOfView = FMath::Lerp<float>(90.0f, 60.0f, ZoomFocaleFactor);
 		RTSCameraSpringArm->TargetArmLength = FMath::Lerp<float>(SpringArmLength, 0.75*SpringArmLength, ZoomFocaleFactor);
 	}
-
 
 
 	APlayerController* PC = Cast<APlayerController>(GetController());
@@ -441,9 +441,6 @@ void AManagerViewPawn::Tick(float DeltaTime)
 			else if (posY < 0.05f) {
 				MoveForward(1.0f);
 			}
-
-
-			
 		}
 		
 		//PitchYawn
@@ -512,4 +509,16 @@ void AManagerViewPawn::Tick(float DeltaTime)
 			}
 		}
 	}
+}
+
+bool AManagerViewPawn::clickOnGuard(FVector& mouseLocation, FVector& mouseDirection, FHitResult& resultHit) {
+	FCollisionQueryParams queryParams{};
+	queryParams.AddIgnoredActor(GetOwner());
+	return (static_cast<APlayerController*>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection) &&
+		GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_GameTraceChannel3, queryParams) &&
+		resultHit.Actor.IsValid() && resultHit.GetActor()->IsA(AGuardCharacter::StaticClass()));
+}
+
+AActor* AManagerViewPawn::getFocus() {
+	return focus;
 }

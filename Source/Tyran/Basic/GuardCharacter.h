@@ -10,14 +10,20 @@
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class ModeGuard : uint8 {
+	OFFENSIF	UMETA(DisplayName="Offensif"),
+	DEFENSIF	UMETA(DisplayName="Defensif"),
+	TENIRPOSITION	UMETA(DisplayName="TenirPosition")
+};
+
 UCLASS()
 class TYRAN_API AGuardCharacter : public ATyranCharacter
 {
 	GENERATED_BODY()
 
-		
-	
 public:
+
 	AGuardCharacter();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Utility")
@@ -27,16 +33,10 @@ public:
 		bool flee;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
-		bool offensif;
+		ModeGuard modeGuard = ModeGuard::TENIRPOSITION;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
-		bool deffensif;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
-		bool tenirPosition;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
-		bool fuiteAutorise;
+		bool fuiteAutorise = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Caractéristics")
 		FString nom;

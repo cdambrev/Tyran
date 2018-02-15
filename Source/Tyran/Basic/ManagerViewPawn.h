@@ -38,8 +38,11 @@ public:
 		NOTHING,
 		BUILDING,
 		PLACINGOBJECT,
-		PLACINGTARGETPOINT,
-		FOCUSGARDE
+		FOCUSGARDE,
+		ORDERMENU,
+		PATROLPOINTS,
+		ZONETRACE,
+		VECTORTRACE
 	};
 
 
@@ -115,25 +118,30 @@ protected:
 	void guardUI(FVector2D mouseLocation);
 
 	UFUNCTION(BlueprintCallable)
-	void offensifChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked);
+	void offensifChecked();
 
 	UFUNCTION(BlueprintCallable)
-	void deffensifChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked);
+	void defensifChecked();
 
 	UFUNCTION(BlueprintCallable)
-	void tenirPositionChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked);
+	void tenirPositionChecked();
 
 	UFUNCTION(BlueprintCallable)
-	void fuiteAutoriseChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked);
+	void fuiteAutoriseChecked(bool isChecked);
 
 	UFUNCTION(BlueprintCallable)
-	void enterSetPatrouilleMode(TSubclassOf<AGuardCharacter> guard);
+	void enterSetPatrouilleMode();
 
 	UFUNCTION(BlueprintCallable)
-	void enterSetZoneSurveillanceMode(TSubclassOf<AGuardCharacter> guard);
+	void enterSetZoneSurveillanceMode();
 
 	UFUNCTION(BlueprintCallable)
-	void enterPositionAndDirectionSelectionMode(TSubclassOf<AGuardCharacter> guard);
+	void enterPositionAndDirectionSelectionMode();
+
+	bool clickOnGuard(FVector& mouseLocation, FVector& mouseDirection, FHitResult& resultHit);
+
+	UFUNCTION(BlueprintCallable)
+	AActor* getFocus();
 
 public:	
 	// Called every frame
