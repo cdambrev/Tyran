@@ -545,6 +545,10 @@ void ATyranCharacter::MoveForward(float Value)
 
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+		if (isAiming)
+			Value /= 2.0f;
+
 		AddMovementInput(Direction, Value);
 	}
 }
@@ -559,6 +563,10 @@ void ATyranCharacter::MoveRight(float Value)
 	
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		if (isAiming)
+			Value /= 2.0f;
+
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
