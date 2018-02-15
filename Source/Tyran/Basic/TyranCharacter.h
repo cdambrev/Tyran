@@ -6,15 +6,17 @@
 #include "GameFramework/Character.h"
 #include "Basic/Enum/TyranTypes.h"
 #include "Net/UnrealNetwork.h"
-//#include "Basic/Enum/Alignement.h"
+#include "Basic/Enum/Alignement.h"
 #include "TyranCharacter.generated.h"
 
 
+
+/*
 UENUM(BlueprintType)
 enum class EAlignement : uint8 {
 	A_TYRAN UMETA(DisplayName="Tyran"),
 	A_REVOLUTIONNAIRE UMETA(DisplayName="Revolutionnaire")
-};
+};*/
 
 UCLASS(config=Game)
 class ATyranCharacter : public ACharacter

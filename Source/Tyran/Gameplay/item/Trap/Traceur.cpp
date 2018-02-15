@@ -5,3 +5,17 @@
 
 
 
+ATraceur::ATraceur() : Super()
+{
+
+}
+
+void ATraceur::triggered()
+{
+
+}
+
+void ATraceur::Tick(float DeltaTime)
+{
+
+}
