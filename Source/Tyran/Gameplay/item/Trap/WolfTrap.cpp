@@ -5,3 +5,17 @@
 
 
 
+AWolfTrap::AWolfTrap() : Super()
+{
+
+}
+
+void AWolfTrap::triggered()
+{
+
+}
+
+void AWolfTrap::Tick(float DeltaTime)
+{
+
+}
