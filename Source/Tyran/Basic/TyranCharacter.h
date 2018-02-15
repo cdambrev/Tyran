@@ -107,6 +107,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "ObjectInteraction") 
 	float MaxUseDistance;
 
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* HitAnim;
+
 protected:
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();

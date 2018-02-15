@@ -136,6 +136,8 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 	if (ActualDamage > 0.f)
 	{
+		float Duration = PlayAnimMontage(HitAnim);
+
 		Health -= ActualDamage;
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
 		if (Health <= 0.f)
