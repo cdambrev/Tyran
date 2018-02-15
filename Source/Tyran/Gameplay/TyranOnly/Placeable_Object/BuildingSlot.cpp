@@ -17,10 +17,12 @@ ABuildingSlot::ABuildingSlot()
 
 void ABuildingSlot::build(TSubclassOf<ABuilding> type)
 {
-	if (currBuilding) {
-		currBuilding->Destroy();
+	if (Role == ROLE_Authority) {
+		if (currBuilding) {
+			currBuilding->Destroy();
+		}
+		currBuilding = GetWorld()->SpawnActor<ABuilding>(type, GetActorTransform());
 	}
-	currBuilding = GetWorld()->SpawnActor<ABuilding>(type,GetActorTransform());
 	//currBuilding->SetActorTransform(GetActorTransform());
 }
 
