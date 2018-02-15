@@ -29,7 +29,7 @@ void AAIGuardController::UpdateNextTargetPoint() {
 		targetPointNumber = 0;
 		BlackboardComponent->SetValueAsInt("TargetPointNumber", targetPointNumber);
 	}
-
+	UE_LOG(LogTemp, Warning, TEXT("nb targetPoint %d"), nbTargetPoint);
 	// Pour tous les AIGuardTargetPoint du niveau
 	for (AAIGuardTargetPoint* targetPoint : patrolPoints)
 	{
