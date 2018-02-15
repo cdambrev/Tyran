@@ -13,8 +13,14 @@ UCLASS()
 class TYRAN_API AMine : public ATrap
 {
 	GENERATED_BODY()
-	
-	
-	
+
+public:
+	AMine();
+	UFUNCTION(BlueprintImplementableEvent, Category = "triggerSystem")
+	void createExplosion();
+
+	virtual void triggered() override;
+	virtual void Tick(float DeltaTime) override;
+
 	
 };

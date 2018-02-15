@@ -13,7 +13,11 @@ UCLASS()
 class TYRAN_API ATraceur : public ATrap
 {
 	GENERATED_BODY()
-	
+
+public:
+	ATraceur();
+	virtual void triggered() override;
+	virtual void Tick(float DeltaTime) override;
 	
 	
 	

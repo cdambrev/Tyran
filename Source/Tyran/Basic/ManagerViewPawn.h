@@ -47,8 +47,9 @@ public:
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class UCameraComponent* RTSCamera;*/
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USpringArmComponent* RTSCameraSpringArm;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCameraComponent* RTSCamera;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Camera")

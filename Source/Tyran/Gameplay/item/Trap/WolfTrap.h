@@ -14,7 +14,10 @@ class TYRAN_API AWolfTrap : public ATrap
 {
 	GENERATED_BODY()
 	
-	
+public:
+	AWolfTrap();
+	virtual void triggered() override;
+	virtual void Tick(float DeltaTime) override;
 	
 	
 };
