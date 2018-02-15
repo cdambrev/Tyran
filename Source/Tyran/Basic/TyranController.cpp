@@ -21,7 +21,7 @@ void ATyranController::initOnTyranClient_Implementation()
 	bShowMouseCursor = true;
 	bEnableClickEvents = true;
 	UUserWidget * managerUI = CreateWidget<UUserWidget>(GetGameInstance(), managerUIClass);
-	managerUI->AddToViewport(9999);
+	managerUI->AddToViewport(9998);
 }
 
 void ATyranController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

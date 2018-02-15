@@ -42,7 +42,7 @@ AManagerViewPawn::AManagerViewPawn()
 	RTSCamera->SetupAttachment(RTSCameraSpringArm, USpringArmComponent::SocketName);
 
 	//AutoPossessPlayer = EAutoReceiveInput::Player0;
-	ConstructorHelpers::FClassFinder<UUserWidget> guardOrderUIHelper(TEXT("/Game/UI/GardeOrder"));
+	ConstructorHelpers::FClassFinder<UUserWidget> guardOrderUIHelper(TEXT("/Game/UI/GuardOrder"));
 	guardUIClass = guardOrderUIHelper.Class;
 
 }
@@ -200,19 +200,19 @@ void AManagerViewPawn::enterPlaceMode(TSubclassOf<APlaceableObject> object, TSub
 	currState = PLACINGOBJECT;
 }
 
-void AManagerViewPawn::offensifChecked(bool isChecked) {
+void AManagerViewPawn::offensifChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked) {
+	
+}
+
+void AManagerViewPawn::deffensifChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked) {
 
 }
 
-void AManagerViewPawn::deffensifChecked(bool isChecked) {
+void AManagerViewPawn::tenirPositionChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked) {
 
 }
 
-void AManagerViewPawn::tenirPositionChecked(bool isChecked) {
-
-}
-
-void AManagerViewPawn::fuiteAutoriseChecked(bool isChecked) {
+void AManagerViewPawn::fuiteAutoriseChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked) {
 
 }
 
@@ -248,6 +248,11 @@ void AManagerViewPawn::leftClickAction()
 					guardUI(FVector2D(mouseScreenX, mouseScreenY));
 				}
 				else {
+					if (GEngine)
+					{
+						FString Lres = guardOrderWidget->GetIsEnabled() ? "is enabled" : "is not enabled";
+						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT(res));
+					}
 					guardOrderWidget->RemoveFromViewport();
 					TArray<FVector> targetPointPos;
 					targetPointPos.Add(resultHit.ImpactPoint);
@@ -377,9 +382,12 @@ void AManagerViewPawn::guardUI_Implementation(FVector2D mouseLocation) {
 	if (guardOrderWidget) {
 		guardOrderWidget->RemoveFromViewport();
 	}
+	APlayerController* playerController = static_cast<APlayerController*>(GetController());
 	guardOrderWidget = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetController()), guardUIClass);
 	guardOrderWidget->AddToViewport(9999);
 	guardOrderWidget->SetPositionInViewport(mouseLocation);
+	guardOrderWidget->bIsFocusable = true;
+	static_cast<APlayerController*>(GetController())->SetInputMode(FInputModeGameAndUI());
 }
 
 // Called every frame

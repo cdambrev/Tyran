@@ -115,16 +115,16 @@ protected:
 	void guardUI(FVector2D mouseLocation);
 
 	UFUNCTION(BlueprintCallable)
-	void offensifChecked(bool isChecked);
+	void offensifChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked);
 
 	UFUNCTION(BlueprintCallable)
-	void deffensifChecked(bool isChecked);
+	void deffensifChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked);
 
 	UFUNCTION(BlueprintCallable)
-	void tenirPositionChecked(bool isChecked);
+	void tenirPositionChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked);
 
 	UFUNCTION(BlueprintCallable)
-	void fuiteAutoriseChecked(bool isChecked);
+	void fuiteAutoriseChecked(TSubclassOf<AGuardCharacter> guard, bool isChecked);
 
 	UFUNCTION(BlueprintCallable)
 	void enterSetPatrouilleMode(TSubclassOf<AGuardCharacter> guard);
