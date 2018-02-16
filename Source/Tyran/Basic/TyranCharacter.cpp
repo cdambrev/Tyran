@@ -29,6 +29,7 @@ ATyranCharacter::ATyranCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
+	alignement = EAlignement::A_REVOLUTIONNAIRE;
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	//bUseControllerRotationPitch = false;
 	//bUseControllerRotationYaw = false;

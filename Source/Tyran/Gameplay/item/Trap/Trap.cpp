@@ -47,7 +47,8 @@ void ATrap::Tick(float DeltaTime)
 	for (auto& i : OverlappingActors) {
 		if (ATyranCharacter* character = Cast<ATyranCharacter>(i)) {
 			//FString f = EAlignementToString(character->getAlignement());
-			//UE_LOG(LogTemp, Warning,TEXT("Alignement character %s"),*f );
+			//FString nom = character->GetName();
+			//UE_LOG(LogTemp, Warning,TEXT("%s Alignement %s"),*nom,*f );
 			if (character->getAlignement() != trapOwner && !bIsTriggered)
 			{
 				triggered();
