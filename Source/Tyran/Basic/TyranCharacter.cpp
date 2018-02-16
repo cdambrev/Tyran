@@ -77,9 +77,13 @@ ATyranCharacter::ATyranCharacter()
 	Health = 100;
 	isDead = false;
 
-
 	MaxUseDistance = 600;
 	DropItemDistance = 100;
+
+	Ammunition.Add(EAmmoType::AssaultRifle, 120);
+	Ammunition.Add(EAmmoType::Pistol, 0);
+	Ammunition.Add(EAmmoType::Shotgun, 0);
+	Ammunition.Add(EAmmoType::SniperRifle, 0);
 
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -105,8 +109,9 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	InputComponent->BindAction("EquipPrimaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipPrimaryWeapon);
 	InputComponent->BindAction("EquipSecondaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipSecondaryWeapon);
 
-
 	InputComponent->BindAction("Use", IE_Pressed, this, &ATyranCharacter::Use);
+
+	InputComponent->BindAction("Reload", IE_Pressed, this, &ATyranCharacter::Reload);
 
 	InputComponent->BindAction("NextWeapon", IE_Pressed, this, &ATyranCharacter::OnNextWeapon);
 	InputComponent->BindAction("PrevWeapon", IE_Pressed, this, &ATyranCharacter::OnPrevWeapon);
@@ -529,6 +534,19 @@ void ATyranCharacter::Use()
 	}
 }
 
+void ATyranCharacter::Reload()
+{
+	if (Ammunition[CurrentWeapon->GetAmmoType()] > 0)
+	{
+		//if (Role == ROLE_Authority) {
+			CurrentWeapon->OnReload();
+		/*}
+		else {
+			ServerReload();
+		}*/	
+	}
+}
+
 void ATyranCharacter::OnDeath()
 {
 	isDead = true;
@@ -626,6 +644,14 @@ bool ATyranCharacter::ServerEquipWeapon_Validate(AWeapon* Weapon) {
 
 void ATyranCharacter::ServerEquipWeapon_Implementation(AWeapon* Weapon) { 
 	EquipWeapon(Weapon); 
+}
+
+bool ATyranCharacter::ServerReload_Validate() {
+	return true;
+}
+
+void ATyranCharacter::ServerReload_Implementation() {
+	Reload();
 }
 
 void ATyranCharacter::OnRep_CurrentWeapon(AWeapon* LastWeapon) {

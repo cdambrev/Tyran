@@ -51,6 +51,9 @@ public:
 	UPROPERTY(Transient, Replicated)
 	TArray<class AWeapon*> Inventory;
 
+	/* Munitions */
+	TMap<EAmmoType, int> Ammunition;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Replicated)
 	bool isVisible;
 
@@ -152,6 +155,8 @@ protected:
 	// Quand la touche Use est appuyée 
 	void Use();
 
+	// Quand la touche Reload est appuyée 
+	void Reload();
 
 	// "Et là IL MEUUUUUUUURT !"
 	void OnDeath();
@@ -201,7 +206,6 @@ public:
 	void OnEquipPrimaryWeapon(); 
 	void OnEquipSecondaryWeapon();
 
-
 	void DropWeapon();
 	void RemoveWeapon(class AWeapon* Weapon);
 
@@ -223,6 +227,9 @@ public:
 	
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerEquipWeapon(AWeapon* Weapon);
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerReload();
 
 	UFUNCTION(Reliable, NetMulticast, WithValidation)
 	void MulticastPlayAnim(UAnimMontage* Anim);

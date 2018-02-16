@@ -14,9 +14,12 @@ AAssaultRifle::AAssaultRifle()
 	ClientSideHitLeeway = 200.0f;
 	MinimumProjectileSpawnDistance = 800; 
 	TracerRoundInterval = 3;
-	Accuracy = 40.0f;
+	Accuracy = 30.0f;
+	MagazineSize = 30;
+	MagazineCurrent = 30;
 
 	StorageSlot = EInventorySlot::Primary; 
+	AmmoType = EAmmoType::AssaultRifle;
 	RifleAttachPoint = TEXT("RifleSocket"); 
 	
 	//GetWeaponMesh()->AddLocalRotation(FRotator(0, 0, -90)); 
@@ -30,6 +33,7 @@ void AAssaultRifle::FireWeapon()
 	
 	const FHitResult Impact = WeaponTrace(StartPos, EndPos); // Trouver l'impact 
 	ProcessInstantHit(Impact, StartPos, AimDir); // Traiter l'impact
+	//MagazineCurrent--;
 }
 
 FVector AAssaultRifle::GetAdjustedAim() const
