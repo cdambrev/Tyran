@@ -224,6 +224,12 @@ public:
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerEquipWeapon(AWeapon* Weapon);
 
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void MulticastPlayAnim(UAnimMontage* Anim);
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void MulticastStopAnim(UAnimMontage* Anim);
+
 	/* La fonction OnRep utilise un paramètre pour la valeur précédente de la variable */ 
 	UFUNCTION()
 	void OnRep_CurrentWeapon(AWeapon* LastWeapon);
