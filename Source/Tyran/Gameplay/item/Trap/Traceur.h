@@ -19,6 +19,6 @@ public:
 	virtual void triggered() override;
 	virtual void Tick(float DeltaTime) override;
 	
-	
+	virtual FString getType() { return "Traceur"; }
 	
 };

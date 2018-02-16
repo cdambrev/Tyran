@@ -22,6 +22,10 @@ protected:
 public:
 
 	EAlignement trapOwner;
+	bool bIsTriggered;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float delayBeforeTrigger;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* myMesh;
@@ -29,6 +33,12 @@ public:
 	UBoxComponent* placementCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBoxComponent* triggerZone;
+	UPROPERTY(Transient, Replicated, EditAnywhere, BlueprintReadWrite)
+	APawn* PawnOwner;
+
+	
+
+	
 
 protected:
 	// Called when the game starts or when spawned
@@ -42,5 +52,10 @@ public:
 	virtual void triggered() { check(0 && "You must override this"); }
 
 	
+	virtual void SetOwningPawn(APawn * NewOwner) ;
+	
+	virtual FString getType() { return "Trap"; }
+	
+	virtual void triggerDelayed() {};
 	
 };
