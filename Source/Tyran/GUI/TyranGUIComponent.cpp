@@ -20,8 +20,6 @@ UTyranGUIComponent::UTyranGUIComponent()
 void UTyranGUIComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	UUserWidget * managerUI = CreateWidget<UUserWidget>(GetOwner()->GetGameInstance(), managerUIClass);
-	managerUI->AddToViewport(9998);
 }
 
 
@@ -32,13 +30,49 @@ void UTyranGUIComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 
 }
 
-void UTyranGUIComponent::guardUI_Implementation(FVector2D mouseLocation) {
-	if (guardOrderWidget) {
-		guardOrderWidget->RemoveFromViewport();
-	}
-	guardOrderWidget = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetController()), guardUIClass);
+void UTyranGUIComponent::initAllGui_Implementation() {
+	// création de tous les widgets
+	UUserWidget * defaultGUI = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwner()->GetInstigatorController()), managerUIClass);
+	defaultGUI->AddToViewport(9998);
+
+	static_cast<APlayerController*>(GetOwner()->GetInstigatorController())->SetInputMode(FInputModeGameAndUI());
+}
+
+void UTyranGUIComponent::displayGuardUI_Implementation(FVector2D mouseLocation) {
+	guardOrderWidget = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwner()->GetInstigatorController()), guardUIClass);
 	guardOrderWidget->AddToViewport(9999);
 	guardOrderWidget->SetPositionInViewport(mouseLocation);
 	guardOrderWidget->bIsFocusable = true;
-	static_cast<APlayerController*>(GetController())->SetInputMode(FInputModeGameAndUI());
+}
+
+void UTyranGUIComponent::removeGuardUI_Implementation() {
+	guardOrderWidget->RemoveFromViewport();
+}
+
+void UTyranGUIComponent::displayDefaultGUI_Implementation() {
+	defaultGUI->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UTyranGUIComponent::removeDefaultGUI_Implementation() {
+	defaultGUI->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UTyranGUIComponent::displayVictoryGUI_Implementation() {
+
+}
+
+void UTyranGUIComponent::removeVictoryGUI_Implementation() {
+
+}
+
+void UTyranGUIComponent::displayDefeatGUI_Implementation() {
+
+}
+
+void UTyranGUIComponent::removeDefeatGUI_Implementation() {
+
+}
+
+bool UTyranGUIComponent::isGuardUIDisplayed() {
+	return (guardOrderWidget != nullptr);
 }

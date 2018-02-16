@@ -42,8 +42,15 @@ AManagerViewPawn::AManagerViewPawn()
 	RTSCamera->SetupAttachment(RTSCameraSpringArm, USpringArmComponent::SocketName);
 
 	//AutoPossessPlayer = EAutoReceiveInput::Player0;
-	ConstructorHelpers::FClassFinder<UUserWidget> guardOrderUIHelper(TEXT("/Game/UI/GuardOrder"));
-	guardUIClass = guardOrderUIHelper.Class;
+	
+	// GUI
+	tyranGuiComponent = this->CreateDefaultSubobject<UTyranGUIComponent>(TEXT("TyranGuiComponent"));
+	tyranGuiComponent->OnComponentCreated();
+	tyranGuiComponent->RegisterComponent();
+	if (tyranGuiComponent->bWantsInitializeComponent) {
+		tyranGuiComponent->InitializeComponent();
+	}
+	tyranGuiComponent->initAllGui();
 }
 
 // Called when the game starts or when spawned
@@ -238,8 +245,7 @@ void AManagerViewPawn::leftClickAction()
 			float mouseScreenX;
 			float mouseScreenY;
 			static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
-
-			guardUI(FVector2D(mouseScreenX, mouseScreenY));
+			tyranGuiComponent->displayGuardUI(FVector2D(mouseScreenX, mouseScreenY));
 		} else {
 			currState = NOTHING;
 			focus->Destroy();
@@ -258,9 +264,13 @@ void AManagerViewPawn::leftClickAction()
 			float mouseScreenY;
 			static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
 
-			guardUI(FVector2D(mouseScreenX, mouseScreenY));
+			if (tyranGuiComponent->isGuardUIDisplayed())
+			{
+				tyranGuiComponent->removeGuardUI();
+			}
+			tyranGuiComponent->displayGuardUI(FVector2D(mouseScreenX, mouseScreenY));
 		} else {
-			guardOrderWidget->RemoveFromViewport();
+			tyranGuiComponent->removeGuardUI();
 			currState = FOCUSGARDE;
 			//TArray<FVector> targetPointPos;
 			//targetPointPos.Add(resultHit.ImpactPoint);
@@ -317,7 +327,7 @@ void AManagerViewPawn::leftClickAction()
 			float mouseScreenY;
 			static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
 
-			guardUI(FVector2D(mouseScreenX, mouseScreenY));
+			tyranGuiComponent->displayGuardUI(FVector2D(mouseScreenX, mouseScreenY));
 		}
 	}
 }
@@ -332,7 +342,7 @@ void AManagerViewPawn::RightClickAction()
 		currState = FOCUSGARDE;
 	}
 	else if (currState == ORDERMENU) {
-		guardOrderWidget->RemoveFromViewport();
+		tyranGuiComponent->removeGuardUI();
 		currState = NOTHING;
 		focus->Destroy();
 	}
@@ -381,17 +391,6 @@ void AManagerViewPawn::orderPatrolPoints_Implementation(AActor* garde, const TAr
 
 bool AManagerViewPawn::orderPatrolPoints_Validate(AActor* garde, const TArray<FVector>& patrolPoints) {
 	return true;
-}
-
-void AManagerViewPawn::guardUI_Implementation(FVector2D mouseLocation) {
-	if (guardOrderWidget) {
-		guardOrderWidget->RemoveFromViewport();
-	}
-	guardOrderWidget = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetController()), guardUIClass);
-	guardOrderWidget->AddToViewport(9999);
-	guardOrderWidget->SetPositionInViewport(mouseLocation);
-	guardOrderWidget->bIsFocusable = true;
-	static_cast<APlayerController*>(GetController())->SetInputMode(FInputModeGameAndUI());
 }
 
 // Called every frame

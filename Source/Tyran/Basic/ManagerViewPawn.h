@@ -13,6 +13,7 @@
 #include "Gameplay/TyranOnly/Placeable_Object/BuildingHint.h"
 #include "Gameplay/TyranOnly/Placeable_Object/BuildingSlot.h"
 #include "GuardCharacter.h"
+#include "GUI/TyranGUIComponent.h"
 #include "ManagerViewPawn.generated.h"
 
 UCLASS()
@@ -30,8 +31,7 @@ private :
 	bool bActivatePitchYawn;
 	// Focus (par le clic)
 	AActor* focus;
-	TSubclassOf<UUserWidget> guardUIClass;
-	UUserWidget* guardOrderWidget;
+	UTyranGUIComponent* tyranGuiComponent;
 
 public:
 	enum ManagerState {
@@ -113,9 +113,6 @@ protected:
 
 	UFUNCTION(Reliable, Server, WithValidation)
 	void orderPatrolPoints(AActor* garde, const TArray<FVector>& patrolPoints);
-
-	UFUNCTION(Reliable, Client)
-	void guardUI(FVector2D mouseLocation);
 
 	UFUNCTION(BlueprintCallable)
 	void offensifChecked();
