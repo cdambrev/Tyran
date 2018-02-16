@@ -16,6 +16,9 @@ class TYRAN_API ATyranController : public APlayerController
 {
 	GENERATED_BODY()
 public:
+	TSubclassOf<UUserWidget> managerUIClass;
+
+public:
 	ATyranController();
 
 	UPROPERTY(Transient, Replicated)

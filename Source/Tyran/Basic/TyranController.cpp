@@ -6,6 +6,7 @@
 #include <UserWidget.h>
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
+#include "GUI/TyranGUIComponent.h"
 //#include "Runtime/UMG/Public/Blueprint/UserWidget.h"
 
 void ATyranController::setTyran(bool b)
@@ -20,6 +21,11 @@ void ATyranController::initOnTyranClient_Implementation()
 {
 	bShowMouseCursor = true;
 	bEnableClickEvents = true;
+	UTyranGUIComponent* guiComponent;
+	
+	
+	UUserWidget * managerUI = CreateWidget<UUserWidget>(GetGameInstance(), managerUIClass);
+	managerUI->AddToViewport(9998);
 }
 
 void ATyranController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -35,4 +41,6 @@ void ATyranController::SetPawn(APawn * InPawn)
 
 ATyranController::ATyranController() {
 	isTyran = false;
+	static ConstructorHelpers::FClassFinder<UUserWidget> managerUIHelper(TEXT("/Game/UI/ManagerInterface"));
+	managerUIClass = managerUIHelper.Class;
 }
