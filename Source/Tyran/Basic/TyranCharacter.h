@@ -107,6 +107,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "ObjectInteraction") 
 	float MaxUseDistance;
 
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* HitAnim;
+
 protected:
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
@@ -223,6 +226,12 @@ public:
 	
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerEquipWeapon(AWeapon* Weapon);
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void MulticastPlayAnim(UAnimMontage* Anim);
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void MulticastStopAnim(UAnimMontage* Anim);
 
 	/* La fonction OnRep utilise un paramètre pour la valeur précédente de la variable */ 
 	UFUNCTION()

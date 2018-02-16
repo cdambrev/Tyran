@@ -134,8 +134,16 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 {
 	// Call the base class - this will tell us how much damage to apply  
 	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-	if (ActualDamage > 0.f)
+	if (ActualDamage > 0.f && !isDead)
 	{
+		/*if (Role == ROLE_Authority) {
+			PlayAnimMontage(HitAnim, 1.0f, NAME_None);
+		}
+		else {*/
+			MulticastPlayAnim(HitAnim);
+		//}
+		float Duration = 
+
 		Health -= ActualDamage;
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
 		if (Health <= 0.f)
@@ -413,10 +421,25 @@ bool ATyranCharacter::ServerDropWeapon_Validate() {
 	return true;
 }
 
-void ATyranCharacter::ServerDropWeapon_Implementation() { 
-	DropWeapon(); 
+void ATyranCharacter::ServerDropWeapon_Implementation() {
+	DropWeapon();
 }
 
+bool ATyranCharacter::MulticastPlayAnim_Validate(UAnimMontage* Anim) {
+	return true;
+}
+
+void ATyranCharacter::MulticastPlayAnim_Implementation(UAnimMontage* Anim) {
+	PlayAnimMontage(Anim);
+}
+
+bool ATyranCharacter::MulticastStopAnim_Validate(UAnimMontage* Anim) {
+	return true;
+}
+
+void ATyranCharacter::MulticastStopAnim_Implementation(UAnimMontage* Anim) {
+	StopAnimMontage(Anim);
+}
 
 void ATyranCharacter::OnResetVR()
 {
@@ -509,6 +532,7 @@ void ATyranCharacter::Use()
 void ATyranCharacter::OnDeath()
 {
 	isDead = true;
+	MulticastStopAnim(HitAnim);
 	while (Inventory.Num() > 0)
 	{
 		DropWeapon();
