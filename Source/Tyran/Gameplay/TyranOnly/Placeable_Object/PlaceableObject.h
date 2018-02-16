@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Basic/TyranCharacter.h"
 #include "PlaceableObject.generated.h"
 
 UCLASS()
@@ -14,7 +15,8 @@ class TYRAN_API APlaceableObject : public AActor
 public:	
 	// Sets default values for this actor's properties
 	APlaceableObject();
-
+	UPROPERTY(Transient,EditAnywhere, BlueprintReadWrite)
+	APawn* PawnOwner;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float basePrice;
 
@@ -26,6 +28,5 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	
 	
 };

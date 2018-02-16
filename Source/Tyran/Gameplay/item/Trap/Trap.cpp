@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Trap.h"
+#include "Basic/TyranCharacter.h"
 
 
 // Sets default values
@@ -8,7 +9,9 @@ ATrap::ATrap()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	
+	bReplicates = true;
+	isTriggered = false;
+
 	trapOwner = EAlignement::A_TYRAN;
 	
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
@@ -32,6 +35,40 @@ void ATrap::BeginPlay()
 void ATrap::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	TArray<AActor*> OverlappingActors;
+	triggerZone->GetOverlappingActors(OverlappingActors);
+	for (auto& i : OverlappingActors) {
+		if (ATyranCharacter* character = Cast<ATyranCharacter>(i)) {
+			//FString f = EAlignementToString(character->getAlignement());
+			//UE_LOG(LogTemp, Warning,TEXT("Alignement character %s"),*f );
+			if (character->getAlignement() != trapOwner && !isTriggered)
+			{
+				triggered();
+			}
+		}
+	}
 }
+
+
+
+void ATrap::SetOwningPawn(APawn * NewOwner)
+{
+	if (PawnOwner != NewOwner) {
+		//Instigator = NewOwner;
+		PawnOwner = NewOwner;
+		// Propriétaire réseau pour les appels RPC. 
+		//SetOwner(NewOwner);
+	}
+	if (ATyranCharacter* character = Cast<ATyranCharacter>(NewOwner))
+	{
+		if (character->getAlignement() == EAlignement::A_REVOLUTIONNAIRE)
+		{
+			trapOwner = EAlignement::A_REVOLUTIONNAIRE;
+		}
+	}
+	else {
+		trapOwner = EAlignement::A_TYRAN;
+	}
+}
+
 

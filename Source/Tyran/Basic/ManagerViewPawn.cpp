@@ -13,6 +13,7 @@
 #include "GuardCharacter.h"
 #include "Basic/ManagerPlayerState.h"
 #include "AI/AIGuardTargetPoint.h"
+#include "Gameplay/item/Trap/Trap.h"
 
 
 /***************/
@@ -302,7 +303,12 @@ bool AManagerViewPawn::callBuildOnSlot_Validate(ABuildingSlot * slot, TSubclassO
 
 void AManagerViewPawn::placeObject_Implementation(FTransform position, TSubclassOf<APlaceableObject> tObjectClass) {
 	if (static_cast<AManagerPlayerState *>(GetController()->PlayerState)->spendMoney(static_cast<APlaceableObject *>(tObjectClass->ClassDefaultObject)->basePrice)) {
-		GetWorld()->SpawnActor<APlaceableObject>(tObjectClass, position);
+		auto obj = GetWorld()->SpawnActor<APlaceableObject>(tObjectClass, position);
+		if (ATrap* trap = Cast<ATrap>(obj))
+		{
+			trap->SetOwningPawn(this);
+		}
+		
 	}
 }
 

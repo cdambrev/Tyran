@@ -22,13 +22,17 @@ protected:
 public:
 
 	EAlignement trapOwner;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* myMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBoxComponent* placementCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBoxComponent* triggerZone;
+
+	
+
+	bool isTriggered;
 
 protected:
 	// Called when the game starts or when spawned
@@ -41,6 +45,8 @@ public:
 
 	virtual void triggered() { check(0 && "You must override this"); }
 
+	
+	virtual void SetOwningPawn(APawn * NewOwner) ;
 	
 	
 };
