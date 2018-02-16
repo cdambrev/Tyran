@@ -10,8 +10,8 @@ ATrap::ATrap()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
-	isTriggered = false;
-
+	bIsTriggered = false;
+	delayBeforeTrigger = 0.0f;
 	trapOwner = EAlignement::A_TYRAN;
 	
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
@@ -22,6 +22,13 @@ ATrap::ATrap()
 	triggerZone = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerZone"));
 	triggerZone->SetupAttachment(myMesh);
 
+}
+
+void ATrap::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ATrap, PawnOwner);
 }
 
 // Called when the game starts or when spawned
@@ -41,7 +48,7 @@ void ATrap::Tick(float DeltaTime)
 		if (ATyranCharacter* character = Cast<ATyranCharacter>(i)) {
 			//FString f = EAlignementToString(character->getAlignement());
 			//UE_LOG(LogTemp, Warning,TEXT("Alignement character %s"),*f );
-			if (character->getAlignement() != trapOwner && !isTriggered)
+			if (character->getAlignement() != trapOwner && !bIsTriggered)
 			{
 				triggered();
 			}
@@ -70,5 +77,4 @@ void ATrap::SetOwningPawn(APawn * NewOwner)
 		trapOwner = EAlignement::A_TYRAN;
 	}
 }
-
 
