@@ -69,6 +69,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	bool isDead;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
+	bool isAiming;
+
 protected:
 	/* Point d'attache pour les items en main et actifs */ 
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
@@ -139,6 +142,9 @@ protected:
 	// Quand la touche Crouch Toggle est appuyée 
 	void OnCrouchToggle();
 
+	// Quand la touche Aim est appuyée
+	void OnStartAim();
+	void OnStopAim();
 
 	// Quand la touche Use est appuyée 
 	void Use();
@@ -208,6 +214,12 @@ public:
 	// Invocation d'une RPC serveur pour actualiser l'état de crouching
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerCrouchToggle(bool NewCrouching);
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerOnStartAim();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerOnStopAim();
 	
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerEquipWeapon(AWeapon* Weapon);

@@ -30,13 +30,13 @@ ATyranCharacter::ATyranCharacter()
 	BaseLookUpRate = 45.f;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
-	bUseControllerRotationRoll = false;
+	//bUseControllerRotationPitch = false;
+	//bUseControllerRotationYaw = false;
+	//bUseControllerRotationRoll = false;
 
 	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
+	//GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
+	//GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->JumpZVelocity = 400.0f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
@@ -97,6 +97,9 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 
 	InputComponent->BindAction("Fire", IE_Pressed, this, &ATyranCharacter::OnStartFire);
 	InputComponent->BindAction("Fire", IE_Released, this, &ATyranCharacter::OnStopFire);
+
+	InputComponent->BindAction("Aim", IE_Pressed, this, &ATyranCharacter::OnStartAim);
+	InputComponent->BindAction("Aim", IE_Released, this, &ATyranCharacter::OnStopAim);
 
 	InputComponent->BindAction("EquipPrimaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipPrimaryWeapon);
 	InputComponent->BindAction("EquipSecondaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipSecondaryWeapon);
@@ -451,7 +454,6 @@ void ATyranCharacter::OnStopJump()
 
 void ATyranCharacter::OnCrouchToggle()
 {
-	// Si nous sommes déjà accroupis, CanCrouch retourne false.
 	if (CrouchButtonDown == false)
 	{
 		CrouchButtonDown = true;
@@ -469,15 +471,23 @@ void ATyranCharacter::OnCrouchToggle()
 		ServerCrouchToggle(true); // le param n'a pas d'importance pour l'instant
 
 	}
-	else
-	{
-		CrouchButtonDown = false;
-		UnCrouch();
-	}
-	// Si nous sommes sur un client
+}
+
+void ATyranCharacter::OnStartAim()
+{
+	isAiming = true;
 	if (Role < ROLE_Authority)
 	{
-		ServerCrouchToggle(true); // le param n'a pas d'importance pour l'instant
+		ServerOnStartAim();
+	}
+}
+
+void ATyranCharacter::OnStopAim()
+{
+	isAiming = false;
+	if (Role < ROLE_Authority)
+	{
+		ServerOnStopAim();
 	}
 }
 
@@ -498,6 +508,10 @@ void ATyranCharacter::Use()
 void ATyranCharacter::OnDeath()
 {
 	isDead = true;
+	while (Inventory.Num() > 0)
+	{
+		DropWeapon();
+	}
 	DetachFromControllerPendingDestroy();
 	SetLifeSpan(10.0f);
 }
@@ -524,6 +538,10 @@ void ATyranCharacter::MoveForward(float Value)
 
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+		if (isAiming)
+			Value /= 2.0f;
+
 		AddMovementInput(Direction, Value);
 	}
 }
@@ -538,6 +556,10 @@ void ATyranCharacter::MoveRight(float Value)
 	
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		if (isAiming)
+			Value /= 2.0f;
+
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
@@ -551,6 +573,26 @@ bool ATyranCharacter::ServerCrouchToggle_Validate(bool NewCrouching)
 void ATyranCharacter::ServerCrouchToggle_Implementation(bool NewCrouching)
 {
 	OnCrouchToggle();
+}
+
+bool ATyranCharacter::ServerOnStartAim_Validate()
+{
+	return true;
+}
+
+void ATyranCharacter::ServerOnStartAim_Implementation()
+{
+	OnStartAim();
+}
+
+bool ATyranCharacter::ServerOnStopAim_Validate()
+{
+	return true;
+}
+
+void ATyranCharacter::ServerOnStopAim_Implementation()
+{
+	OnStopAim();
 }
 
 bool ATyranCharacter::ServerEquipWeapon_Validate(AWeapon* Weapon) { 
@@ -585,6 +627,7 @@ void ATyranCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ATyranCharacter, CurrentWeapon);
 	DOREPLIFETIME(ATyranCharacter, Health);
 	DOREPLIFETIME(ATyranCharacter, isDead);
+	DOREPLIFETIME(ATyranCharacter, isAiming);
 	DOREPLIFETIME_CONDITION(ATyranCharacter, CrouchButtonDown, COND_SkipOwner);
 }
 
@@ -652,7 +695,7 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 				bHasNewFocus = false; 
 				
 				// Pour débogage, vous pourrez l'oter par la suite 
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Focus")); 
+				// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Focus")); 
 			} 
 		}
 	}
