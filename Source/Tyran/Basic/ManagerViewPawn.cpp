@@ -13,6 +13,7 @@
 #include "GuardCharacter.h"
 #include "Basic/ManagerPlayerState.h"
 #include "AI/AIGuardTargetPoint.h"
+#include "TyranController.h"
 
 
 /***************/

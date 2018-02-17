@@ -32,6 +32,8 @@ ATyranGameMode::ATyranGameMode()
 	{
 		defaultTyranPawn = ManagerViewPawnBPClass.Class;
 	}
+	
+	
 
 	tyranController = nullptr;
 }
@@ -40,6 +42,7 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 {
 	if (NewPlayer->IsLocalController()) {
 		//Action for server player (spectator ?)
+
 	}
 	else {
 		ATyranController * player = static_cast<ATyranController *>(NewPlayer);
@@ -56,6 +59,8 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 			player->setTyran(false);
 			ATyranCharacter * revChar = GetWorld()->SpawnActor<ATyranCharacter>(defaultRebelPawn, FTransform((*spawnPoints)->GetActorLocation()));
 			player->Possess(revChar);
+			
+
 		}
 	}
 }

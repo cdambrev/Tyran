@@ -229,7 +229,6 @@ public:
 
 	/* Vérifier si l'emplacement est libre */
 	bool WeaponSlotAvailable(EInventorySlot CheckSlot);
-
 	void Tick(float DeltaSeconds) override;
 };
 
