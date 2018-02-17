@@ -1,23 +1,36 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Traceur.h"
-
+#include "TimerManager.h"
 #define COLLISION_WEAPON ECC_GameTraceChannel3
 
 
 
 ATraceur::ATraceur() : Super()
 {
-	
+	visibilityDelay = 2.0f;
 }
 
 void ATraceur::triggered()
 {
 	if (cible) {
+		
+		FTimerHandle UnusedHandle;
 		FString impactResult = cible->GetName();
 		UE_LOG(LogTemp, Warning, TEXT("trace touch %s and traceur triggered"), *impactResult);
+		cible->setVisible(true);
+		cible->isAlwaysVisible = true;
+		GetWorldTimerManager().SetTimer(UnusedHandle, this, &ATraceur::triggerDelayed, visibilityDelay, false);
 	}
 }
+
+void ATraceur::triggerDelayed()
+{
+	cible->setViewedThisTick();
+	cible->isAlwaysVisible = false;
+}
+
+
 
 FHitResult ATraceur::TraceurTrace(const FVector & TraceFrom, const FVector & TraceTo) const
 {

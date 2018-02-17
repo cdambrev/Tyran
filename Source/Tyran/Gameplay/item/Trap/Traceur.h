@@ -17,8 +17,11 @@ class TYRAN_API ATraceur : public ATrap
 
 private:
 	ATyranCharacter* cible;
+	void triggerDelayed();
 public:
 	ATraceur();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float visibilityDelay;
 	virtual void triggered() override;
 	FHitResult TraceurTrace(const FVector & TraceFrom, const FVector & TraceTo) const;
 	virtual void Tick(float DeltaTime) override;
