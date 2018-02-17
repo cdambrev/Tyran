@@ -51,6 +51,9 @@ public:
 	UPROPERTY(Transient, Replicated)
 	TArray<class AWeapon*> Inventory;
 
+	/* Munitions */
+	TMap<EAmmoType, int> Ammunition;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Replicated)
 	bool isVisible;
 
@@ -68,6 +71,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	bool isDead;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
+	bool isAiming;
 
 protected:
 	/* Point d'attache pour les items en main et actifs */ 
@@ -104,6 +110,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "ObjectInteraction") 
 	float MaxUseDistance;
 
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* HitAnim;
+
 protected:
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
@@ -139,10 +148,15 @@ protected:
 	// Quand la touche Crouch Toggle est appuyée 
 	void OnCrouchToggle();
 
+	// Quand la touche Aim est appuyée
+	void OnStartAim();
+	void OnStopAim();
 
 	// Quand la touche Use est appuyée 
 	void Use();
 
+	// Quand la touche Reload est appuyée 
+	void Reload();
 
 	// "Et là IL MEUUUUUUUURT !"
 	void OnDeath();
@@ -152,12 +166,15 @@ protected:
 	// End of APawn interface
 
 	// AActor
-	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-
+	
 
 	class ALoot* GetLootInView();
 
 public:
+
+	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
@@ -192,7 +209,6 @@ public:
 	void OnEquipPrimaryWeapon(); 
 	void OnEquipSecondaryWeapon();
 
-
 	void DropWeapon();
 	void RemoveWeapon(class AWeapon* Weapon);
 
@@ -205,9 +221,24 @@ public:
 	// Invocation d'une RPC serveur pour actualiser l'état de crouching
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerCrouchToggle(bool NewCrouching);
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerOnStartAim();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerOnStopAim();
 	
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerEquipWeapon(AWeapon* Weapon);
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerReload();
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void MulticastPlayAnim(UAnimMontage* Anim);
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void MulticastStopAnim(UAnimMontage* Anim);
 
 	/* La fonction OnRep utilise un paramètre pour la valeur précédente de la variable */ 
 	UFUNCTION()

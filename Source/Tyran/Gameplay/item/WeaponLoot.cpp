@@ -21,8 +21,5 @@ void AWeaponLoot::OnUsed(APawn * InstigatorPawn)
 
 		MyPawn->AddWeapon(NewWeapon);
 		Destroy();
-		{ 
-			//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, "Emplacement d'arme déjà pris!"); 
-		} 
 	}
 }

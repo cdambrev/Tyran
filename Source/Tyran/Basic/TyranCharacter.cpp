@@ -11,7 +11,6 @@
 #include "Gameplay/item/Weapon.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
 #include "Basic/TyranController.h"
-//#include "ManagerViewPawn.h"
 #include <EngineUtils.h>
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
@@ -30,14 +29,15 @@ ATyranCharacter::ATyranCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
+	alignement = EAlignement::A_REVOLUTIONNAIRE;
 	// Don't rotate when the controller rotates. Let that just affect the camera.
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
-	bUseControllerRotationRoll = false;
+	//bUseControllerRotationPitch = false;
+	//bUseControllerRotationYaw = false;
+	//bUseControllerRotationRoll = false;
 
 	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
+	//GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
+	//GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->JumpZVelocity = 400.0f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
@@ -77,9 +77,13 @@ ATyranCharacter::ATyranCharacter()
 	Health = 100;
 	isDead = false;
 
-
 	MaxUseDistance = 600;
 	DropItemDistance = 100;
+
+	Ammunition.Add(EAmmoType::AssaultRifle, 120);
+	Ammunition.Add(EAmmoType::Pistol, 0);
+	Ammunition.Add(EAmmoType::Shotgun, 0);
+	Ammunition.Add(EAmmoType::SniperRifle, 0);
 
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -99,11 +103,15 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	InputComponent->BindAction("Fire", IE_Pressed, this, &ATyranCharacter::OnStartFire);
 	InputComponent->BindAction("Fire", IE_Released, this, &ATyranCharacter::OnStopFire);
 
+	InputComponent->BindAction("Aim", IE_Pressed, this, &ATyranCharacter::OnStartAim);
+	InputComponent->BindAction("Aim", IE_Released, this, &ATyranCharacter::OnStopAim);
+
 	InputComponent->BindAction("EquipPrimaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipPrimaryWeapon);
 	InputComponent->BindAction("EquipSecondaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipSecondaryWeapon);
 
-
 	InputComponent->BindAction("Use", IE_Pressed, this, &ATyranCharacter::Use);
+
+	InputComponent->BindAction("Reload", IE_Pressed, this, &ATyranCharacter::Reload);
 
 	InputComponent->BindAction("NextWeapon", IE_Pressed, this, &ATyranCharacter::OnNextWeapon);
 	InputComponent->BindAction("PrevWeapon", IE_Pressed, this, &ATyranCharacter::OnPrevWeapon);
@@ -131,8 +139,16 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 {
 	// Call the base class - this will tell us how much damage to apply  
 	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-	if (ActualDamage > 0.f)
+	if (ActualDamage > 0.f && !isDead)
 	{
+		/*if (Role == ROLE_Authority) {
+			PlayAnimMontage(HitAnim, 1.0f, NAME_None);
+		}
+		else {*/
+			MulticastPlayAnim(HitAnim);
+		//}
+		float Duration = 
+
 		Health -= ActualDamage;
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
 		if (Health <= 0.f)
@@ -410,10 +426,25 @@ bool ATyranCharacter::ServerDropWeapon_Validate() {
 	return true;
 }
 
-void ATyranCharacter::ServerDropWeapon_Implementation() { 
-	DropWeapon(); 
+void ATyranCharacter::ServerDropWeapon_Implementation() {
+	DropWeapon();
 }
 
+bool ATyranCharacter::MulticastPlayAnim_Validate(UAnimMontage* Anim) {
+	return true;
+}
+
+void ATyranCharacter::MulticastPlayAnim_Implementation(UAnimMontage* Anim) {
+	PlayAnimMontage(Anim);
+}
+
+bool ATyranCharacter::MulticastStopAnim_Validate(UAnimMontage* Anim) {
+	return true;
+}
+
+void ATyranCharacter::MulticastStopAnim_Implementation(UAnimMontage* Anim) {
+	StopAnimMontage(Anim);
+}
 
 void ATyranCharacter::OnResetVR()
 {
@@ -452,7 +483,6 @@ void ATyranCharacter::OnStopJump()
 
 void ATyranCharacter::OnCrouchToggle()
 {
-	// Si nous sommes déjà accroupis, CanCrouch retourne false.
 	if (CrouchButtonDown == false)
 	{
 		CrouchButtonDown = true;
@@ -470,15 +500,23 @@ void ATyranCharacter::OnCrouchToggle()
 		ServerCrouchToggle(true); // le param n'a pas d'importance pour l'instant
 
 	}
-	else
-	{
-		CrouchButtonDown = false;
-		UnCrouch();
-	}
-	// Si nous sommes sur un client
+}
+
+void ATyranCharacter::OnStartAim()
+{
+	isAiming = true;
 	if (Role < ROLE_Authority)
 	{
-		ServerCrouchToggle(true); // le param n'a pas d'importance pour l'instant
+		ServerOnStartAim();
+	}
+}
+
+void ATyranCharacter::OnStopAim()
+{
+	isAiming = false;
+	if (Role < ROLE_Authority)
+	{
+		ServerOnStopAim();
 	}
 }
 
@@ -496,9 +534,27 @@ void ATyranCharacter::Use()
 	}
 }
 
+void ATyranCharacter::Reload()
+{
+	if (Ammunition[CurrentWeapon->GetAmmoType()] > 0)
+	{
+		//if (Role == ROLE_Authority) {
+			CurrentWeapon->OnReload();
+		/*}
+		else {
+			ServerReload();
+		}*/	
+	}
+}
+
 void ATyranCharacter::OnDeath()
 {
 	isDead = true;
+	MulticastStopAnim(HitAnim);
+	while (Inventory.Num() > 0)
+	{
+		DropWeapon();
+	}
 	DetachFromControllerPendingDestroy();
 	SetLifeSpan(10.0f);
 }
@@ -525,6 +581,10 @@ void ATyranCharacter::MoveForward(float Value)
 
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+		if (isAiming)
+			Value /= 2.0f;
+
 		AddMovementInput(Direction, Value);
 	}
 }
@@ -539,6 +599,10 @@ void ATyranCharacter::MoveRight(float Value)
 	
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		if (isAiming)
+			Value /= 2.0f;
+
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
@@ -554,12 +618,40 @@ void ATyranCharacter::ServerCrouchToggle_Implementation(bool NewCrouching)
 	OnCrouchToggle();
 }
 
+bool ATyranCharacter::ServerOnStartAim_Validate()
+{
+	return true;
+}
+
+void ATyranCharacter::ServerOnStartAim_Implementation()
+{
+	OnStartAim();
+}
+
+bool ATyranCharacter::ServerOnStopAim_Validate()
+{
+	return true;
+}
+
+void ATyranCharacter::ServerOnStopAim_Implementation()
+{
+	OnStopAim();
+}
+
 bool ATyranCharacter::ServerEquipWeapon_Validate(AWeapon* Weapon) { 
 	return true; 
 } 
 
 void ATyranCharacter::ServerEquipWeapon_Implementation(AWeapon* Weapon) { 
 	EquipWeapon(Weapon); 
+}
+
+bool ATyranCharacter::ServerReload_Validate() {
+	return true;
+}
+
+void ATyranCharacter::ServerReload_Implementation() {
+	Reload();
 }
 
 void ATyranCharacter::OnRep_CurrentWeapon(AWeapon* LastWeapon) {
@@ -586,6 +678,7 @@ void ATyranCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ATyranCharacter, CurrentWeapon);
 	DOREPLIFETIME(ATyranCharacter, Health);
 	DOREPLIFETIME(ATyranCharacter, isDead);
+	DOREPLIFETIME(ATyranCharacter, isAiming);
 	DOREPLIFETIME_CONDITION(ATyranCharacter, CrouchButtonDown, COND_SkipOwner);
 }
 
@@ -660,7 +753,7 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 				bHasNewFocus = false; 
 				
 				// Pour débogage, vous pourrez l'oter par la suite 
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Focus")); 
+				// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Focus")); 
 			} 
 		}
 	}

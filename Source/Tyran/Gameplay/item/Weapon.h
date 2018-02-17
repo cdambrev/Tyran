@@ -40,6 +40,8 @@ protected:
 	/* Le socket (emplacement) où l'objet sera placé */ 
 	EInventorySlot StorageSlot;
 
+	EAmmoType AmmoType;
+
 	// ******* Équipement 
 	/** Départ de l'équipement */ 
 	float EquipStartedTime; 
@@ -52,15 +54,29 @@ protected:
 	bool bPendingEquip; 
 	
 	FTimerHandle EquipFinishedTimerHandle;
-	
-	EWeaponState CurrentState;
 		
+	// ******* Rechargement 
+	/** Départ du rechargement */
+	float ReloadStartedTime;
+
+	/** Durée du rechargement */
+	float ReloadDuration;
+
+	bool bPendingReload;
+
+	FTimerHandle ReloadFinishedTimerHandle;
+
+	EWeaponState CurrentState;
+
 	// Animations et son 
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* EquipAnim;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Sounds") 
 	USoundCue* EquipSound;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* ReloadAnim;
 
 	bool bWantsToFire; 
 	bool bRefiring; 
@@ -82,6 +98,11 @@ protected:
 	FName MuzzleAttachPoint; 
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_BurstCounter) 
 	int32 BurstCounter;
+
+	UPROPERTY(EditDefaultsOnly)
+	int MagazineSize;
+	UPROPERTY(Transient, Replicated)
+	int MagazineCurrent;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -156,12 +177,17 @@ public:
 	
 	UFUNCTION(Reliable, Server, WithValidation) 
 	void ServerHandleFiring(); 
+
+	void OnReload();
+	void OnReloadFinished();
 	
 	UFUNCTION() 
 	void OnRep_BurstCounter(); 
 	
 	FVector GetMuzzleLocation() const; 
 	FVector GetMuzzleDirection() const;
+
+	EAmmoType GetAmmoType();
 
 	/** Obtenir le mesh de l'arme */ 
 	UFUNCTION(BlueprintCallable, Category = "Game|Weapon") 
