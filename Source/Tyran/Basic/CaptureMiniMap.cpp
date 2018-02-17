@@ -42,7 +42,17 @@ UTexture2D * ACaptureMiniMap::GetTextureAtLocation(FVector location)
 	TArray<FColor> MapTexDataResize;
 	for (int y = texY - tailleY / 2; y < texY - tailleY / 2 + tailleY; ++y) {
 		for (int x = texX - tailleX / 2; x < texX - tailleX / 2 + tailleX; ++x) {
-			MapTexDataResize.Add(MapTexData[x + y * 1024]);
+			FColor c = MapTexData[x + y * 1024];
+			FColor res = FColor(0,0,0);
+			float z = c.R / 255.0f + c.G / 65025.0f + c.B / 16581375.0f + c.A / 4228250625.0f;
+			if ( z < 0.0158f) {
+				if (z > 0.001)
+					res = FColor(0, 0, 128);
+				else
+					res = FColor(0, 0, 255);
+			}
+			MapTexDataResize.Add(res);
+			
 		}
 	}
 	FTexture2DMipMap& Mip = tex->PlatformData->Mips[0];
