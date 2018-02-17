@@ -31,7 +31,10 @@ private :
 	// Focus (par le clic)
 	AActor* focus;
 	TSubclassOf<UUserWidget> guardUIClass;
+	TSubclassOf<UUserWidget> patrolPointsUIClass;
 	UUserWidget* guardOrderWidget;
+	UUserWidget* patrolPointsWidget;
+	TArray<FVector> patrolPoints;
 
 public:
 	enum ManagerState {
@@ -117,16 +120,19 @@ protected:
 	UFUNCTION(Reliable, Client)
 	void guardUI(FVector2D mouseLocation);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(Reliable, Client)
+	void patrolPointsUI();
+
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable)
 	void offensifChecked();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable)
 	void defensifChecked();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable)
 	void tenirPositionChecked();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable)
 	void fuiteAutoriseChecked(bool isChecked);
 
 	UFUNCTION(BlueprintCallable)

@@ -32,10 +32,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Utility")
 		bool flee;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
+	UPROPERTY(Transient, Replicated, EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
 		ModeGuard modeGuard = ModeGuard::TENIRPOSITION;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
+	UPROPERTY(Transient, Replicated, EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
 		bool fuiteAutorise = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Caractéristics")

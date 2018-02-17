@@ -44,6 +44,8 @@ AManagerViewPawn::AManagerViewPawn()
 	//AutoPossessPlayer = EAutoReceiveInput::Player0;
 	ConstructorHelpers::FClassFinder<UUserWidget> guardOrderUIHelper(TEXT("/Game/UI/GuardOrder"));
 	guardUIClass = guardOrderUIHelper.Class;
+	ConstructorHelpers::FClassFinder<UUserWidget> patrolPointsUIHelper(TEXT("/Game/UI/SetPatrouille"));
+	patrolPointsUIClass = patrolPointsUIHelper.Class;
 }
 
 // Called when the game starts or when spawned
@@ -197,24 +199,42 @@ void AManagerViewPawn::enterPlaceMode(TSubclassOf<APlaceableObject> object, TSub
 	currState = PLACINGOBJECT;
 }
 
-void AManagerViewPawn::offensifChecked() {
+bool AManagerViewPawn::offensifChecked_Validation() {
+	return true;
+}
+void AManagerViewPawn::offensifChecked_Implementation() {
 	(static_cast<AGuardCharacter*> (focus))->modeGuard = ModeGuard::OFFENSIF;
 }
 
-void AManagerViewPawn::defensifChecked() {
+bool AManagerViewPawn::defensifChecked_Validation() {
+	return true;
+}
+void AManagerViewPawn::defensifChecked_Implementation() {
 	(static_cast<AGuardCharacter*> (focus))->modeGuard = ModeGuard::DEFENSIF;
 }
 
-void AManagerViewPawn::tenirPositionChecked() {
+bool AManagerViewPawn::tenirPositionChecked_Validation() {
+	return true;
+}
+void AManagerViewPawn::tenirPositionChecked_Implementation() {
 	(static_cast<AGuardCharacter*> (focus))->modeGuard = ModeGuard::TENIRPOSITION;
 }
 
-void AManagerViewPawn::fuiteAutoriseChecked(bool isChecked) {
+bool AManagerViewPawn::fuiteAutoriseChecked_Validation() {
+	return true;
+}
+void AManagerViewPawn::fuiteAutoriseChecked_Implementation(bool isChecked) {
 	(static_cast<AGuardCharacter*> (focus))->fuiteAutorise = isChecked;
 }
 
 void AManagerViewPawn::enterSetPatrouilleMode() {
-
+	currState = PATROLPOINTS;
+	if (patrolPointsWidget != nullptr) {
+		patrolPointsWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+	else {
+		patrolPointsUI();
+	}
 }
 
 void AManagerViewPawn::enterSetZoneSurveillanceMode() {
@@ -223,6 +243,12 @@ void AManagerViewPawn::enterSetZoneSurveillanceMode() {
 
 void AManagerViewPawn::enterPositionAndDirectionSelectionMode() {
 
+}
+
+void AManagerViewPawn::patrolPointsUI_Implementation() {
+	patrolPointsWidget = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetController()), patrolPointsUIClass);
+	patrolPointsWidget->AddToViewport(9999);
+	patrolPointsWidget->bIsFocusable = true;
 }
 
 void AManagerViewPawn::leftClickAction()
@@ -243,9 +269,18 @@ void AManagerViewPawn::leftClickAction()
 		} else {
 			currState = NOTHING;
 			focus->Destroy();
-			//TArray<FVector> targetPointPos;
-			//targetPointPos.Add(resultHit.ImpactPoint);
-			//orderPatrolPoints(focus, targetPointPos);
+		}
+	}
+	else if (currState == PATROLPOINTS) {
+		FHitResult resultHit{};
+		FVector mouseLocation;
+		FVector mouseDirection;
+		FCollisionQueryParams queryParams{};
+		queryParams.AddIgnoredActor(GetOwner());
+		if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_GameTraceChannel3, queryParams)) {
+			patrolPoints.Add(resultHit.ImpactPoint);
+			// mettre orderpatrolpoints en server truc
+			orderPatrolPoints(focus, patrolPoints);
 		}
 	} else if (currState == ORDERMENU) {
 		FHitResult resultHit{};
