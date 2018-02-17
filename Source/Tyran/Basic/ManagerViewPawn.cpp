@@ -15,6 +15,7 @@
 #include "AI/AIGuardTargetPoint.h"
 #include <ConstructorHelpers.h>
 #include <UserWidget.h>
+#include "GUI/TyranHUD.h"
 
 
 /***************/
@@ -42,8 +43,8 @@ AManagerViewPawn::AManagerViewPawn()
 	RTSCamera->SetupAttachment(RTSCameraSpringArm, USpringArmComponent::SocketName);
 
 	//AutoPossessPlayer = EAutoReceiveInput::Player0;
-	ConstructorHelpers::FClassFinder<UUserWidget> guardOrderUIHelper(TEXT("/Game/UI/GuardOrder"));
-	guardUIClass = guardOrderUIHelper.Class;
+	//ConstructorHelpers::FClassFinder<UUserWidget> guardOrderUIHelper(TEXT("/Game/UI/GuardOrder"));
+	//guardUIClass = guardOrderUIHelper.Class;
 	ConstructorHelpers::FClassFinder<UUserWidget> patrolPointsUIHelper(TEXT("/Game/UI/SetPatrouille"));
 	patrolPointsUIClass = patrolPointsUIHelper.Class;
 }
@@ -199,32 +200,46 @@ void AManagerViewPawn::enterPlaceMode(TSubclassOf<APlaceableObject> object, TSub
 	currState = PLACINGOBJECT;
 }
 
-bool AManagerViewPawn::offensifChecked_Validation() {
-	return true;
-}
-void AManagerViewPawn::offensifChecked_Implementation() {
-	(static_cast<AGuardCharacter*> (focus))->modeGuard = ModeGuard::OFFENSIF;
+void AManagerViewPawn::offensifChecked() {
+	offensifCheckedServ(static_cast<AGuardCharacter*>(focus));
 }
 
-bool AManagerViewPawn::defensifChecked_Validation() {
-	return true;
+void AManagerViewPawn::defensifChecked() {
+	defensifCheckedServ(static_cast<AGuardCharacter*>(focus));
 }
-void AManagerViewPawn::defensifChecked_Implementation() {
-	(static_cast<AGuardCharacter*> (focus))->modeGuard = ModeGuard::DEFENSIF;
+void AManagerViewPawn::tenirPositionChecked() {
+	tenirPositionCheckedServ(static_cast<AGuardCharacter*>(focus));
 }
-
-bool AManagerViewPawn::tenirPositionChecked_Validation() {
-	return true;
-}
-void AManagerViewPawn::tenirPositionChecked_Implementation() {
-	(static_cast<AGuardCharacter*> (focus))->modeGuard = ModeGuard::TENIRPOSITION;
+void AManagerViewPawn::fuiteAutoriseChecked(bool isChecked) {
+	fuiteAutoriseCheckedServ(static_cast<AGuardCharacter*>(focus), isChecked);
 }
 
-bool AManagerViewPawn::fuiteAutoriseChecked_Validation() {
+bool AManagerViewPawn::offensifCheckedServ_Validate(AGuardCharacter* guard) {
 	return true;
 }
-void AManagerViewPawn::fuiteAutoriseChecked_Implementation(bool isChecked) {
-	(static_cast<AGuardCharacter*> (focus))->fuiteAutorise = isChecked;
+void AManagerViewPawn::offensifCheckedServ_Implementation(AGuardCharacter* guard) {
+	(static_cast<AGuardCharacter*> (guard))->modeGuard = ModeGuard::OFFENSIF;
+}
+
+bool AManagerViewPawn::defensifCheckedServ_Validate(AGuardCharacter* guard) {
+	return true;
+}
+void AManagerViewPawn::defensifCheckedServ_Implementation(AGuardCharacter* guard) {
+	(static_cast<AGuardCharacter*> (guard))->modeGuard = ModeGuard::DEFENSIF;
+}
+
+bool AManagerViewPawn::tenirPositionCheckedServ_Validate(AGuardCharacter* guard) {
+	return true;
+}
+void AManagerViewPawn::tenirPositionCheckedServ_Implementation(AGuardCharacter* guard) {
+	(static_cast<AGuardCharacter*> (guard))->modeGuard = ModeGuard::TENIRPOSITION;
+}
+
+bool AManagerViewPawn::fuiteAutoriseCheckedServ_Validate(AGuardCharacter* guard, bool isChecked) {
+	return true;
+}
+void AManagerViewPawn::fuiteAutoriseCheckedServ_Implementation(AGuardCharacter* guard, bool isChecked) {
+	(static_cast<AGuardCharacter*> (guard))->fuiteAutorise = isChecked;
 }
 
 void AManagerViewPawn::enterSetPatrouilleMode() {
@@ -264,8 +279,7 @@ void AManagerViewPawn::leftClickAction()
 			float mouseScreenX;
 			float mouseScreenY;
 			static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
-
-			guardUI(FVector2D(mouseScreenX, mouseScreenY));
+			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->displayGuardOrder(FVector2D(mouseScreenX, mouseScreenY));
 		} else {
 			currState = NOTHING;
 			focus->Destroy();
@@ -292,14 +306,10 @@ void AManagerViewPawn::leftClickAction()
 			float mouseScreenX;
 			float mouseScreenY;
 			static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
-
-			guardUI(FVector2D(mouseScreenX, mouseScreenY));
+			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->displayGuardOrder(FVector2D(mouseScreenX, mouseScreenY));
 		} else {
-			guardOrderWidget->RemoveFromViewport();
+			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardOrder();
 			currState = FOCUSGARDE;
-			//TArray<FVector> targetPointPos;
-			//targetPointPos.Add(resultHit.ImpactPoint);
-			//orderPatrolPoints(focus, targetPointPos);
 		}
 
 	} else if (currState == BUILDING) {
@@ -351,8 +361,8 @@ void AManagerViewPawn::leftClickAction()
 			float mouseScreenX;
 			float mouseScreenY;
 			static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
+			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->displayGuardOrder(FVector2D(mouseScreenX, mouseScreenY));
 
-			guardUI(FVector2D(mouseScreenX, mouseScreenY));
 		}
 	}
 }
@@ -367,7 +377,7 @@ void AManagerViewPawn::RightClickAction()
 		currState = FOCUSGARDE;
 	}
 	else if (currState == ORDERMENU) {
-		guardOrderWidget->RemoveFromViewport();
+		static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardOrder();
 		currState = NOTHING;
 		focus->Destroy();
 	}
@@ -402,31 +412,20 @@ bool AManagerViewPawn::placeObject_Validate(FTransform position, TSubclassOf<APl
 void AManagerViewPawn::orderPatrolPoints_Implementation(AActor* garde, const TArray<FVector>& patrolPointsPos) {
 	AAIGuardController* aiGuardController = Cast<AAIGuardController>(garde->GetInstigatorController());
 	if (garde) {
-		TArray<AAIGuardTargetPoint*> patrolPoints;
+		TArray<AAIGuardTargetPoint*> guardTargetPoints;
 		for (int i = 0; i < patrolPointsPos.Num(); ++i) {
 			FVector targetPointPos = patrolPointsPos[i];
 			AAIGuardTargetPoint* targetPoint = GetWorld()->SpawnActor<AAIGuardTargetPoint>(AAIGuardTargetPoint::StaticClass(), FTransform(targetPointPos));
 			targetPoint->SetActorLocation(targetPointPos);
 			targetPoint->Position = i;
-			patrolPoints.Add(targetPoint);
+			guardTargetPoints.Add(targetPoint);
 		}
-		aiGuardController->setPatrolPoint(patrolPoints);
+		aiGuardController->setPatrolPoint(guardTargetPoints);
 	}
 }
 
-bool AManagerViewPawn::orderPatrolPoints_Validate(AActor* garde, const TArray<FVector>& patrolPoints) {
+bool AManagerViewPawn::orderPatrolPoints_Validate(AActor* garde, const TArray<FVector>& patrolPointsPos) {
 	return true;
-}
-
-void AManagerViewPawn::guardUI_Implementation(FVector2D mouseLocation) {
-	if (guardOrderWidget) {
-		guardOrderWidget->RemoveFromViewport();
-	}
-	guardOrderWidget = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetController()), guardUIClass);
-	guardOrderWidget->AddToViewport(9999);
-	guardOrderWidget->SetPositionInViewport(mouseLocation);
-	guardOrderWidget->bIsFocusable = true;
-	static_cast<APlayerController*>(GetController())->SetInputMode(FInputModeGameAndUI());
 }
 
 // Called every frame
