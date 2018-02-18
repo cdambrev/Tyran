@@ -9,18 +9,24 @@
 ATraceur::ATraceur() : Super()
 {
 	visibilityDelay = 2.0f;
+	coolDown = 1.0f;
+	beam = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Beam"));
+	beam->SetupAttachment(RootComponent);
 }
 
 void ATraceur::triggered()
 {
 	if (cible) {
-		
+		bIsTriggered = true;
 		FTimerHandle UnusedHandle;
 		FString impactResult = cible->GetName();
 		UE_LOG(LogTemp, Warning, TEXT("trace touch %s and traceur triggered"), *impactResult);
 		cible->setVisible(true);
 		cible->isAlwaysVisible = true;
 		GetWorldTimerManager().SetTimer(UnusedHandle, this, &ATraceur::triggerDelayed, visibilityDelay, false);
+
+		FTimerHandle UnusedHandle2;
+		GetWorldTimerManager().SetTimer(UnusedHandle2, this, &ATraceur::TraceurCoolDown, coolDown, false);
 	}
 }
 
@@ -32,16 +38,20 @@ void ATraceur::triggerDelayed()
 
 
 
+void ATraceur::TraceurCoolDown()
+{
+	bIsTriggered = false;
+}
+
 FHitResult ATraceur::TraceurTrace(const FVector & TraceFrom, const FVector & TraceTo) const
 {
-	const FName TraceTag("TraceurRay");
-	GetWorld()->DebugDrawTraceTag = TraceTag;
-
-
+	//const FName TraceTag("TraceurRay");
+	//GetWorld()->DebugDrawTraceTag = TraceTag;
 	FCollisionQueryParams TraceParams(TEXT("WeaponTrace"), true, Instigator);
 	TraceParams.bTraceAsyncScene = true;
 	TraceParams.bReturnPhysicalMaterial = true;
-	TraceParams.TraceTag = TraceTag;
+	//TraceParams.TraceTag = TraceTag;
+	TraceParams.AddIgnoredActor(this); //tres Important
 	FHitResult Hit(ForceInit);
 	GetWorld()->LineTraceSingleByChannel(Hit, TraceFrom, TraceTo, COLLISION_WEAPON, TraceParams);
 
@@ -53,14 +63,16 @@ void ATraceur::Tick(float DeltaTime)
 	Super::Super::Tick(DeltaTime);
 	float traceRange = 2000.0f;
 	const FVector upVector = GetActorUpVector();
-	const FVector StartPos = GetActorLocation() + upVector*2; // + 2 up vector pour que le startPoint ne soit pas dans le mesh
+	const FVector StartPos = GetActorLocation();
 	const FVector EndPos = StartPos + (upVector * traceRange); // Position de fin du tir 
 	const FHitResult Impact = TraceurTrace(StartPos, EndPos); // Trouver l'impact 
 	if (Impact.GetActor()) {
+		beam->SetBeamSourcePoint(1, StartPos, 1);
+		beam->SetBeamTargetPoint(1, EndPos, 1);
 		if (ATyranCharacter* character = Cast<ATyranCharacter>(Impact.GetActor())) {
 			//FString impactResult = character->GetName();
 			//UE_LOG(LogTemp, Warning, TEXT("trace touch %s"), *impactResult);
-			if (character->getAlignement() != trapOwner) {
+			if (character->getAlignement() != trapOwner && !bIsTriggered) {
 				cible = character;
 				triggered();
 			}
