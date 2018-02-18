@@ -2,6 +2,7 @@
 
 #include "Traceur.h"
 #include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
 #define COLLISION_WEAPON ECC_GameTraceChannel3
 
 
@@ -12,6 +13,10 @@ ATraceur::ATraceur() : Super()
 	coolDown = 1.0f;
 	beam = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Beam"));
 	beam->SetupAttachment(RootComponent);
+	beam->SetBeamSourcePoint(0, GetActorLocation(), 0);
+	beam->SetBeamTargetPoint(0, GetActorLocation(), 0);
+
+	
 }
 
 void ATraceur::triggered()
@@ -67,8 +72,9 @@ void ATraceur::Tick(float DeltaTime)
 	const FVector EndPos = StartPos + (upVector * traceRange); // Position de fin du tir 
 	const FHitResult Impact = TraceurTrace(StartPos, EndPos); // Trouver l'impact 
 	if (Impact.GetActor()) {
-		beam->SetBeamSourcePoint(1, StartPos, 1);
-		beam->SetBeamTargetPoint(1, EndPos, 1);
+		//FString impactResult = Impact.GetActor()->GetName();
+		//UE_LOG(LogTemp, Warning, TEXT("trace touch %s"), *impactResult);
+		beam->SetBeamTargetPoint(0, Impact.ImpactPoint, 0);
 		if (ATyranCharacter* character = Cast<ATyranCharacter>(Impact.GetActor())) {
 			//FString impactResult = character->GetName();
 			//UE_LOG(LogTemp, Warning, TEXT("trace touch %s"), *impactResult);
@@ -77,6 +83,10 @@ void ATraceur::Tick(float DeltaTime)
 				triggered();
 			}
 		}
+	}
+	else {
+		beam->SetBeamTargetPoint(0, StartPos, 0);
+		//beam->SetActorParameter("BeamTarget", this);
 	}
 
 }
