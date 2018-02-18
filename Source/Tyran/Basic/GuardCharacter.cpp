@@ -4,6 +4,6 @@
 
 
 AGuardCharacter::AGuardCharacter() {
-	
+	alignement = EAlignement::A_TYRAN;
 }
 

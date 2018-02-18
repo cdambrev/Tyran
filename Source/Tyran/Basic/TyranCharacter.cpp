@@ -16,6 +16,7 @@
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
 #include <DrawDebugHelpers.h>
 #include "Gameplay/item/WeaponLoot.h"
+#include "TimerManager.h"
 #include "Components/StaticMeshComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -67,6 +68,8 @@ ATyranCharacter::ATyranCharacter()
 	SpineAttachPoint = TEXT("SpineSocket");
 
 	bWantsToFire = false;
+
+	isTraced = false;
 
 	isVisible = false;
 
@@ -692,6 +695,8 @@ void ATyranCharacter::setVisible(bool b) {
 	}
 }
 
+
+
 EAlignement ATyranCharacter::getAlignement() {
 	return alignement;
 }
@@ -757,4 +762,23 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 			} 
 		}
 	}
+}
+
+void ATyranCharacter::setTemporarilyVisible(float second)
+{
+	if (!isAlwaysVisible)
+	{
+		FTimerHandle UnusedHandle;
+		setVisible(true);
+		isAlwaysVisible = true;
+		isTraced = true;
+		GetWorldTimerManager().SetTimer(UnusedHandle, this, &ATyranCharacter::setTemporarilyVisibleDelayedImplementation, second, false);
+	}
+}
+
+void ATyranCharacter::setTemporarilyVisibleDelayedImplementation()
+{
+	isTraced = false;
+	setViewedThisTick();
+	isAlwaysVisible = false;
 }
