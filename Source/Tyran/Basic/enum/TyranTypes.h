@@ -9,3 +9,10 @@ enum class EInventorySlot : uint8 {
 	/* Emplacement pour petits items comme lampe de poche */ 
 	Secondary 
 };
+
+enum class EAmmoType : uint8 {
+	AssaultRifle,
+	Shotgun,
+	Pistol,
+	SniperRifle
+};
