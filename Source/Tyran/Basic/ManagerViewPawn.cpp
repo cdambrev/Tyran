@@ -43,10 +43,6 @@ AManagerViewPawn::AManagerViewPawn()
 	RTSCamera->SetupAttachment(RTSCameraSpringArm, USpringArmComponent::SocketName);
 
 	//AutoPossessPlayer = EAutoReceiveInput::Player0;
-	//ConstructorHelpers::FClassFinder<UUserWidget> guardOrderUIHelper(TEXT("/Game/UI/GuardOrder"));
-	//guardUIClass = guardOrderUIHelper.Class;
-	ConstructorHelpers::FClassFinder<UUserWidget> patrolPointsUIHelper(TEXT("/Game/UI/SetPatrouille"));
-	patrolPointsUIClass = patrolPointsUIHelper.Class;
 }
 
 // Called when the game starts or when spawned
@@ -244,12 +240,8 @@ void AManagerViewPawn::fuiteAutoriseCheckedServ_Implementation(AGuardCharacter* 
 
 void AManagerViewPawn::enterSetPatrouilleMode() {
 	currState = PATROLPOINTS;
-	if (patrolPointsWidget != nullptr) {
-		patrolPointsWidget->SetVisibility(ESlateVisibility::Visible);
-	}
-	else {
-		patrolPointsUI();
-	}
+	static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->displayPatrolPointsMode();
+	static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardOrder();
 }
 
 void AManagerViewPawn::enterSetZoneSurveillanceMode() {
@@ -258,12 +250,6 @@ void AManagerViewPawn::enterSetZoneSurveillanceMode() {
 
 void AManagerViewPawn::enterPositionAndDirectionSelectionMode() {
 
-}
-
-void AManagerViewPawn::patrolPointsUI_Implementation() {
-	patrolPointsWidget = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetController()), patrolPointsUIClass);
-	patrolPointsWidget->AddToViewport(9999);
-	patrolPointsWidget->bIsFocusable = true;
 }
 
 void AManagerViewPawn::leftClickAction()
@@ -279,9 +265,13 @@ void AManagerViewPawn::leftClickAction()
 			float mouseScreenX;
 			float mouseScreenY;
 			static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
+			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardOrder();
 			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->displayGuardOrder(FVector2D(mouseScreenX, mouseScreenY));
+			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardInfo();
+			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->displayGuardInfo();
 		} else {
 			currState = NOTHING;
+			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardInfo();
 			focus->Destroy();
 		}
 	}
@@ -291,11 +281,9 @@ void AManagerViewPawn::leftClickAction()
 		FVector mouseDirection;
 		FCollisionQueryParams queryParams{};
 		queryParams.AddIgnoredActor(GetOwner());
-		if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_GameTraceChannel3, queryParams)) {
+		//if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_GameTraceChannel3, queryParams)) {
 			patrolPoints.Add(resultHit.ImpactPoint);
-			// mettre orderpatrolpoints en server truc
-			orderPatrolPoints(focus, patrolPoints);
-		}
+		//}
 	} else if (currState == ORDERMENU) {
 		FHitResult resultHit{};
 		FVector mouseLocation;
@@ -306,7 +294,10 @@ void AManagerViewPawn::leftClickAction()
 			float mouseScreenX;
 			float mouseScreenY;
 			static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
+			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardOrder();
 			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->displayGuardOrder(FVector2D(mouseScreenX, mouseScreenY));
+			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardInfo();
+			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->displayGuardInfo();
 		} else {
 			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardOrder();
 			currState = FOCUSGARDE;
@@ -362,7 +353,7 @@ void AManagerViewPawn::leftClickAction()
 			float mouseScreenY;
 			static_cast<APlayerController*>(GetController())->GetMousePosition(mouseScreenX, mouseScreenY);
 			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->displayGuardOrder(FVector2D(mouseScreenX, mouseScreenY));
-
+			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->displayGuardInfo();
 		}
 	}
 }
@@ -372,18 +363,26 @@ void AManagerViewPawn::RightClickAction()
 	if (currState == BUILDING || currState == PLACINGOBJECT) {
 		currState = NOTHING;
 		currBuild->Destroy();
-	} else if (currState == PATROLPOINTS) {
-		// pas oublier de détruire ce qui a été targeté
-		currState = FOCUSGARDE;
 	}
 	else if (currState == ORDERMENU) {
 		static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardOrder();
+		static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardInfo();
 		currState = NOTHING;
 		focus->Destroy();
 	}
 	else if (currState == FOCUSGARDE) {
 		currState = NOTHING;
+		static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardInfo();
 		focus->Destroy();
+	}
+	else if (currState == PATROLPOINTS) {
+		if (patrolPoints.Num() != 0) {
+			patrolPoints.RemoveAt(patrolPoints.Num() - 1);
+		}
+		else {
+			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removePatrolPointsMode();
+			currState = FOCUSGARDE;
+		}
 	}
 }
 
@@ -426,6 +425,13 @@ void AManagerViewPawn::orderPatrolPoints_Implementation(AActor* garde, const TAr
 
 bool AManagerViewPawn::orderPatrolPoints_Validate(AActor* garde, const TArray<FVector>& patrolPointsPos) {
 	return true;
+}
+
+void AManagerViewPawn::terminatePatrolPoints() {
+	orderPatrolPoints(focus, patrolPoints);
+	static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removePatrolPointsMode();
+	patrolPoints.Empty();
+	currState = FOCUSGARDE;
 }
 
 // Called every frame

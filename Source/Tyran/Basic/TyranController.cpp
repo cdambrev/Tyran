@@ -23,6 +23,7 @@ void ATyranController::initOnTyranClient_Implementation()
 	
 	UUserWidget * managerUI = CreateWidget<UUserWidget>(GetGameInstance(), managerUIClass);
 	managerUI->AddToViewport(9998);
+	SetInputMode(FInputModeGameAndUI());
 }
 
 void ATyranController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

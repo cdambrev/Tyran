@@ -31,8 +31,6 @@ private :
 	bool bActivatePitchYawn;
 	// Focus (par le clic)
 	AActor* focus;
-	TSubclassOf<UUserWidget> patrolPointsUIClass;
-	UUserWidget* patrolPointsWidget;
 	TArray<FVector> patrolPoints;
 
 public:
@@ -116,8 +114,8 @@ protected:
 	UFUNCTION(Reliable, Server, WithValidation)
 	void orderPatrolPoints(AActor* garde, const TArray<FVector>& patrolPoints);
 
-	UFUNCTION(Reliable, Client)
-	void patrolPointsUI();
+	UFUNCTION(BlueprintCallable)
+	void terminatePatrolPoints();
 
 	UFUNCTION(BlueprintCallable)
 	void offensifChecked();

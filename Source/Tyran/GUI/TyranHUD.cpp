@@ -8,10 +8,15 @@
 ATyranHUD::ATyranHUD() {
 	ConstructorHelpers::FClassFinder<UUserWidget> guardOrderUIHelper(TEXT("/Game/UI/GuardOrder"));
 	guardUIClass = guardOrderUIHelper.Class;
+	
+	ConstructorHelpers::FClassFinder<UUserWidget> patrolPointsUIHelper(TEXT("/Game/UI/SetPatrouille"));
+	patrolPointsModeUIClass = patrolPointsUIHelper.Class;
+	
+	ConstructorHelpers::FClassFinder<UUserWidget> guardInfoUIHelper(TEXT("/Game/UI/GuardInfo"));
+	guardInfoUIClass = guardInfoUIHelper.Class;
 }
 
 void ATyranHUD::DrawHUD() {
-	DrawText("COUCOU", FColor::Yellow, 0, 0);
 }
 
 void ATyranHUD::displayGuardOrder(FVector2D position) {
@@ -23,5 +28,27 @@ void ATyranHUD::displayGuardOrder(FVector2D position) {
 }
 
 void ATyranHUD::removeGuardOrder() {
-	guardOrderWidget->RemoveFromViewport();
+	if (guardOrderWidget != nullptr) {
+		guardOrderWidget->RemoveFromViewport();
+	}
+}
+
+void ATyranHUD::displayPatrolPointsMode() {
+	patrolPointsMode = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), patrolPointsModeUIClass);
+	patrolPointsMode->AddToViewport(9999);
+	patrolPointsMode->bIsFocusable = true;
+}
+
+void ATyranHUD::removePatrolPointsMode() {
+	patrolPointsMode->RemoveFromViewport();
+}
+
+void ATyranHUD::displayGuardInfo() {
+	guardInfo = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), guardInfoUIClass);
+	guardInfo->AddToViewport(9999);
+	guardInfo->bIsFocusable = false;
+}
+
+void ATyranHUD::removeGuardInfo() {
+	guardInfo->RemoveFromViewport();
 }
