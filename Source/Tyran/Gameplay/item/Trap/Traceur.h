@@ -16,9 +16,7 @@ class TYRAN_API ATraceur : public ATrap
 {
 	GENERATED_BODY()
 
-private:
-	ATyranCharacter* cible;
-	void TraceurCoolDown();
+
 public:
 	ATraceur();
 
@@ -33,5 +31,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	virtual FString getType() { return "Traceur"; }
-	
+private:
+	void TraceurCoolDown();
 };

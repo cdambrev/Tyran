@@ -27,12 +27,12 @@ void AMine::triggered()
 {
 	bIsTriggered = true;
 	FTimerHandle UnusedHandle;
-	GetWorldTimerManager().SetTimer(UnusedHandle, this, &AMine::triggerDelayed, delayBeforeTrigger, false);
+	GetWorldTimerManager().SetTimer(UnusedHandle, this, &AMine::triggerDelayedImplementation, delayBeforeTrigger, false);
 
 	
 }
  
-void AMine::triggerDelayed()
+void AMine::triggerDelayedImplementation()
 {
 	createExplosion();
 	TArray<AActor*> OverlappingActors;

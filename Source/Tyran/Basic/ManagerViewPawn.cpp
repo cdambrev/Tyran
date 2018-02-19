@@ -374,21 +374,20 @@ void AManagerViewPawn::Tick(float DeltaTime)
 
 			float posX = LocationX / SizeX;
 			float posY = LocationY / SizeY;
+			float edgeLength = 0.005f; // 0.01f = 1% of viewport
 
-			if (posX > 0.95f) {
+			if (posX > 1.0f- edgeLength) {
 				MoveRight(1.0f);
 			}
-			else if (posX < 0.05f) {
+			else if (posX < edgeLength) {
 				MoveRight(-1.0f);
 			}
-			if (posY > 0.95f) {
+			if (posY > 1.0f - edgeLength) {
 				MoveForward(-1.0f);
 			}
-			else if (posY < 0.05f) {
+			else if (posY < edgeLength) {
 				MoveForward(1.0f);
 			}
-
-
 			
 		}
 		

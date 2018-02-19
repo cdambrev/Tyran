@@ -54,7 +54,12 @@ public:
 	/* Munitions */
 	TMap<EAmmoType, int> Ammunition;
 
+	
+	/*Trap status*/
 	bool isTraced;
+	bool isStun;
+
+
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Replicated)
 	bool isVisible;
@@ -256,8 +261,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Tyran")
 	void setVisible(bool b);
 
-	void setTemporarilyVisible(float second);
-	
+
 
 	UFUNCTION(BlueprintCallable, Category="Tyran")
 	void setViewedThisTick();
@@ -268,7 +272,13 @@ public:
 	/* Vérifier si l'emplacement est libre */
 	bool WeaponSlotAvailable(EInventorySlot CheckSlot);
 	void Tick(float DeltaSeconds) override;
+
+	void setTemporarilyVisible(float second);
+
+	void setTemporarilyStun(float second);
 protected:
 	void setTemporarilyVisibleDelayedImplementation();
+
+	void setTemporarilyStunDelayedImplementation();
 };
 

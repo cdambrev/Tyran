@@ -21,15 +21,15 @@ ATraceur::ATraceur() : Super()
 
 void ATraceur::triggered()
 {
-	if (cible && !(cible->isTraced)) {
+	if (trapTarget && !(trapTarget->isTraced)) {
 		bIsTriggered = true;
 		//FTimerHandle UnusedHandle;
 		//FString impactResult = cible->GetName();
 		//UE_LOG(LogTemp, Warning, TEXT("trace touch %s and traceur triggered"), *impactResult);
-		cible->setTemporarilyVisible(visibilityDelay);
+		trapTarget->setTemporarilyVisible(visibilityDelay);
 		FTimerHandle UnusedHandle2;
 		GetWorldTimerManager().SetTimer(UnusedHandle2, this, &ATraceur::TraceurCoolDown, coolDown, false);
-		cible = nullptr;
+		trapTarget = nullptr;
 	}
 }
 
@@ -72,7 +72,7 @@ void ATraceur::Tick(float DeltaTime)
 			//FString impactResult = character->GetName();
 			//UE_LOG(LogTemp, Warning, TEXT("trace touch %s"), *impactResult);
 			if (character->getAlignement() != trapOwner && !bIsTriggered) {
-				cible = character;
+				trapTarget = character;
 				triggered();
 			}
 		}

@@ -13,11 +13,18 @@ UCLASS()
 class TYRAN_API AWolfTrap : public ATrap
 {
 	GENERATED_BODY()
-	
+
 public:
+
 	AWolfTrap();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float stunTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float damage;
 	virtual void triggered() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual FString getType() { return "WolfTrap"; }
-	
+
+protected:
+	virtual void triggerDelayedImplementation();
 };

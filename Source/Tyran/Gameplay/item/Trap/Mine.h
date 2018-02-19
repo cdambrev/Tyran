@@ -19,6 +19,8 @@ public:
 	AMine();
 
 	FPointDamageEvent PointDmg;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float delayBeforeTrigger;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USphereComponent* explosionZone;
@@ -29,6 +31,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual FString getType() { return "Mine"; }
-	
-	virtual void triggerDelayed() override;
+private:
+	void triggerDelayedImplementation() override;
 };

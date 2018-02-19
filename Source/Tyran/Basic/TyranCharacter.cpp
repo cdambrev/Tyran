@@ -69,7 +69,7 @@ ATyranCharacter::ATyranCharacter()
 
 	bWantsToFire = false;
 
-	isTraced = false;
+
 
 	isVisible = false;
 
@@ -89,6 +89,11 @@ ATyranCharacter::ATyranCharacter()
 	Ammunition.Add(EAmmoType::SniperRifle, 0);
 
 	PrimaryActorTick.bCanEverTick = true;
+
+
+	/*Trap*/
+	isTraced = false;
+	isStun = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -576,7 +581,7 @@ void ATyranCharacter::LookUpAtRate(float Rate)
 
 void ATyranCharacter::MoveForward(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f))
+	if ((Controller != NULL) && (Value != 0.0f) && !isStun)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -594,7 +599,7 @@ void ATyranCharacter::MoveForward(float Value)
 
 void ATyranCharacter::MoveRight(float Value)
 {
-	if ( (Controller != NULL) && (Value != 0.0f) )
+	if ( (Controller != NULL) && (Value != 0.0f) && !isStun)
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -781,4 +786,17 @@ void ATyranCharacter::setTemporarilyVisibleDelayedImplementation()
 	isTraced = false;
 	setViewedThisTick();
 	isAlwaysVisible = false;
+}
+
+void ATyranCharacter::setTemporarilyStun(float second)
+{
+	FTimerHandle UnusedHandle;
+	isStun = true;
+	GetWorldTimerManager().SetTimer(UnusedHandle, this, &ATyranCharacter::setTemporarilyStunDelayedImplementation, second, false);
+
+}
+
+void ATyranCharacter::setTemporarilyStunDelayedImplementation()
+{
+	isStun = false;
 }
