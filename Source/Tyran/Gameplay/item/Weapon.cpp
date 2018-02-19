@@ -18,6 +18,7 @@ AWeapon::AWeapon()
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Mesh->SetCollisionResponseToAllChannels(ECR_Ignore);
 	Mesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	Mesh->SetSimulatePhysics(false);
 	RootComponent = Mesh;
 
 	StorageSlot = EInventorySlot::Primary;
@@ -27,6 +28,7 @@ AWeapon::AWeapon()
 
 	// Pour multi-joueurs 
 	bReplicates = true;
+	bReplicateMovement = true;
 	bNetUseOwnerRelevancy = true;
 
 	MuzzleAttachPoint = TEXT("MuzzleFlashSocket");
@@ -252,6 +254,7 @@ void AWeapon::HandleFiring() {
 			// Mettre à jour l'effet sur les objets distants 
 			BurstCounter++; 
 		} 
+		MagazineCurrent--;
 	} 
 	if (MyPawn && MyPawn->IsLocallyControlled()) { 
 		if (Role < ROLE_Authority) { 
@@ -283,7 +286,8 @@ void AWeapon::ServerHandleFiring_Implementation() {
 bool AWeapon::CanFire() const { 
 	bool bPawnCanFire = MyPawn && MyPawn->CanFire(); 
 	bool bStateOK = CurrentState == EWeaponState::Idle || CurrentState == EWeaponState::Firing; 
-	return bPawnCanFire && bStateOK; 
+	bool bNotMagEmpty = MagazineCurrent > 0;
+	return bPawnCanFire && bStateOK && bNotMagEmpty; 
 }
 
 void AWeapon::SimulateWeaponFire() { 
@@ -311,6 +315,11 @@ FVector AWeapon::GetMuzzleLocation() const {
 
 FVector AWeapon::GetMuzzleDirection() const {
 	return Mesh->GetSocketRotation(MuzzleAttachPoint).Vector();
+}
+
+EAmmoType AWeapon::GetAmmoType()
+{
+	return AmmoType;
 }
 
 // Called every frame
@@ -359,6 +368,7 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, MyPawn);
+	DOREPLIFETIME(AWeapon, MagazineCurrent);
 }
 
 void AWeapon::OnRep_MyPawn() {
@@ -368,6 +378,43 @@ void AWeapon::OnRep_MyPawn() {
 	else {
 		OnLeaveInventory();
 	}
+}
+
+void AWeapon::OnReload()
+{
+	if (MyPawn->Ammunition[AmmoType] > 0 && MagazineCurrent < MagazineSize)
+	{
+		bPendingReload = true;
+
+		float Duration = PlayWeaponAnimation(ReloadAnim);
+		if (Duration <= 0.0f) {
+			// Pour ne pas avoir de problème 
+			Duration = 0.5f;
+		}
+		ReloadStartedTime = GetWorld()->TimeSeconds;
+		ReloadDuration = Duration;
+
+		GetWorldTimerManager().SetTimer(ReloadFinishedTimerHandle, this, &AWeapon::OnReloadFinished, Duration, false);
+	}
+}
+
+void AWeapon::OnReloadFinished()
+{
+	bPendingReload = false;
+
+	int NbAmmoToFill = MagazineSize - MagazineCurrent;
+	if (MyPawn->Ammunition[AmmoType] > NbAmmoToFill)
+	{
+		MagazineCurrent = MagazineSize;
+		MyPawn->Ammunition[AmmoType] -= NbAmmoToFill;
+	} 
+	else
+	{
+		MagazineCurrent += MyPawn->Ammunition[AmmoType];
+		MyPawn->Ammunition[AmmoType] = 0;
+	}
+
+	DetermineWeaponState();
 }
 
 void AWeapon::OnRep_BurstCounter() {

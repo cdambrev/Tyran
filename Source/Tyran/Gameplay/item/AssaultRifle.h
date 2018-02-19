@@ -26,6 +26,9 @@ class TYRAN_API AAssaultRifle : public AWeapon
 	
 	UPROPERTY(EditDefaultsOnly) 
 	float WeaponRange; 
+
+	UPROPERTY(EditDefaultsOnly)
+	float Accuracy;
 	
 	/* Verification d'un «hit»: déclencheur pour 
 	le calcul du produit vectoriel entre la 

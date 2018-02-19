@@ -4,7 +4,7 @@
 
 
 AGuardCharacter::AGuardCharacter() {
-	
+	alignement = EAlignement::A_TYRAN;
 }
 
 void AGuardCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

@@ -5,7 +5,9 @@
 #include "Core.h"
 #include "GameFramework/PlayerController.h"
 #include "Net/UnrealNetwork.h"
+#include "CaptureMiniMap.h"
 #include "TyranController.generated.h"
+
 
 
 /**
@@ -17,6 +19,16 @@ class TYRAN_API ATyranController : public APlayerController
 	GENERATED_BODY()
 public:
 	TSubclassOf<UUserWidget> managerUIClass;
+	TSubclassOf<UUserWidget> revolutionnaireUIClass;
+	
+	UPROPERTY()
+	UUserWidget * revUI;
+	
+	UPROPERTY()
+		TSubclassOf<ACaptureMiniMap> defaultCapture;
+
+	UPROPERTY()
+		ACaptureMiniMap * captureMap;
 
 public:
 	ATyranController();
@@ -33,4 +45,8 @@ public:
 	UFUNCTION(Reliable, Client)
 	void initOnTyranClient();
 
+	UFUNCTION(Reliable, Client)
+	void initOnRevolutionnaireClient();
+
+	void updateSelfMap();
 };

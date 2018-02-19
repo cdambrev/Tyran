@@ -15,9 +15,10 @@ class TYRAN_API UBTTaskNodeUtility : public UBTTaskNode
 	GENERATED_BODY()
 public:
 		float GetUtility() const;
-		void CalculUtility();
+		virtual void CalculUtility(UBehaviorTreeComponent & OwnerComp);
+		void clampUtility();
 		bool operator>(const UBTTaskNodeUtility &autre);
-private:
+protected:
 	float utility = 0.0f;
 	
 	

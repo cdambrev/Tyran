@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Basic/TyranCharacter.h"
 #include "Sound/SoundCue.h"
+#include "ParticleDefinitions.h"
 #include "Weapon.generated.h"
 
 UENUM() enum class EWeaponState {
@@ -24,6 +25,10 @@ public:
 	// Sets default values for this actor's properties
 	AWeapon();
 
+	/* Classe a faire apparaître lorsque l'objet est lache */
+	UPROPERTY(EditDefaultsOnly, Category = "Game|Weapon")
+	TSubclassOf<class AWeaponLoot> WeaponLootClass;
+
 protected:
 	/** Le propriétaire */ 
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_MyPawn)
@@ -34,6 +39,8 @@ protected:
 
 	/* Le socket (emplacement) où l'objet sera placé */ 
 	EInventorySlot StorageSlot;
+
+	EAmmoType AmmoType;
 
 	// ******* Équipement 
 	/** Départ de l'équipement */ 
@@ -47,15 +54,29 @@ protected:
 	bool bPendingEquip; 
 	
 	FTimerHandle EquipFinishedTimerHandle;
-	
-	EWeaponState CurrentState;
 		
+	// ******* Rechargement 
+	/** Départ du rechargement */
+	float ReloadStartedTime;
+
+	/** Durée du rechargement */
+	float ReloadDuration;
+
+	bool bPendingReload;
+
+	FTimerHandle ReloadFinishedTimerHandle;
+
+	EWeaponState CurrentState;
+
 	// Animations et son 
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* EquipAnim;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Sounds") 
 	USoundCue* EquipSound;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* ReloadAnim;
 
 	bool bWantsToFire; 
 	bool bRefiring; 
@@ -77,6 +98,11 @@ protected:
 	FName MuzzleAttachPoint; 
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_BurstCounter) 
 	int32 BurstCounter;
+
+	UPROPERTY(EditDefaultsOnly)
+	int MagazineSize;
+	UPROPERTY(Transient, Replicated)
+	int MagazineCurrent;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -146,18 +172,22 @@ public:
 	virtual void StopSimulatingWeaponFire(); 
 	
 	/* Avec PURE_VIRTUAL, nous n'avons pas à implanter la fonction ici, 
-	nous l'implanterons dans les classes dérivées 
-	(dans WeaponInstant.cpp et Flashlight.cpp) */ 
+	nous l'implanterons dans les classes dérivées */ 
 	virtual void FireWeapon() PURE_VIRTUAL(AWeapon::FireWeapon, ); 
 	
 	UFUNCTION(Reliable, Server, WithValidation) 
 	void ServerHandleFiring(); 
+
+	void OnReload();
+	void OnReloadFinished();
 	
 	UFUNCTION() 
 	void OnRep_BurstCounter(); 
 	
 	FVector GetMuzzleLocation() const; 
 	FVector GetMuzzleDirection() const;
+
+	EAmmoType GetAmmoType();
 
 	/** Obtenir le mesh de l'arme */ 
 	UFUNCTION(BlueprintCallable, Category = "Game|Weapon") 
@@ -167,4 +197,9 @@ public:
 
 	UFUNCTION() 
 	void OnRep_MyPawn();
+
+	/* LOOT */
+	/*void OnBeginFocus() override;
+	void OnEndFocus() override;
+	void OnUsed(APawn* InstigatorPawn) override;*/
 };
