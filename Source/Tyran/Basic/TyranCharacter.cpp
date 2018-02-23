@@ -80,7 +80,7 @@ ATyranCharacter::ATyranCharacter()
 	MaxUseDistance = 600;
 	DropItemDistance = 100;
 
-	Ammunition.Add(EAmmoType::AssaultRifle, 120);
+	Ammunition.Add(EAmmoType::AssaultRifle, 1200);
 	Ammunition.Add(EAmmoType::Pistol, 0);
 	Ammunition.Add(EAmmoType::Shotgun, 0);
 	Ammunition.Add(EAmmoType::SniperRifle, 0);
@@ -98,23 +98,23 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATyranCharacter::OnStartJump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ATyranCharacter::OnStopJump);
 
-	InputComponent->BindAction("CrouchToggle", IE_Released, this, &ATyranCharacter::OnCrouchToggle);
+	PlayerInputComponent->BindAction("CrouchToggle", IE_Released, this, &ATyranCharacter::OnCrouchToggle);
 
-	InputComponent->BindAction("Fire", IE_Pressed, this, &ATyranCharacter::OnStartFire);
-	InputComponent->BindAction("Fire", IE_Released, this, &ATyranCharacter::OnStopFire);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ATyranCharacter::OnStartFire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ATyranCharacter::OnStopFire);
 
-	InputComponent->BindAction("Aim", IE_Pressed, this, &ATyranCharacter::OnStartAim);
-	InputComponent->BindAction("Aim", IE_Released, this, &ATyranCharacter::OnStopAim);
+	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ATyranCharacter::OnStartAim);
+	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ATyranCharacter::OnStopAim);
 
-	InputComponent->BindAction("EquipPrimaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipPrimaryWeapon);
-	InputComponent->BindAction("EquipSecondaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipSecondaryWeapon);
+	PlayerInputComponent->BindAction("EquipPrimaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipPrimaryWeapon);
+	PlayerInputComponent->BindAction("EquipSecondaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipSecondaryWeapon);
 
-	InputComponent->BindAction("Use", IE_Pressed, this, &ATyranCharacter::Use);
+	PlayerInputComponent->BindAction("Use", IE_Pressed, this, &ATyranCharacter::Use);
 
-	InputComponent->BindAction("Reload", IE_Pressed, this, &ATyranCharacter::Reload);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ATyranCharacter::OnReload);
 
-	InputComponent->BindAction("NextWeapon", IE_Pressed, this, &ATyranCharacter::OnNextWeapon);
-	InputComponent->BindAction("PrevWeapon", IE_Pressed, this, &ATyranCharacter::OnPrevWeapon);
+	PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, this, &ATyranCharacter::OnNextWeapon);
+	PlayerInputComponent->BindAction("PrevWeapon", IE_Pressed, this, &ATyranCharacter::OnPrevWeapon);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ATyranCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ATyranCharacter::MoveRight);
@@ -320,7 +320,7 @@ void ATyranCharacter::OnNextWeapon()
 	if (Inventory.Num() >= 2) { 
 		const int32 CurrentWeaponIndex = Inventory.IndexOfByKey(CurrentWeapon);
 		AWeapon* NextWeapon = Inventory[(CurrentWeaponIndex + 1) % Inventory.Num()];
-		EquipWeapon(NextWeapon); 
+		EquipWeapon(NextWeapon);
 	}
 }
 
@@ -534,16 +534,16 @@ void ATyranCharacter::Use()
 	}
 }
 
-void ATyranCharacter::Reload()
+void ATyranCharacter::OnReload()
 {
 	if (Ammunition[CurrentWeapon->GetAmmoType()] > 0)
 	{
-		//if (Role == ROLE_Authority) {
+		if (Role == ROLE_Authority) {
 			CurrentWeapon->OnReload();
-		/*}
+		}
 		else {
-			ServerReload();
-		}*/	
+			CurrentWeapon->ServerReload();
+		}
 	}
 }
 
@@ -644,14 +644,6 @@ bool ATyranCharacter::ServerEquipWeapon_Validate(AWeapon* Weapon) {
 
 void ATyranCharacter::ServerEquipWeapon_Implementation(AWeapon* Weapon) { 
 	EquipWeapon(Weapon); 
-}
-
-bool ATyranCharacter::ServerReload_Validate() {
-	return true;
-}
-
-void ATyranCharacter::ServerReload_Implementation() {
-	Reload();
 }
 
 void ATyranCharacter::OnRep_CurrentWeapon(AWeapon* LastWeapon) {
