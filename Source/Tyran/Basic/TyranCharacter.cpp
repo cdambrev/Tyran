@@ -16,6 +16,7 @@
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
 #include <DrawDebugHelpers.h>
 #include "Gameplay/item/WeaponLoot.h"
+#include "TimerManager.h"
 #include "Components/StaticMeshComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -68,6 +69,8 @@ ATyranCharacter::ATyranCharacter()
 
 	bWantsToFire = false;
 
+
+
 	isVisible = false;
 
 	isAlwaysVisible = false;
@@ -86,6 +89,11 @@ ATyranCharacter::ATyranCharacter()
 	Ammunition.Add(EAmmoType::SniperRifle, 0);
 
 	PrimaryActorTick.bCanEverTick = true;
+
+
+	/*Trap*/
+	isTraced = false;
+	isStun = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -573,7 +581,7 @@ void ATyranCharacter::LookUpAtRate(float Rate)
 
 void ATyranCharacter::MoveForward(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f))
+	if ((Controller != NULL) && (Value != 0.0f) && !isStun)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -591,7 +599,7 @@ void ATyranCharacter::MoveForward(float Value)
 
 void ATyranCharacter::MoveRight(float Value)
 {
-	if ( (Controller != NULL) && (Value != 0.0f) )
+	if ( (Controller != NULL) && (Value != 0.0f) && !isStun)
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -684,6 +692,8 @@ void ATyranCharacter::setVisible(bool b) {
 	}
 }
 
+
+
 EAlignement ATyranCharacter::getAlignement() {
 	return alignement;
 }
@@ -701,9 +711,16 @@ bool ATyranCharacter::WeaponSlotAvailable(EInventorySlot CheckSlot)
 	});
 }
 
+
+
 void ATyranCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	ATyranController * controller = Cast<ATyranController>(GetController());
+	if (controller)
+		controller->updateSelfMap();
+
 	if (!isAlwaysVisible) {
 		if (timeSinceLastView < timeBeforeDisapear) {
 			++timeSinceLastView;
@@ -742,4 +759,36 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 			} 
 		}
 	}
+}
+
+void ATyranCharacter::setTemporarilyVisible(float second)
+{
+	if (!isAlwaysVisible)
+	{
+		FTimerHandle UnusedHandle;
+		setVisible(true);
+		isAlwaysVisible = true;
+		isTraced = true;
+		GetWorldTimerManager().SetTimer(UnusedHandle, this, &ATyranCharacter::setTemporarilyVisibleDelayedImplementation, second, false);
+	}
+}
+
+void ATyranCharacter::setTemporarilyVisibleDelayedImplementation()
+{
+	isTraced = false;
+	setViewedThisTick();
+	isAlwaysVisible = false;
+}
+
+void ATyranCharacter::setTemporarilyStun(float second)
+{
+	FTimerHandle UnusedHandle;
+	isStun = true;
+	GetWorldTimerManager().SetTimer(UnusedHandle, this, &ATyranCharacter::setTemporarilyStunDelayedImplementation, second, false);
+
+}
+
+void ATyranCharacter::setTemporarilyStunDelayedImplementation()
+{
+	isStun = false;
 }

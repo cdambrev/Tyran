@@ -12,6 +12,8 @@
 #include "Gameplay/TyranOnly/Placeable_Object/PlaceableObject.h"
 #include "Gameplay/TyranOnly/Placeable_Object/BuildingHint.h"
 #include "Gameplay/TyranOnly/Placeable_Object/BuildingSlot.h"
+#include "GuardCharacter.h"
+#include "AI/AIGuardTargetPoint.h"
 #include "ManagerViewPawn.generated.h"
 
 UCLASS()
@@ -29,14 +31,18 @@ private :
 	bool bActivatePitchYawn;
 	// Focus (par le clic)
 	AActor* focus;
+	TArray<FVector> patrolPoints;
 
 public:
 	enum ManagerState {
 		NOTHING,
 		BUILDING,
 		PLACINGOBJECT,
-		PLACINGTARGETPOINT,
-		FOCUSGARDE
+		FOCUSGARDE,
+		ORDERMENU,
+		PATROLPOINTS,
+		ZONETRACE,
+		VECTORTRACE
 	};
 
 
@@ -108,6 +114,47 @@ protected:
 
 	UFUNCTION(Reliable, Server, WithValidation)
 	void orderPatrolPoints(AActor* garde, const TArray<FVector>& patrolPoints);
+
+	UFUNCTION(BlueprintCallable)
+	void terminatePatrolPoints();
+
+	UFUNCTION(BlueprintCallable)
+	void offensifChecked();
+
+	UFUNCTION(BlueprintCallable)
+	void defensifChecked();
+
+	UFUNCTION(BlueprintCallable)
+	void tenirPositionChecked();
+
+	UFUNCTION(BlueprintCallable)
+	void fuiteAutoriseChecked(bool isChecked);
+	
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable)
+	void offensifCheckedServ(AGuardCharacter* guard);
+
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable)
+	void defensifCheckedServ(AGuardCharacter* guard);
+
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable)
+	void tenirPositionCheckedServ(AGuardCharacter* guard);
+
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable)
+	void fuiteAutoriseCheckedServ(AGuardCharacter* guard, bool isChecked);
+
+	UFUNCTION(BlueprintCallable)
+	void enterSetPatrouilleMode();
+
+	UFUNCTION(BlueprintCallable)
+	void enterSetZoneSurveillanceMode();
+
+	UFUNCTION(BlueprintCallable)
+	void enterPositionAndDirectionSelectionMode();
+
+	bool clickOnGuard(FVector& mouseLocation, FVector& mouseDirection, FHitResult& resultHit);
+
+	UFUNCTION(BlueprintCallable)
+	AActor* getFocus();
 
 public:	
 	// Called every frame

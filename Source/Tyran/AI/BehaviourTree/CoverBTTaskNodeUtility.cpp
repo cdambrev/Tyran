@@ -21,7 +21,8 @@ FString UCoverBTTaskNodeUtility::GetStaticDescription() const
 
 void UCoverBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerComp)
 {
-	utility = 0.5f;
+	utility = 0.0f;
+	clampUtility();
 }
 
 

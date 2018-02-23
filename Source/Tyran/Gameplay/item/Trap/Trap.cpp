@@ -11,7 +11,7 @@ ATrap::ATrap()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	bIsTriggered = false;
-	delayBeforeTrigger = 0.0f;
+	
 	trapOwner = EAlignement::A_TYRAN;
 	
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
@@ -51,6 +51,7 @@ void ATrap::Tick(float DeltaTime)
 			//UE_LOG(LogTemp, Warning,TEXT("%s Alignement %s"),*nom,*f );
 			if (character->getAlignement() != trapOwner && !bIsTriggered)
 			{
+				trapTarget = character;
 				triggered();
 			}
 		}

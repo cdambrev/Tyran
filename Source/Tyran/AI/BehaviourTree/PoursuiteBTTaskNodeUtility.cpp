@@ -1,12 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PoursuiteBTTaskNodeUtility.h"
+#include "AI/AIGuardController.h"
+#include "runtime/AIModule/Classes/BehaviorTree/BlackboardComponent.h" 
+#include "Runtime/AIModule/Classes/BrainComponent.h" 
 
 EBTNodeResult::Type UPoursuiteBTTaskNodeUtility::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Pursue"));
 	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
-	NodeResult = EBTNodeResult::Succeeded;
+	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
+	if (AIGuardController->MoveToEnemy() == EPathFollowingRequestResult::RequestSuccessful)
+		NodeResult = EBTNodeResult::Succeeded;
+	else
+		NodeResult = EBTNodeResult::Failed;
+
 	return NodeResult;
 }
 
@@ -21,7 +29,16 @@ FString UPoursuiteBTTaskNodeUtility::GetStaticDescription() const
 
 void UPoursuiteBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerComp)
 {
-	utility = 0.0f;
+	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
+	AActor* HeroCharacterActor = Cast<AActor>(AIGuardController->GetBlackboardComponent()->GetValueAsObject("TargetActorToFollow"));
+
+	if (HeroCharacterActor)
+		utility = 1.0f - 500/(FVector::Distance(HeroCharacterActor->GetActorLocation(), AIGuardController->GetPawn()->GetActorLocation()));
+	else
+		utility = 0.0f;
+	//1 - distance voulue/ distance a la cible actuelle
+
+	clampUtility();
 }
 
 
