@@ -10,26 +10,34 @@ ACityGenerator::ACityGenerator()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	nbIterationsRoadsGeneration = 50;
+	nbIterationsBigRoadsGeneration = 2;
+	nbIterationsRoadsGeneration = 6;
+	nbIterationsPathsGeneration = 10;
 
 	lastElementId = 0;
-	BigRoadLengthMin = 10000;
+	BigRoadLengthMin = 80000;
 	RoadLengthMin = 10000;
-	PathLengthMin = 6000;
-	BigRoadLengthMax = 50000;
+	PathLengthMin = 3100;
+	BigRoadLengthMax = 120000;
 	RoadLengthMax = 20000;
 	PathLengthMax = 10000;
 
-	BigCrossRoadBigRoadAmountMin = 2;
-	BigCrossRoadBigRoadAmountMax = 4;
+	BigCrossRoadBigRoadAmountMin = 1;
+	BigCrossRoadBigRoadAmountMax = 3;
 	BigCrossRoadRoadAmountMin = 1;
-	BigCrossRoadRoadAmountMax = 2;
+	BigCrossRoadRoadAmountMax = 4;
 	BigCrossRoadPathAmountMin = 0;
 	BigCrossRoadPathAmountMax = 2;
 
-	SquaredMergeCrossroadDistance = 6000*6000;
-	minAngleBetweenRoads = PI / 12;
+	SquaredMergeBigCrossroadDistance = 6000 * 6000;
+	SquaredMergeCrossroadDistance = 6000 * 6000;
+	SquaredMergeCrossPathDistance = 3000 * 3000;
+	minAngleBetweenRoads = PI / 5;
 	numberOfTryOnAngleFail = 50;
+
+	BigCrossroadRadius = 1000.0f;
+	CrossroadRadius = 800.0f;
+	CrossPathRadius = 400.0f;
 }
 
 // Called when the game starts or when spawned
@@ -43,50 +51,49 @@ void ACityGenerator::BeginPlay()
 
 void ACityGenerator::generateRoads() {
 	crossroads.Add(new Crossroad{ 0.0f,0.0f,3 });
-	for (int i = 0; i < nbIterationsRoadsGeneration; ++i) {
-		auto tempCrossroads = crossroads;
+	for (int i = 0; i < nbIterationsBigRoadsGeneration; ++i) {
+		TArray<ACityGenerator::Crossroad *> tempCrossroads{ crossroads };
 		for (auto c : tempCrossroads) {
 			if (c->isSeeding && c->level == 3) {
-				seedFromCrossRoad(c, BigRoadLengthMin, BigRoadLengthMax, BigCrossRoadBigRoadAmountMin, BigCrossRoadBigRoadAmountMax, 3);
+				seedFromCrossRoad(c, BigRoadLengthMin, BigRoadLengthMax, BigCrossRoadBigRoadAmountMin, BigCrossRoadBigRoadAmountMax, 3, SquaredMergeBigCrossroadDistance);
 			}
 		}
 	}
-	splitRoads(3, 2);
+	splitRoads(3, 2, SquaredMergeCrossroadDistance);
 	for (int i = 0; i < nbIterationsRoadsGeneration; ++i) {
-		auto tempCrossroads = crossroads;
+		TArray<ACityGenerator::Crossroad *> tempCrossroads{ crossroads };
 		for (auto c : tempCrossroads) {
 			if (c->isSeeding && c->level == 2) {
-				seedFromCrossRoad(c, RoadLengthMin, RoadLengthMax, BigCrossRoadRoadAmountMin, BigCrossRoadRoadAmountMax, 2);
+				seedFromCrossRoad(c, RoadLengthMin, RoadLengthMax, BigCrossRoadRoadAmountMin, BigCrossRoadRoadAmountMax, 2, SquaredMergeCrossroadDistance);
+			}
+		}
+	}
+	splitRoads(2, 1, SquaredMergeCrossPathDistance);
+	for (int i = 0; i < nbIterationsPathsGeneration; ++i) {
+		TArray<ACityGenerator::Crossroad *> tempCrossroads{ crossroads };
+		for (auto c : tempCrossroads) {
+			if (c->isSeeding && c->level == 1) {
+				seedFromCrossRoad(c, PathLengthMin, PathLengthMax, BigCrossRoadPathAmountMin, BigCrossRoadPathAmountMax, 1, SquaredMergeCrossPathDistance);
 			}
 		}
 	}
 }
 
-void ACityGenerator::seedFromCrossRoad(Crossroad * c, float lengthMin, float lengthMax, int amountMin, int amountMax, int roadLevel) {
+void ACityGenerator::seedFromCrossRoad(Crossroad * c, float lengthMin, float lengthMax, int amountMin, int amountMax, int roadLevel, float squaredMergeDistance) {
 	int nbRoad = FMath::RandRange(amountMin, amountMax);
 	for (int i = 0; i < nbRoad; ++i) {
 		int count = 0;
 		bool done = false;
 		while (count < numberOfTryOnAngleFail && !done) {
-			//LIMITED TO 45
-			float Angles[] = { PI / 4,PI / 2, 3 * PI / 4, PI, -PI / 4, -PI / 2, -3 * PI / 4 };
-			int choice = FMath::RandRange(0, 6);
-			float angle = Angles[choice];
-			//LIMITED to 90
-			/*float Angles[] = {PI / 2, PI, -PI / 2};
+			float Angles[] = {90, 180, 270};
 			int choice = FMath::RandRange(0, 2);
-			float angle = Angles[choice];*/
-			//FREE
-			/*float angle = FMath::RandRange(-PI, PI);*/
-			//END ANGLE
+			float angle = Angles[choice];
 			float roadLength = FMath::RandRange(lengthMin, lengthMax);
-			float cosA = cos(angle);
-			float sinA = sin(angle);
-			float dirX = cosA*c->dirX - sinA*c->dirY;
-			float dirY = sinA*c->dirX + cosA*c->dirY;
-			float crossX = c->posX + roadLength*dirX;
-			float crossY = c->posY + roadLength*dirY;
-			Crossroad * mC = getOverlappingCrossRoad(crossX, crossY);
+			FVector2D dir(c->dirX, c->dirY);
+			auto rDir = dir.GetRotated(angle);
+			float crossX = c->posX + roadLength*rDir.X;
+			float crossY = c->posY + roadLength*rDir.Y;
+			Crossroad * mC = getOverlappingCrossRoad(crossX, crossY, squaredMergeDistance);
 			if (mC) {
 				if (checkExistingRoads(c, mC)) {
 					Road * road = new Road(c, mC, roadLevel);
@@ -100,7 +107,7 @@ void ACityGenerator::seedFromCrossRoad(Crossroad * c, float lengthMin, float len
 				}
 			}
 			else {
-				Crossroad * nC = new Crossroad(crossX, crossY, roadLevel, dirX, dirY);
+				Crossroad * nC = new Crossroad(crossX, crossY, roadLevel, rDir.X, rDir.Y);
 				if (checkExistingRoads(c, nC)) {
 					crossroads.Add(nC);
 					Road * road = new Road(c, nC, roadLevel);
@@ -118,25 +125,27 @@ void ACityGenerator::seedFromCrossRoad(Crossroad * c, float lengthMin, float len
 	c->isSeeding = false;
 }
 
-void ACityGenerator::splitRoads(int roadLevel, int crossroadLevel)
+void ACityGenerator::splitRoads(int roadLevel, int crossroadLevel, float squaredMergeDistance)
 {
-	for (int i = 0; i < 4; ++i) {
+	for (int i = 0; i < 20; ++i) {
 		auto tempRoads = roads;
 		for (Road * r : tempRoads) {
-			if (r->level == roadLevel && FMath::RandBool()) {
+			if (r->level == roadLevel) {
 				float roadSize = sqrt((r->endPoint->posX - r->beginPoint->posX) * (r->endPoint->posX - r->beginPoint->posX) + (r->endPoint->posY - r->beginPoint->posY) * (r->endPoint->posY - r->beginPoint->posY));
-				float crossDist = FMath::RandRange(0.0f, roadSize);
-				FVector2D dir{ r->endPoint->posX - r->beginPoint->posX, r->beginPoint->posY };
+				float crossDist = FMath::RandRange(6000.0f, roadSize - 6000.0f);
+				FVector2D dir{ r->endPoint->posX - r->beginPoint->posX, r->endPoint->posY - r->beginPoint->posY };
 				dir.Normalize();
-				Crossroad * c = new Crossroad(r->beginPoint->posX + crossDist*dir.X, r->beginPoint->posY + crossDist*dir.Y, crossroadLevel, r->beginPoint->dirX, r->beginPoint->dirY);
-				crossroads.Add(c);
-				Road * nR = new Road(c, r->endPoint, roadLevel);
-				roads.Add(nR);
-				r->endPoint->connected.Remove(r);
-				r->endPoint->connected.Add(nR);
-				r->endPoint = c;
-				c->connected.Add(r);
-				c->connected.Add(nR);
+				if (!getOverlappingCrossRoad(r->beginPoint->posX + crossDist*dir.X, r->beginPoint->posY + crossDist*dir.Y, squaredMergeDistance)) {
+					Crossroad * c = new Crossroad(r->beginPoint->posX + crossDist*dir.X, r->beginPoint->posY + crossDist*dir.Y, crossroadLevel, r->beginPoint->dirX, r->beginPoint->dirY);
+					crossroads.Add(c);
+					Road * nR = new Road(c, r->endPoint, roadLevel);
+					roads.Add(nR);
+					r->endPoint->connected.Remove(r);
+					r->endPoint->connected.Add(nR);
+					r->endPoint = c;
+					c->connected.Add(r);
+					c->connected.Add(nR);
+				}
 			}
 		}
 	}
@@ -145,20 +154,54 @@ void ACityGenerator::splitRoads(int roadLevel, int crossroadLevel)
 void ACityGenerator::buildRoads() {
 	for (auto r : roads) {
 		auto road = GetWorld()->SpawnActor<AproceduralRoad>(AproceduralRoad::StaticClass(), GetActorTransform());
+		float bRadius;
+		float eRadius;
+		if (r->beginPoint->level == 3) {
+			bRadius = BigCrossroadRadius;
+		}
+		else if (r->beginPoint->level == 2) {
+			bRadius = CrossroadRadius;
+		}
+		else {
+			bRadius = CrossPathRadius;
+		}
+		if (r->endPoint->level == 3) {
+			eRadius = BigCrossroadRadius;
+		}
+		else if (r->endPoint->level == 2) {
+			eRadius = CrossroadRadius;
+		}
+		else {
+			eRadius = CrossPathRadius;
+		}
 		if (r->level == 3) {
-			road->buildBigRoad(r->beginPoint->posX, r->beginPoint->posY, r->endPoint->posX, r->endPoint->posY);
+			road->buildBigRoad(r->beginPoint->posX, r->beginPoint->posY, r->endPoint->posX, r->endPoint->posY, bRadius, eRadius);
 		}
 		else if (r->level == 2) {
-			road->buildRoad(r->beginPoint->posX, r->beginPoint->posY, r->endPoint->posX, r->endPoint->posY);
+			road->buildRoad(r->beginPoint->posX, r->beginPoint->posY, r->endPoint->posX, r->endPoint->posY, bRadius, eRadius);
 		}
 		else if (r->level == 1) {
-			road->buildPath(r->beginPoint->posX, r->beginPoint->posY, r->endPoint->posX, r->endPoint->posY);
+			road->buildPath(r->beginPoint->posX, r->beginPoint->posY, r->endPoint->posX, r->endPoint->posY, bRadius, eRadius);
 		}
 	}
 }
 
 void ACityGenerator::buildCrossroads()
 {
+	for (auto c : crossroads) {
+		auto cross = GetWorld()->SpawnActor<AproceduralRoad>(AproceduralRoad::StaticClass(), GetActorTransform());
+		float radius;
+		if (c->level == 3) {
+			radius = BigCrossroadRadius;
+		}
+		else if (c->level == 2) {
+			radius = CrossroadRadius;
+		}
+		else {
+			radius = CrossPathRadius;
+		}
+		cross->buildCross(c, radius);
+	}
 }
 
 // Called every frame
@@ -168,10 +211,10 @@ void ACityGenerator::Tick(float DeltaTime)
 
 }
 
-ACityGenerator::Crossroad * ACityGenerator::getOverlappingCrossRoad(float x, float y)
+ACityGenerator::Crossroad * ACityGenerator::getOverlappingCrossRoad(float x, float y, float squaredDistance)
 {
 	for (auto c : crossroads) {
-		if (((c->posX - x) * (c->posX - x) + (c->posY - y) * (c->posY - y)) < SquaredMergeCrossroadDistance) {
+		if (((c->posX - x) * (c->posX - x) + (c->posY - y) * (c->posY - y)) < squaredDistance) {
 			return c;
 		}
 	}
@@ -184,7 +227,13 @@ bool ACityGenerator::checkExistingRoads(ACityGenerator::Crossroad * c1, ACityGen
 	dir.Normalize();
 	float cosMax = cos(minAngleBetweenRoads);
 	for (Road * r : c1->connected) {
-		FVector2D dirRef{ r->endPoint->posX - r->beginPoint->posX, r->endPoint->posY - r->beginPoint->posY };
+		FVector2D dirRef;
+		if (r->beginPoint == c1) {
+			dirRef = FVector2D( r->endPoint->posX - r->beginPoint->posX, r->endPoint->posY - r->beginPoint->posY );
+		}
+		else {
+			dirRef = FVector2D(r->beginPoint->posX - r->endPoint->posX, r->beginPoint->posY - r->endPoint->posY);
+		}
 		dirRef.Normalize();
 		float cosA = FVector2D::DotProduct(dir, dirRef);
 		if (cosA > cosMax) {
@@ -192,7 +241,13 @@ bool ACityGenerator::checkExistingRoads(ACityGenerator::Crossroad * c1, ACityGen
 		}
 	}
 	for (Road * r : c2->connected) {
-		FVector2D dirRef{ r->endPoint->posX - r->beginPoint->posX, r->endPoint->posY - r->beginPoint->posY };
+		FVector2D dirRef;
+		if (r->beginPoint == c2) {
+			dirRef = FVector2D(r->endPoint->posX - r->beginPoint->posX, r->endPoint->posY - r->beginPoint->posY);
+		}
+		else {
+			dirRef = FVector2D(r->beginPoint->posX - r->endPoint->posX, r->beginPoint->posY - r->endPoint->posY);
+		}
 		dirRef.Normalize();
 		float cosA = FVector2D::DotProduct(dir, dirRef);
 		if (cosA < -cosMax) {
@@ -209,7 +264,7 @@ bool ACityGenerator::checkExistingRoads(ACityGenerator::Crossroad * c1, ACityGen
 		if (div) {
 			m = (Ix * c1->posY - Ix * r->beginPoint->posY - Iy * c1->posX + Iy *  r->beginPoint->posX) / div;
 			k = (Jx * c1->posY - Jx * r->beginPoint->posY - Jy * c1->posX + Jy *  r->beginPoint->posX) / div;
-			if ((m > 0.1 && m < 0.9) || (k > 0.1 && k < 0.9)) {
+			if ((m > 0 && m < 1) && (k > 0 && k < 1)) {
 				return false;
 				// position d'intersection : c1 + m * J);
 			}

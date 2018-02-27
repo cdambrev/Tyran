@@ -53,7 +53,11 @@ public:
 	TArray<Road *> roads;
 
 	UPROPERTY(EditAnywhere)
+	int nbIterationsBigRoadsGeneration;
+	UPROPERTY(EditAnywhere)
 	int nbIterationsRoadsGeneration;
+	UPROPERTY(EditAnywhere)
+	int nbIterationsPathsGeneration;
 
 	UPROPERTY(EditAnywhere)
 	float BigRoadLengthMin;
@@ -82,21 +86,32 @@ public:
 	int BigCrossRoadPathAmountMax;
 
 	UPROPERTY(EditAnywhere)
+	float SquaredMergeBigCrossroadDistance;
+	UPROPERTY(EditAnywhere)
 	float SquaredMergeCrossroadDistance;
+	UPROPERTY(EditAnywhere)
+	float SquaredMergeCrossPathDistance;
 	UPROPERTY(EditAnywhere)
 	float minAngleBetweenRoads;
 	UPROPERTY(EditAnywhere)
 	int numberOfTryOnAngleFail;
+
+	UPROPERTY(EditAnywhere)
+	int BigCrossroadRadius;
+	UPROPERTY(EditAnywhere)
+	int CrossroadRadius;
+	UPROPERTY(EditAnywhere)
+	int CrossPathRadius;
 
 protected:
 	virtual void BeginPlay() override;
 	void generateRoads();
 	void buildRoads();
 	void buildCrossroads();
-	Crossroad * getOverlappingCrossRoad(float x, float y);
+	Crossroad * getOverlappingCrossRoad(float x, float y, float squaredDistance);
 	bool checkExistingRoads(Crossroad * c1, Crossroad * c2);
-	void seedFromCrossRoad(Crossroad * c, float lengthMin, float lengthMax, int amountMin, int amountMax, int roadLevel);
-	void splitRoads(int roadLevel, int crossroadLevel);
+	void seedFromCrossRoad(Crossroad * c, float lengthMin, float lengthMax, int amountMin, int amountMax, int roadLevel, float squaredMergeDistance);
+	void splitRoads(int roadLevel, int crossroadLevel, float squaredMergeDistance);
 
 public:	
 	virtual void Tick(float DeltaTime) override;
