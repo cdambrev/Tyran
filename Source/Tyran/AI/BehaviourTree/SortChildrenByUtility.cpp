@@ -11,17 +11,8 @@ USortChildrenByUtility::USortChildrenByUtility()
 
 void USortChildrenByUtility::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory, float DeltaSeconds)
 {
-	SortChildrenByUtility();
-}
+	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-void USortChildrenByUtility::SortChildrenByUtility() {
-	Children->Sort([](const FBTCompositeChild& a, const FBTCompositeChild& b) {
-		return static_cast<UBTTaskNodeUtility *>(a.ChildTask)->GetUtility() > static_cast<UBTTaskNodeUtility *>(b.ChildTask)->GetUtility();
-	});
-
-}
-
-void USortChildrenByUtility::setChildrenArray(TArray<FBTCompositeChild> * c)
-{
-	Children = c;
+	USelectorUtility *selectorUtility = Cast<USelectorUtility>(OwnerComp.GetActiveNode()->GetNextNode());
+	selectorUtility->sortChildren(OwnerComp);
 }

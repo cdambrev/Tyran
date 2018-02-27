@@ -6,15 +6,17 @@
 #include "GameFramework/Character.h"
 #include "Basic/Enum/TyranTypes.h"
 #include "Net/UnrealNetwork.h"
-//#include "Basic/Enum/Alignement.h"
+#include "Basic/Enum/Alignement.h"
 #include "TyranCharacter.generated.h"
 
 
+
+/*
 UENUM(BlueprintType)
 enum class EAlignement : uint8 {
 	A_TYRAN UMETA(DisplayName="Tyran"),
 	A_REVOLUTIONNAIRE UMETA(DisplayName="Revolutionnaire")
-};
+};*/
 
 UCLASS(config=Game)
 class ATyranCharacter : public ACharacter
@@ -67,6 +69,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	bool isDead;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
+	bool isAiming;
+
 protected:
 	/* Point d'attache pour les items en main et actifs */ 
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
@@ -94,6 +99,16 @@ protected:
 	int timeSinceLastView;
 
 	bool bWantsToFire;
+
+	bool bHasNewFocus; // Seulement vrai lors de la première image avec un nouveau focus.
+	class ALoot* FocusedLoot;
+
+	// Distance maximale de focus sur les objets.
+	UPROPERTY(EditDefaultsOnly, Category = "ObjectInteraction") 
+	float MaxUseDistance;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* HitAnim;
 
 protected:
 	/** Resets HMD orientation in VR. */
@@ -130,6 +145,14 @@ protected:
 	// Quand la touche Crouch Toggle est appuyée 
 	void OnCrouchToggle();
 
+	// Quand la touche Aim est appuyée
+	void OnStartAim();
+	void OnStopAim();
+
+	// Quand la touche Use est appuyée 
+	void Use();
+
+
 	// "Et là IL MEUUUUUUUURT !"
 	void OnDeath();
 
@@ -139,6 +162,9 @@ protected:
 
 	// AActor
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+
+	class ALoot* GetLootInView();
 
 public:
 	/** Returns CameraBoom subobject **/
@@ -175,12 +201,34 @@ public:
 	void OnEquipPrimaryWeapon(); 
 	void OnEquipSecondaryWeapon();
 
+
+	void DropWeapon();
+	void RemoveWeapon(class AWeapon* Weapon);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerUse();
+
+	UFUNCTION(Reliable, Server, WithValidation) 
+	void ServerDropWeapon();
+
 	// Invocation d'une RPC serveur pour actualiser l'état de crouching
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerCrouchToggle(bool NewCrouching);
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerOnStartAim();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerOnStopAim();
 	
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerEquipWeapon(AWeapon* Weapon);
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void MulticastPlayAnim(UAnimMontage* Anim);
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void MulticastStopAnim(UAnimMontage* Anim);
 
 	/* La fonction OnRep utilise un paramètre pour la valeur précédente de la variable */ 
 	UFUNCTION()
@@ -199,6 +247,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Tyran")
 	EAlignement getAlignement();
+
+	/* Vérifier si l'emplacement est libre */
+	bool WeaponSlotAvailable(EInventorySlot CheckSlot);
 
 	void Tick(float DeltaSeconds) override;
 };

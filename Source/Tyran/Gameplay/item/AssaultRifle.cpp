@@ -14,8 +14,9 @@ AAssaultRifle::AAssaultRifle()
 	ClientSideHitLeeway = 200.0f;
 	MinimumProjectileSpawnDistance = 800; 
 	TracerRoundInterval = 3;
+	Accuracy = 40.0f;
 
-	StorageSlot = EInventorySlot::Secondary; 
+	StorageSlot = EInventorySlot::Primary; 
 	RifleAttachPoint = TEXT("RifleSocket"); 
 	
 	//GetWeaponMesh()->AddLocalRotation(FRotator(0, 0, -90)); 
@@ -44,6 +45,17 @@ FVector AAssaultRifle::GetAdjustedAim() const
 	} else if (Instigator) { 
 		FinalAim = Instigator->GetBaseAimRotation().Vector(); 
 	} 
+
+	// Dispersion
+	float SpreadFactor = 1.0f/Accuracy;
+	if (MyPawn->isAiming)
+		SpreadFactor /= 4;
+	float x = FMath::RandRange(-SpreadFactor, SpreadFactor);
+	float y = FMath::RandRange(-SpreadFactor, SpreadFactor);
+	float z = FMath::RandRange(-SpreadFactor, SpreadFactor);
+	FVector Spread{x,y,z};
+	FinalAim = FinalAim + Spread;
+	FinalAim.Normalize();
 	
 	return FinalAim;
 }

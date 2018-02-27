@@ -4,16 +4,31 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Gameplay/TyranOnly/Placeable_Object/PlaceableObject.h"
+#include "Basic/Enum/Alignement.h"
+#include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Trap.generated.h"
 
-UCLASS()
-class TYRAN_API ATrap : public AActor
+
+UCLASS(abstract)
+class TYRAN_API ATrap : public APlaceableObject
 {
 	GENERATED_BODY()
 	
-public:	
+protected:
 	// Sets default values for this actor's properties
 	ATrap();
+public:
+
+	EAlignement trapOwner;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* myMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* placementCollision;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* triggerZone;
 
 protected:
 	// Called when the game starts or when spawned
@@ -22,6 +37,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+
+	virtual void triggered() { check(0 && "You must override this"); }
 
 	
 	
