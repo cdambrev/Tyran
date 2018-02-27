@@ -26,6 +26,8 @@ public:
 	UPROPERTY()
 	TSubclassOf<APawn> defaultTyranPawn;
 
+
+
 	ATyranGameMode();
 	
 	virtual void PostLogin(APlayerController* NewPlayer) override;

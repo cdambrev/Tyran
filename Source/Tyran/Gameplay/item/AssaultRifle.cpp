@@ -14,9 +14,12 @@ AAssaultRifle::AAssaultRifle()
 	ClientSideHitLeeway = 200.0f;
 	MinimumProjectileSpawnDistance = 800; 
 	TracerRoundInterval = 3;
-	Accuracy = 40.0f;
+	Accuracy = 20.0f;
+	MagazineSize = 30;
+	MagazineCurrent = 30;
 
 	StorageSlot = EInventorySlot::Primary; 
+	AmmoType = EAmmoType::AssaultRifle;
 	RifleAttachPoint = TEXT("RifleSocket"); 
 	
 	//GetWeaponMesh()->AddLocalRotation(FRotator(0, 0, -90)); 
@@ -24,12 +27,15 @@ AAssaultRifle::AAssaultRifle()
 
 void AAssaultRifle::FireWeapon()
 {
+	UpdateSpreadVector();
 	const FVector AimDir = GetAdjustedAim(); // Obtenir le «ciblage» 
-	const FVector StartPos = GetCameraDamageStartLocation(AimDir); // Position de départ du tir 
+	//const FVector StartPos = GetCameraDamageStartLocation(AimDir); // Position de départ du tir 
+	const FVector StartPos = GetMuzzleLocation();
 	const FVector EndPos = StartPos + (AimDir * WeaponRange); // Position de fin du tir 
 	
 	const FHitResult Impact = WeaponTrace(StartPos, EndPos); // Trouver l'impact 
 	ProcessInstantHit(Impact, StartPos, AimDir); // Traiter l'impact
+	//MagazineCurrent--;
 }
 
 FVector AAssaultRifle::GetAdjustedAim() const
@@ -46,15 +52,7 @@ FVector AAssaultRifle::GetAdjustedAim() const
 		FinalAim = Instigator->GetBaseAimRotation().Vector(); 
 	} 
 
-	// Dispersion
-	float SpreadFactor = 1.0f/Accuracy;
-	if (MyPawn->isAiming)
-		SpreadFactor /= 4;
-	float x = FMath::RandRange(-SpreadFactor, SpreadFactor);
-	float y = FMath::RandRange(-SpreadFactor, SpreadFactor);
-	float z = FMath::RandRange(-SpreadFactor, SpreadFactor);
-	FVector Spread{x,y,z};
-	FinalAim = FinalAim + Spread;
+	FinalAim += SpreadVector;
 	FinalAim.Normalize();
 	
 	return FinalAim;
@@ -94,12 +92,12 @@ void AAssaultRifle::ProcessInstantHit(const FHitResult & Impact, const FVector &
 		// Si nous sommes client et frappons quelque chose contrôlé par le serveur 
 		if (Impact.GetActor() && Impact.GetActor()->GetRemoteRole() == ROLE_Authority) { 
 			// Avertir le serveur de notre frappe pour valider et appliquer le dommage. 
-			ServerNotifyHit(Impact, ShootDir); 
+			ServerNotifyHit(Impact, /*Origin, */ShootDir); 
 		} else if (Impact.GetActor() == nullptr) { 
 			if (Impact.bBlockingHit) { 
-				ServerNotifyHit(Impact, ShootDir); 
+				ServerNotifyHit(Impact, /*Origin, */ShootDir); 
 			} else { 
-				ServerNotifyMiss(ShootDir); 
+				ServerNotifyMiss(/*Origin, */ShootDir); 
 			}
 		}
 	} 
@@ -107,11 +105,11 @@ void AAssaultRifle::ProcessInstantHit(const FHitResult & Impact, const FVector &
 	ProcessInstantHitConfirmed(Impact, Origin, ShootDir);
 }
 
-bool AAssaultRifle::ServerNotifyHit_Validate(const FHitResult Impact, FVector_NetQuantizeNormal ShootDir) {
+bool AAssaultRifle::ServerNotifyHit_Validate(const FHitResult Impact, /*FVector_NetQuantizeNormal Origin, */FVector_NetQuantizeNormal ShootDir) {
 	return true; 
 }
 
-void AAssaultRifle::ServerNotifyHit_Implementation(const FHitResult Impact, FVector_NetQuantizeNormal ShootDir) { 
+void AAssaultRifle::ServerNotifyHit_Implementation(const FHitResult Impact,/* FVector_NetQuantizeNormal Origin,*/ FVector_NetQuantizeNormal ShootDir) {
 	// Si nous avons un instigateur, nous calculons le produit vectoriel entre la vue et le tir. 
 	if (Instigator && (Impact.GetActor() || Impact.bBlockingHit)) {
 		const FVector Origin = GetMuzzleLocation(); 
@@ -148,11 +146,11 @@ void AAssaultRifle::ServerNotifyHit_Implementation(const FHitResult Impact, FVec
 	}
 }
 
-bool AAssaultRifle::ServerNotifyMiss_Validate(FVector_NetQuantizeNormal ShootDir) { 
+bool AAssaultRifle::ServerNotifyMiss_Validate(/*FVector_NetQuantizeNormal Origin, */FVector_NetQuantizeNormal ShootDir) {
 	return true; 
 } 
 
-void AAssaultRifle::ServerNotifyMiss_Implementation(FVector_NetQuantizeNormal ShootDir) {
+void AAssaultRifle::ServerNotifyMiss_Implementation(/*FVector_NetQuantizeNormal Origin, */FVector_NetQuantizeNormal ShootDir) {
 	const FVector Origin = GetMuzzleLocation();
 
 	// Sur les clients distants 
@@ -281,4 +279,17 @@ void AAssaultRifle::OnRep_HitLocation()
 {
 	// À jouer sur tous les clients distants
 	SimulateInstantHit(HitOriginNotify);
+}
+
+void AAssaultRifle::UpdateSpreadVector()
+{
+	// Dispersion
+	float SpreadFactor = 1.0f/Accuracy;
+	if (MyPawn->isAiming)
+		SpreadFactor /= 8;
+
+	float x = FMath::RandRange(-SpreadFactor, SpreadFactor);
+	float y = FMath::RandRange(-SpreadFactor, SpreadFactor);
+	float z = FMath::RandRange(-SpreadFactor, SpreadFactor);
+	SpreadVector = FVector{x,y,z};
 }

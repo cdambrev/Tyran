@@ -11,12 +11,12 @@
 #include "Gameplay/item/Weapon.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
 #include "Basic/TyranController.h"
-//#include "ManagerViewPawn.h"
 #include <EngineUtils.h>
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
 #include <DrawDebugHelpers.h>
 #include "Gameplay/item/WeaponLoot.h"
+#include "TimerManager.h"
 #include "Components/StaticMeshComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -30,6 +30,7 @@ ATyranCharacter::ATyranCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
+	alignement = EAlignement::A_REVOLUTIONNAIRE;
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	//bUseControllerRotationPitch = false;
 	//bUseControllerRotationYaw = false;
@@ -68,6 +69,8 @@ ATyranCharacter::ATyranCharacter()
 
 	bWantsToFire = false;
 
+
+
 	isVisible = false;
 
 	isAlwaysVisible = false;
@@ -77,11 +80,20 @@ ATyranCharacter::ATyranCharacter()
 	Health = 100;
 	isDead = false;
 
-
 	MaxUseDistance = 600;
 	DropItemDistance = 100;
 
+	Ammunition.Add(EAmmoType::AssaultRifle, 1200);
+	Ammunition.Add(EAmmoType::Pistol, 0);
+	Ammunition.Add(EAmmoType::Shotgun, 0);
+	Ammunition.Add(EAmmoType::SniperRifle, 0);
+
 	PrimaryActorTick.bCanEverTick = true;
+
+
+	/*Trap*/
+	isTraced = false;
+	isStun = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -94,22 +106,23 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATyranCharacter::OnStartJump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ATyranCharacter::OnStopJump);
 
-	InputComponent->BindAction("CrouchToggle", IE_Released, this, &ATyranCharacter::OnCrouchToggle);
+	PlayerInputComponent->BindAction("CrouchToggle", IE_Released, this, &ATyranCharacter::OnCrouchToggle);
 
-	InputComponent->BindAction("Fire", IE_Pressed, this, &ATyranCharacter::OnStartFire);
-	InputComponent->BindAction("Fire", IE_Released, this, &ATyranCharacter::OnStopFire);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ATyranCharacter::OnStartFire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ATyranCharacter::OnStopFire);
 
-	InputComponent->BindAction("Aim", IE_Pressed, this, &ATyranCharacter::OnStartAim);
-	InputComponent->BindAction("Aim", IE_Released, this, &ATyranCharacter::OnStopAim);
+	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ATyranCharacter::OnStartAim);
+	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ATyranCharacter::OnStopAim);
 
-	InputComponent->BindAction("EquipPrimaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipPrimaryWeapon);
-	InputComponent->BindAction("EquipSecondaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipSecondaryWeapon);
+	PlayerInputComponent->BindAction("EquipPrimaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipPrimaryWeapon);
+	PlayerInputComponent->BindAction("EquipSecondaryWeapon", IE_Pressed, this, &ATyranCharacter::OnEquipSecondaryWeapon);
 
+	PlayerInputComponent->BindAction("Use", IE_Pressed, this, &ATyranCharacter::Use);
 
-	InputComponent->BindAction("Use", IE_Pressed, this, &ATyranCharacter::Use);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ATyranCharacter::OnReload);
 
-	InputComponent->BindAction("NextWeapon", IE_Pressed, this, &ATyranCharacter::OnNextWeapon);
-	InputComponent->BindAction("PrevWeapon", IE_Pressed, this, &ATyranCharacter::OnPrevWeapon);
+	PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, this, &ATyranCharacter::OnNextWeapon);
+	PlayerInputComponent->BindAction("PrevWeapon", IE_Pressed, this, &ATyranCharacter::OnPrevWeapon);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ATyranCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ATyranCharacter::MoveRight);
@@ -315,7 +328,7 @@ void ATyranCharacter::OnNextWeapon()
 	if (Inventory.Num() >= 2) { 
 		const int32 CurrentWeaponIndex = Inventory.IndexOfByKey(CurrentWeapon);
 		AWeapon* NextWeapon = Inventory[(CurrentWeaponIndex + 1) % Inventory.Num()];
-		EquipWeapon(NextWeapon); 
+		EquipWeapon(NextWeapon);
 	}
 }
 
@@ -529,6 +542,19 @@ void ATyranCharacter::Use()
 	}
 }
 
+void ATyranCharacter::OnReload()
+{
+	if (Ammunition[CurrentWeapon->GetAmmoType()] > 0)
+	{
+		if (Role == ROLE_Authority) {
+			CurrentWeapon->OnReload();
+		}
+		else {
+			CurrentWeapon->ServerReload();
+		}
+	}
+}
+
 void ATyranCharacter::OnDeath()
 {
 	isDead = true;
@@ -555,7 +581,7 @@ void ATyranCharacter::LookUpAtRate(float Rate)
 
 void ATyranCharacter::MoveForward(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f))
+	if ((Controller != NULL) && (Value != 0.0f) && !isStun)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -573,7 +599,7 @@ void ATyranCharacter::MoveForward(float Value)
 
 void ATyranCharacter::MoveRight(float Value)
 {
-	if ( (Controller != NULL) && (Value != 0.0f) )
+	if ( (Controller != NULL) && (Value != 0.0f) && !isStun)
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -666,6 +692,8 @@ void ATyranCharacter::setVisible(bool b) {
 	}
 }
 
+
+
 EAlignement ATyranCharacter::getAlignement() {
 	return alignement;
 }
@@ -683,9 +711,16 @@ bool ATyranCharacter::WeaponSlotAvailable(EInventorySlot CheckSlot)
 	});
 }
 
+
+
 void ATyranCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	ATyranController * controller = Cast<ATyranController>(GetController());
+	if (controller)
+		controller->updateSelfMap();
+
 	if (!isAlwaysVisible) {
 		if (timeSinceLastView < timeBeforeDisapear) {
 			++timeSinceLastView;
@@ -724,4 +759,36 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 			} 
 		}
 	}
+}
+
+void ATyranCharacter::setTemporarilyVisible(float second)
+{
+	if (!isAlwaysVisible)
+	{
+		FTimerHandle UnusedHandle;
+		setVisible(true);
+		isAlwaysVisible = true;
+		isTraced = true;
+		GetWorldTimerManager().SetTimer(UnusedHandle, this, &ATyranCharacter::setTemporarilyVisibleDelayedImplementation, second, false);
+	}
+}
+
+void ATyranCharacter::setTemporarilyVisibleDelayedImplementation()
+{
+	isTraced = false;
+	setViewedThisTick();
+	isAlwaysVisible = false;
+}
+
+void ATyranCharacter::setTemporarilyStun(float second)
+{
+	FTimerHandle UnusedHandle;
+	isStun = true;
+	GetWorldTimerManager().SetTimer(UnusedHandle, this, &ATyranCharacter::setTemporarilyStunDelayedImplementation, second, false);
+
+}
+
+void ATyranCharacter::setTemporarilyStunDelayedImplementation()
+{
+	isStun = false;
 }

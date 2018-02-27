@@ -78,6 +78,13 @@ void AWeapon::OnUnEquip()
 		GetWorldTimerManager().ClearTimer(EquipFinishedTimerHandle);
 	}
 
+	if (bPendingReload) {
+		StopWeaponAnimation(ReloadAnim);
+		bPendingReload = false;
+
+		GetWorldTimerManager().ClearTimer(ReloadFinishedTimerHandle);
+	}
+
 	DetermineWeaponState();
 }
 
@@ -167,9 +174,7 @@ float AWeapon::PlayWeaponAnimation(UAnimMontage* Animation, float InPlayRate /*=
 {
 	float Duration = 0.0f;
 	if (MyPawn) {
-		if (Animation) {
-			Duration = MyPawn->PlayAnimMontage(Animation, InPlayRate, StartSectionName);
-		}
+		Duration = MyPawn->PlayAnimMontage(Animation, InPlayRate, StartSectionName);
 	}
 
 	return Duration;
@@ -254,6 +259,7 @@ void AWeapon::HandleFiring() {
 			// Mettre à jour l'effet sur les objets distants 
 			BurstCounter++; 
 		} 
+		MagazineCurrent--;
 	} 
 	if (MyPawn && MyPawn->IsLocallyControlled()) { 
 		if (Role < ROLE_Authority) { 
@@ -285,7 +291,8 @@ void AWeapon::ServerHandleFiring_Implementation() {
 bool AWeapon::CanFire() const { 
 	bool bPawnCanFire = MyPawn && MyPawn->CanFire(); 
 	bool bStateOK = CurrentState == EWeaponState::Idle || CurrentState == EWeaponState::Firing; 
-	return bPawnCanFire && bStateOK; 
+	bool bNotMagEmpty = MagazineCurrent > 0;
+	return bPawnCanFire && bStateOK && bNotMagEmpty; 
 }
 
 void AWeapon::SimulateWeaponFire() { 
@@ -307,12 +314,17 @@ void AWeapon::StopSimulatingWeaponFire() {
 	}
 }
 
-FVector AWeapon::GetMuzzleLocation() const { 
+FVector AWeapon::GetMuzzleLocation() const {
 	return Mesh->GetSocketLocation(MuzzleAttachPoint); 
 } 
 
 FVector AWeapon::GetMuzzleDirection() const {
 	return Mesh->GetSocketRotation(MuzzleAttachPoint).Vector();
+}
+
+EAmmoType AWeapon::GetAmmoType()
+{
+	return AmmoType;
 }
 
 // Called every frame
@@ -361,6 +373,8 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, MyPawn);
+	DOREPLIFETIME(AWeapon, MagazineCurrent);
+	DOREPLIFETIME(AWeapon, bPendingReload);
 }
 
 void AWeapon::OnRep_MyPawn() {
@@ -372,41 +386,50 @@ void AWeapon::OnRep_MyPawn() {
 	}
 }
 
-//void AWeapon::OnBeginFocus()
-//{
-//	Super::OnBeginFocus();
-//
-//	// Utilisé par notre PostProcess pour le rendu d'un «surlignage»
-//	Mesh->SetRenderCustomDepth(true);
-//}
-//
-//void AWeapon::OnEndFocus()
-//{
-//	Super::OnEndFocus();
-//
-//	Mesh->SetRenderCustomDepth(false);
-//}
-//
-//void AWeapon::OnUsed(APawn* InstigatorPawn)
-//{
-//	Super::OnUsed(InstigatorPawn);
-//
-//	ATyranCharacter* MyPawn = Cast<ATyranCharacter>(InstigatorPawn); 
-//	if (MyPawn) { 
-//		/* CHoisir le bon type d'objet à prendre et ajouter à l'inventaire */ 
-//		if (MyPawn->WeaponSlotAvailable(GetStorageSlot())) {
-//			FActorSpawnParameters SpawnInfo;
-//			SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn; 
-//			AWeapon* NewWeapon = GetWorld()->SpawnActor<AWeapon>(this->GetClass(), SpawnInfo); 
-//			MyPawn->AddWeapon(NewWeapon); 
-//			Destroy(); 
-//		} 
-//		{ 
-//			if (GEngine)
-//				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, "Emplacement d'arme déjà pris!");
-//		} 
-//	}
-//}
+void AWeapon::OnReload()
+{
+	if (MyPawn->Ammunition[AmmoType] > 0 && MagazineCurrent < MagazineSize)
+	{
+		bPendingReload = true;
+
+		float Duration = PlayWeaponAnimation(ReloadAnim);
+		if (Duration <= 0.0f) {
+			// Pour ne pas avoir de problème 
+			Duration = 0.5f;
+		}
+		ReloadStartedTime = GetWorld()->TimeSeconds;
+		ReloadDuration = Duration;
+
+		GetWorldTimerManager().SetTimer(ReloadFinishedTimerHandle, this, &AWeapon::OnReloadFinished, Duration, false);
+	}
+}
+
+bool AWeapon::ServerReload_Validate() {
+	return true;
+}
+
+void AWeapon::ServerReload_Implementation() {
+	OnReload();
+}
+
+void AWeapon::OnReloadFinished()
+{
+	bPendingReload = false;
+
+	int NbAmmoToFill = MagazineSize - MagazineCurrent;
+	if (MyPawn->Ammunition[AmmoType] > NbAmmoToFill)
+	{
+		MagazineCurrent = MagazineSize;
+		MyPawn->Ammunition[AmmoType] -= NbAmmoToFill;
+	} 
+	else
+	{
+		MagazineCurrent += MyPawn->Ammunition[AmmoType];
+		MyPawn->Ammunition[AmmoType] = 0;
+	}
+
+	DetermineWeaponState();
+}
 
 void AWeapon::OnRep_BurstCounter() {
 	if (BurstCounter > 0) { 
@@ -414,4 +437,17 @@ void AWeapon::OnRep_BurstCounter() {
 	} else { 
 		StopSimulatingWeaponFire(); 
 	} 
+}
+
+void AWeapon::OnRep_bPendingReload()
+{
+	if (bPendingReload)
+	{
+		PlayWeaponAnimation(ReloadAnim);
+		//OnReload();
+	}
+	/*else
+	{
+		OnReloadFinished();
+	}*/
 }

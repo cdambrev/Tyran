@@ -19,9 +19,13 @@ class TYRAN_API ATrap : public APlaceableObject
 protected:
 	// Sets default values for this actor's properties
 	ATrap();
+	ATyranCharacter* trapTarget;
 public:
 
 	EAlignement trapOwner;
+	bool bIsTriggered;
+
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* myMesh;
@@ -29,11 +33,17 @@ public:
 	UBoxComponent* placementCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBoxComponent* triggerZone;
+	UPROPERTY(Transient, Replicated, EditAnywhere, BlueprintReadWrite)
+	APawn* PawnOwner;
+
+	
+
+	
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	virtual void triggerDelayedImplementation() {};
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -42,5 +52,10 @@ public:
 	virtual void triggered() { check(0 && "You must override this"); }
 
 	
+	virtual void SetOwningPawn(APawn * NewOwner) ;
+	
+	virtual FString getType() { return "Trap"; }
+	
+
 	
 };

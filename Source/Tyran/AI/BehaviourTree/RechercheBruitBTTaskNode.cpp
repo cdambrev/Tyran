@@ -4,7 +4,7 @@
 
 EBTNodeResult::Type URechercheBruitBTTaskNode::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
-	UE_LOG(LogTemp, Warning, TEXT("SeekSound"));
+	//UE_LOG(LogTemp, Warning, TEXT("SeekSound"));
 	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
 	NodeResult = EBTNodeResult::Failed;
 	return NodeResult;

@@ -23,5 +23,6 @@ FString UFleeBTTaskNodeUtility::GetStaticDescription() const
 void UFleeBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerComp)
 {
 	utility = 0.0f;
+	clampUtility();
 }
 

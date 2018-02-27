@@ -51,6 +51,16 @@ public:
 	UPROPERTY(Transient, Replicated)
 	TArray<class AWeapon*> Inventory;
 
+	/* Munitions */
+	TMap<EAmmoType, int> Ammunition;
+
+	
+	/*Trap status*/
+	bool isTraced;
+	bool isStun;
+
+
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Replicated)
 	bool isVisible;
 
@@ -152,6 +162,8 @@ protected:
 	// Quand la touche Use est appuyée 
 	void Use();
 
+	// Quand la touche Reload est appuyée 
+	void OnReload();
 
 	// "Et là IL MEUUUUUUUURT !"
 	void OnDeath();
@@ -161,12 +173,17 @@ protected:
 	// End of APawn interface
 
 	// AActor
-	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-
+	
 
 	class ALoot* GetLootInView();
 
+
+
 public:
+
+	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
@@ -200,7 +217,6 @@ public:
 
 	void OnEquipPrimaryWeapon(); 
 	void OnEquipSecondaryWeapon();
-
 
 	void DropWeapon();
 	void RemoveWeapon(class AWeapon* Weapon);
@@ -242,6 +258,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Tyran")
 	void setVisible(bool b);
 
+
+
 	UFUNCTION(BlueprintCallable, Category="Tyran")
 	void setViewedThisTick();
 
@@ -250,7 +268,14 @@ public:
 
 	/* Vérifier si l'emplacement est libre */
 	bool WeaponSlotAvailable(EInventorySlot CheckSlot);
-
 	void Tick(float DeltaSeconds) override;
+
+	void setTemporarilyVisible(float second);
+
+	void setTemporarilyStun(float second);
+protected:
+	void setTemporarilyVisibleDelayedImplementation();
+
+	void setTemporarilyStunDelayedImplementation();
 };
 
