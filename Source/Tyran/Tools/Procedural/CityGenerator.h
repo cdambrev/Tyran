@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Gameplay/TyranOnly/Placeable_Object/BuildingSlot.h"
 #include "CityGenerator.generated.h"
 
 UCLASS()
@@ -102,6 +103,29 @@ public:
 	int CrossroadRadius;
 	UPROPERTY(EditAnywhere)
 	int CrossPathRadius;
+
+	UPROPERTY(EditAnywhere)
+	float halfSizeBigRoad;
+	UPROPERTY(EditAnywhere)
+	float halfSizeRoad;
+	UPROPERTY(EditAnywhere)
+	float halfSizePath;
+
+	UPROPERTY(EditAnywhere)
+	float sideSizeBigRoad;
+	UPROPERTY(EditAnywhere)
+	float sideSizeRoad;
+	UPROPERTY(EditAnywhere)
+	float sideSizePath;
+
+	UPROPERTY(EditAnywhere)
+	float sideHeightBigRoad;
+	UPROPERTY(EditAnywhere)
+	float sideHeightRoad;
+	UPROPERTY(EditAnywhere)
+	float sideHeightPath;
+
+	TSubclassOf<ABuildingSlot> buildSlot;
 
 protected:
 	virtual void BeginPlay() override;

@@ -9,16 +9,20 @@ AproceduralRoad::AproceduralRoad()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	roadMesh = CreateDefaultSubobject<UCustomMeshComponent>(TEXT("RoadMesh"));
-	halfSizeBigRoad = 500;
-	halfSizeRoad = 300;
-	halfSizePath = 200;
-	sideHeightBigRoad = 10;
-	sideHeightRoad = 10;
-	sideHeightPath = 10;
-	sideSizeBigRoad = 200;
-	sideSizeRoad = 100;
-	sideSizePath = 100;
+	roadMesh = CreateDefaultSubobject<UProceduralRoadMeshComponent>(TEXT("RoadMesh"));
+}
+
+void AproceduralRoad::initValues(float hSB, float hSR, float hSP, float sSB, float sSR, float sSP, float sHB, float sHR, float sHP)
+{
+	halfSizeBigRoad = hSB;
+	halfSizeRoad = hSR;
+	halfSizePath = hSP;
+	sideHeightBigRoad = sHB;
+	sideHeightRoad = sHR;
+	sideHeightPath = sHP;
+	sideSizeBigRoad = sSB;
+	sideSizeRoad = sSR;
+	sideSizePath = sSP;
 }
 
 void AproceduralRoad::buildBigRoad(float startX, float startY, float endX, float endY, float radBegin, float radEnd)
@@ -168,7 +172,7 @@ void AproceduralRoad::buildCross(ACityGenerator::Crossroad * c, float radius)
 		}
 		
 	}
-	roadMesh->SetCustomMeshTriangles(triangles);
+	roadMesh->setCustomTriangles(triangles);
 	RootComponent = roadMesh;
 }
 
@@ -260,7 +264,7 @@ void AproceduralRoad::buildParametrizedRoad(float startX, float startY, float en
 	triangles.Add(t9);
 	triangles.Add(t10);
 
-	roadMesh->SetCustomMeshTriangles(triangles);
+	roadMesh->setCustomTriangles(triangles);
 	RootComponent = roadMesh;
 }
 

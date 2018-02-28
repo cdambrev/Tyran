@@ -3,6 +3,7 @@
 #include "CityGenerator.h"
 #include "EngineUtils.h"
 #include "proceduralRoad.h"
+#include "UObject/ConstructorHelpers.h"
 
 
 // Sets default values
@@ -38,6 +39,19 @@ ACityGenerator::ACityGenerator()
 	BigCrossroadRadius = 1000.0f;
 	CrossroadRadius = 800.0f;
 	CrossPathRadius = 400.0f;
+
+	halfSizeBigRoad = 500;
+	halfSizeRoad = 300;
+	halfSizePath = 200;
+	sideHeightBigRoad = 10;
+	sideHeightRoad = 10;
+	sideHeightPath = 10;
+	sideSizeBigRoad = 200;
+	sideSizeRoad = 100;
+	sideSizePath = 100;
+
+	static ConstructorHelpers::FClassFinder<ABuildingSlot> buildSlotHelper(TEXT("/Game/Blueprints/BP_BuildingSlot"));
+	buildSlot = buildSlotHelper.Class;
 }
 
 // Called when the game starts or when spawned
@@ -154,6 +168,7 @@ void ACityGenerator::splitRoads(int roadLevel, int crossroadLevel, float squared
 void ACityGenerator::buildRoads() {
 	for (auto r : roads) {
 		auto road = GetWorld()->SpawnActor<AproceduralRoad>(AproceduralRoad::StaticClass(), GetActorTransform());
+		road->initValues(halfSizeBigRoad, halfSizeRoad, halfSizePath, sideSizeBigRoad, sideSizeRoad, sideSizePath, sideHeightBigRoad, sideHeightRoad, sideHeightPath);
 		float bRadius;
 		float eRadius;
 		if (r->beginPoint->level == 3) {
@@ -190,6 +205,7 @@ void ACityGenerator::buildCrossroads()
 {
 	for (auto c : crossroads) {
 		auto cross = GetWorld()->SpawnActor<AproceduralRoad>(AproceduralRoad::StaticClass(), GetActorTransform());
+		cross->initValues(halfSizeBigRoad, halfSizeRoad, halfSizePath, sideSizeBigRoad, sideSizeRoad, sideSizePath, sideHeightBigRoad, sideHeightRoad, sideHeightPath);
 		float radius;
 		if (c->level == 3) {
 			radius = BigCrossroadRadius;

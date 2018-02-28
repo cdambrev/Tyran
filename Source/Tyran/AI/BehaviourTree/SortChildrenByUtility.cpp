@@ -9,6 +9,7 @@ USortChildrenByUtility::USortChildrenByUtility()
 	bCallTickOnSearchStart = true;
 }
 
+
 void USortChildrenByUtility::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);

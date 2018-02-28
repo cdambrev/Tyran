@@ -6,6 +6,7 @@
 #include "CustomMeshComponent.h"
 #include "GameFramework/Actor.h"
 #include "CityGenerator.h"
+#include "ProceduralRoadMeshComponent.h"
 #include "proceduralRoad.generated.h"
 
 UCLASS()
@@ -28,8 +29,9 @@ public:
 
 	// Sets default values for this actor's properties
 	AproceduralRoad();
-	UCustomMeshComponent * roadMesh;
+	UProceduralRoadMeshComponent * roadMesh;
 
+	void initValues(float hSB, float hSR, float hSP, float sSB, float sSR, float sSP, float sHB, float sHR, float sHP);
 	void buildBigRoad(float startX, float startY, float endX, float endY, float radBegin, float radEnd);
 	void buildRoad(float startX, float startY, float endX, float endY, float radBegin, float radEnd);
 	void buildPath(float startX, float startY, float endX, float endY, float radBegin, float radEnd);
