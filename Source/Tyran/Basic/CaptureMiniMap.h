@@ -25,9 +25,7 @@ public:
 	UFUNCTION()
 	void update();
 
-	UTextureRenderTarget2D * GetMiniMapTexture();
-
-
+	TArray<FColor> MapTexData;
 	UTexture2D * tex;
 
 	UFUNCTION()
