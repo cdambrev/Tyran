@@ -18,42 +18,45 @@ ACaptureMiniMap::ACaptureMiniMap() {
 
 	tex = CreateDefaultSubobject<UTexture2D>(TEXT("TextureMap"));
 	tex = UTexture2D::CreateTransient(128,128);
+	
 }
 
 void ACaptureMiniMap::update() {
 	GetCaptureComponent2D()->CaptureScene();
-}
+	
+	auto t = renderTarget->GameThread_GetRenderTargetResource();
+	t->ReadPixels(MapTexData);
+	for (int i = 0; i < MapTexData.Num(); ++i) {
+		FColor c = MapTexData[i];
+		FColor res = FColor(0, 0, 0);
+		float z = c.R / 255.0f + c.G / 65025.0f + c.B / 16581375.0f + c.A / 4228250625.0f;
+		if (z < 0.0158f) {
+			if (z > 0.001)
+				res = FColor(0, 0, 128);
+			else
+				res = FColor(0, 0, 255);
+		}
 
-UTextureRenderTarget2D * ACaptureMiniMap::GetMiniMapTexture()
-{
-	return renderTarget;
+		MapTexData[i] = res;
+
+	}
 }
 
 UTexture2D * ACaptureMiniMap::GetTextureAtLocation(FVector location)
 {
 	int tailleX = tex->GetSizeX();
 	int tailleY = tex->GetSizeY();
-	TArray<FColor> MapTexData;
-	auto t = renderTarget->GameThread_GetRenderTargetResource();
-	t->ReadPixels(MapTexData);
+
 	int texY = (-location.X * 1024.0 / 50000.0) + 512;
 	int texX = (location.Y * 1024.0 / 50000.0) + 512;
 
 	TArray<FColor> MapTexDataResize;
 	for (int y = texY - tailleY / 2; y < texY - tailleY / 2 + tailleY; ++y) {
-		for (int x = texX - tailleX / 2; x < texX - tailleX / 2 + tailleX; ++x) {
-			FColor c = MapTexData[x + y * 1024];
-			FColor res = FColor(0,0,0);
-			float z = c.R / 255.0f + c.G / 65025.0f + c.B / 16581375.0f + c.A / 4228250625.0f;
-			if ( z < 0.0158f) {
-				if (z > 0.001)
-					res = FColor(0, 0, 128);
-				else
-					res = FColor(0, 0, 255);
-			}
-			MapTexDataResize.Add(res);
-			
-		}
+// 		for (int x = texX - tailleX / 2; x < texX - tailleX / 2 + tailleX; ++x) {
+// 			MapTexDataResize.Add(MapTexData[x + y * 1024]);
+// 		}
+		int x = texX - tailleX / 2;
+		MapTexDataResize.Append(&MapTexData[x + y * 1024], tailleY);
 	}
 	FTexture2DMipMap& Mip = tex->PlatformData->Mips[0];
 	void * Data = Mip.BulkData.Lock(LOCK_READ_WRITE);

@@ -15,7 +15,9 @@ EBTNodeResult::Type URoutineBTTaskNode::ExecuteTask(UBehaviorTreeComponent & Own
 
 	//Appeler la fonction UpdateNextTargetPoint qui contient la logique pour selectionner
 	// le prochain TargePoint
-	AIGuardController->UpdateNextTargetPoint();
+	if (FVector::Distance(AIGuardController->GetPawn()->GetActorLocation(), AIGuardController->GetBlackboardComponent()->GetValueAsVector("TargetPointPosition")) < 200.0 ) {
+		AIGuardController->UpdateNextTargetPoint();
+	}
 	AIGuardController->MoveToLocation(AIGuardController->GetBlackboardComponent()->GetValueAsVector("TargetPointPosition"));
 	
 	NodeResult = EBTNodeResult::Succeeded;

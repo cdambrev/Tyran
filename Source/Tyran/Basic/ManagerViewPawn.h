@@ -156,6 +156,10 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	AActor* getFocus();
 
+	void mouseRaycast(FHitResult & hitResult, ECollisionChannel colChannel);
+
+
+	void addPatrolPoint(FVector v);
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

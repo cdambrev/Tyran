@@ -17,6 +17,7 @@
 #include <UserWidget.h>
 #include "GUI/TyranHUD.h"
 #include "Gameplay/item/Trap/Trap.h"
+#include "TyranController.h"
 
 
 /***************/
@@ -277,14 +278,10 @@ void AManagerViewPawn::leftClickAction()
 		}
 	}
 	else if (currState == PATROLPOINTS) {
-		FHitResult resultHit{};
-		FVector mouseLocation;
-		FVector mouseDirection;
-		FCollisionQueryParams queryParams{};
-		queryParams.AddIgnoredActor(GetOwner());
-		//if (GetWorld()->LineTraceSingleByChannel(resultHit, mouseLocation, mouseLocation + 100000 * mouseDirection, ECollisionChannel::ECC_GameTraceChannel3, queryParams)) {
-			patrolPoints.Add(resultHit.ImpactPoint);
-		//}
+		FHitResult hitResult{};
+		mouseRaycast(hitResult, ECollisionChannel::ECC_GameTraceChannel4);
+		patrolPoints.Add(hitResult.ImpactPoint);
+		
 	} else if (currState == ORDERMENU) {
 		FHitResult resultHit{};
 		FVector mouseLocation;
@@ -359,6 +356,19 @@ void AManagerViewPawn::leftClickAction()
 	}
 }
 
+void AManagerViewPawn::mouseRaycast(FHitResult & hitResult, ECollisionChannel colChannel) {
+	FVector mouseLocation;
+	FVector mouseDirection;
+	FCollisionQueryParams queryParams{};
+	queryParams.AddIgnoredActor(GetOwner());
+	if (static_cast<APlayerController *>(GetController())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection)) {
+		GetWorld()->LineTraceSingleByChannel(hitResult, mouseLocation, mouseLocation + 100000 * mouseDirection, colChannel, queryParams);
+	}
+}
+
+
+
+
 void AManagerViewPawn::RightClickAction()
 {
 	if (currState == BUILDING || currState == PLACINGOBJECT) {
@@ -391,6 +401,16 @@ void AManagerViewPawn::callBuildOnSlot_Implementation(ABuildingSlot * slot, TSub
 {
 	if (static_cast<AManagerPlayerState *>(GetController()->PlayerState)->spendMoney(static_cast<ABuilding *>(tBuildClass->ClassDefaultObject)->basePrice)) {
 		slot->build(tBuildClass);
+
+		for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+		{
+			ATyranController * c = Cast<ATyranController>(Iterator->Get());
+			if (c)
+			{
+				if (!c->isTyran)
+					c->setMapUpdateState(true);
+			}
+		}
 	}
 }
 

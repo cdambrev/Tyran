@@ -14,6 +14,9 @@ void USortChildrenByUtility::TickNode(UBehaviorTreeComponent & OwnerComp, uint8 
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-	USelectorUtility *selectorUtility = Cast<USelectorUtility>(OwnerComp.GetActiveNode()->GetNextNode());
-	selectorUtility->sortChildren(OwnerComp);
+	USelectorUtility *selectorUtility = Cast<USelectorUtility>(GetParentNode());
+	if (selectorUtility) {
+		selectorUtility->sortChildren(OwnerComp);
+	}
+	
 }
