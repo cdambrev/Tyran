@@ -7,7 +7,6 @@
 #include "EngineUtils.h"
 #include "Runtime/Engine/Classes/GameFramework/PlayerStart.h"
 #include "ManagerPlayerState.h"
-#include "GUI/TyranHUD.h"
 
 ATyranGameMode::ATyranGameMode()
 {
@@ -34,6 +33,11 @@ ATyranGameMode::ATyranGameMode()
 		defaultTyranPawn = ManagerViewPawnBPClass.Class;
 	}
 	
+	static ConstructorHelpers::FClassFinder<ATyranHUD> HUDTyranBPClass(TEXT("/Game/UI/BP_TyranHUD"));
+	if (HUDTyranBPClass.Class != NULL)
+	{
+		TyranHUD = HUDTyranBPClass.Class;
+	}
 	
 
 	tyranController = nullptr;
@@ -52,7 +56,7 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 			tyranController = player;
 			player->PlayerState = GetWorld()->SpawnActor<AManagerPlayerState>(AManagerPlayerState::StaticClass(), FTransform());
 			player->setTyran(true);
-			player->ClientSetHUD(ATyranHUD::StaticClass());
+			player->ClientSetHUD(TyranHUD);
 			//AManagerViewPawn * tyranPawn = GetWorld()->SpawnActor<AManagerViewPawn>(defaultTyranPawn,FTransform((*spawnPoints)->GetActorLocation()));
 			AManagerViewPawn * tyranPawn = GetWorld()->SpawnActor<AManagerViewPawn>(defaultTyranPawn, FTransform(FVector(-3370.0f, 1090.0f, 1220.0f)));
 			player->Possess(tyranPawn);

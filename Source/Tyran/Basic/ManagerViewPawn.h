@@ -156,6 +156,18 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	AActor* getFocus();
 
+	UFUNCTION(BlueprintCallable)
+	void modificationOffensifCheckedInfo();
+	
+	UFUNCTION(BlueprintCallable)
+	void modificationDefensifCheckedInfo();
+	
+	UFUNCTION(BlueprintCallable)
+	void modificationTenirPosCheckedInfo();
+	
+	UFUNCTION(BlueprintCallable)
+	void modificationFuiteCheckedInfo();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

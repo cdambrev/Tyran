@@ -29,10 +29,6 @@ void ATyranController::initOnTyranClient_Implementation()
 {
 	bShowMouseCursor = true;
 	bEnableClickEvents = true;
-	
-	UUserWidget * managerUI = CreateWidget<UUserWidget>(GetGameInstance(), managerUIClass);
-	managerUI->AddToViewport(9998);
-	SetInputMode(FInputModeGameAndUI());
 }
 
 void ATyranController::initOnRevolutionnaireClient_Implementation()
@@ -70,8 +66,6 @@ void ATyranController::updateSelfMap() {
 
 ATyranController::ATyranController() {
 	isTyran = false;
-	static ConstructorHelpers::FClassFinder<UUserWidget> managerUIHelper(TEXT("/Game/UI/ManagerInterface"));
-	managerUIClass = managerUIHelper.Class;
 
 	static ConstructorHelpers::FClassFinder<UUserWidget> revUIHelper(TEXT("/Game/UI/RevolutionnaireInterface"));
 	revolutionnaireUIClass = revUIHelper.Class;

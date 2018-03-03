@@ -18,7 +18,6 @@ class TYRAN_API ATyranController : public APlayerController
 {
 	GENERATED_BODY()
 public:
-	TSubclassOf<UUserWidget> managerUIClass;
 	TSubclassOf<UUserWidget> revolutionnaireUIClass;
 	
 	UPROPERTY()

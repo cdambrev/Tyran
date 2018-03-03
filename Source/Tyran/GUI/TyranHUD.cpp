@@ -14,41 +14,90 @@ ATyranHUD::ATyranHUD() {
 	
 	ConstructorHelpers::FClassFinder<UUserWidget> guardInfoUIHelper(TEXT("/Game/UI/GuardInfo"));
 	guardInfoUIClass = guardInfoUIHelper.Class;
+	
+	ConstructorHelpers::FClassFinder<UUserWidget> defaultUIHelper(TEXT("/Game/UI/ManagerInterface"));
+	defaultUIClass = defaultUIHelper.Class;
 }
 
 void ATyranHUD::DrawHUD() {
 }
 
-void ATyranHUD::displayGuardOrder(FVector2D position) {
-	guardOrderWidget = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), guardUIClass);
-	guardOrderWidget->AddToViewport(9999);
-	guardOrderWidget->SetPositionInViewport(position);
-	guardOrderWidget->bIsFocusable = true;
+void ATyranHUD::BeginPlay() {
+	Super::BeginPlay();
 	static_cast<APlayerController*>(GetOwningPlayerController())->SetInputMode(FInputModeGameAndUI());
+	
+	// default UI
+	defaultUIWidget = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), defaultUIClass);
+	defaultUIWidget->AddToViewport(9998);
+	
+	// mode placer des points de patrouille
+	patrolPointsMode = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), patrolPointsModeUIClass);
+	patrolPointsMode->SetVisibility(ESlateVisibility::Hidden);
+	patrolPointsMode->AddToViewport(9999);
+	patrolPointsMode->bIsFocusable = true;
+
+	// mode affichage des ordres possibles
+	guardOrderWidget = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), guardUIClass);
+	guardOrderWidget->SetVisibility(ESlateVisibility::Hidden);
+	guardOrderWidget->AddToViewport(9999);
+	guardOrderWidget->bIsFocusable = true;
+
+	// affichage des informations sur le garde
+	//guardInfo = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), guardInfoUIClass);
+	//guardInfo->SetVisibility(ESlateVisibility::Hidden);
+	//guardInfo->AddToViewport(9999);
+	//guardInfo->bIsFocusable = false;
+
+}
+void ATyranHUD::displayGuardOrder(FVector2D position) {
+	guardOrderWidget->SetPositionInViewport(position);
+	guardOrderWidget->SetVisibility(ESlateVisibility::Visible);
+	OnVisibleGuardOrder();
 }
 
 void ATyranHUD::removeGuardOrder() {
-	if (guardOrderWidget != nullptr) {
-		guardOrderWidget->RemoveFromViewport();
-	}
+	guardOrderWidget->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void ATyranHUD::displayPatrolPointsMode() {
-	patrolPointsMode = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), patrolPointsModeUIClass);
-	patrolPointsMode->AddToViewport(9999);
-	patrolPointsMode->bIsFocusable = true;
+	patrolPointsMode->SetVisibility(ESlateVisibility::Visible);
 }
 
 void ATyranHUD::removePatrolPointsMode() {
-	patrolPointsMode->RemoveFromViewport();
+	patrolPointsMode->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void ATyranHUD::displayGuardInfo() {
 	guardInfo = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), guardInfoUIClass);
+	//guardInfo->SetVisibility(ESlateVisibility::Hidden);
 	guardInfo->AddToViewport(9999);
 	guardInfo->bIsFocusable = false;
+	//guardInfo->SetVisibility(ESlateVisibility::Visible);
+	//OnVisibleGuardInfo();
 }
 
 void ATyranHUD::removeGuardInfo() {
 	guardInfo->RemoveFromViewport();
+	//guardInfo->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void ATyranHUD::displayDefaultUI() {
+	defaultUIWidget->SetVisibility(ESlateVisibility::Visible);
+}
+
+void ATyranHUD::removeDefaultUI() {
+	defaultUIWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void ATyranHUD::modificationGuardInfoOffensif() {
+	OnModificationGuardInfoOffensif();
+}
+void ATyranHUD::modificationGuardInfoDefensif() {
+	OnModificationGuardInfoDefensif();
+}
+void ATyranHUD::modificationGuardInfoTenirPos() {
+	OnModificationGuardInfoTenirPos();
+}
+void ATyranHUD::modificationGuardInfoFuite() {
+	OnModificationGuardInfoFuite();
 }
