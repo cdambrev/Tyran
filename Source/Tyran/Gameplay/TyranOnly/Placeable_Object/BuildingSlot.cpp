@@ -21,6 +21,8 @@ void ABuildingSlot::build(TSubclassOf<ABuilding> type)
 		currBuilding->Destroy();
 	}
 	currBuilding = GetWorld()->SpawnActor<ABuilding>(type,GetActorTransform());
+
+
 	//currBuilding->SetActorTransform(GetActorTransform());
 }
 

@@ -163,7 +163,7 @@ protected:
 	void Use();
 
 	// Quand la touche Reload est appuyée 
-	void Reload();
+	void OnReload();
 
 	// "Et là IL MEUUUUUUUURT !"
 	void OnDeath();
@@ -239,9 +239,6 @@ public:
 	
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerEquipWeapon(AWeapon* Weapon);
-
-	UFUNCTION(Reliable, Server, WithValidation)
-	void ServerReload();
 
 	UFUNCTION(Reliable, NetMulticast, WithValidation)
 	void MulticastPlayAnim(UAnimMontage* Anim);

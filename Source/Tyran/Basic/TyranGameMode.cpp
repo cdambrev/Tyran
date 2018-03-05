@@ -72,8 +72,6 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 			//player->ClientSetHUD(RevHUD);
 			ATyranCharacter * revChar = GetWorld()->SpawnActor<ATyranCharacter>(defaultRebelPawn, FTransform((*spawnPoints)->GetActorLocation()));
 			player->Possess(revChar);
-			
-
 		}
 	}
 }

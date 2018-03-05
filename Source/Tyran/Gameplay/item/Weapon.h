@@ -62,6 +62,7 @@ protected:
 	/** Durée du rechargement */
 	float ReloadDuration;
 
+	UPROPERTY(ReplicatedUsing = OnRep_bPendingReload)
 	bool bPendingReload;
 
 	FTimerHandle ReloadFinishedTimerHandle;
@@ -180,9 +181,15 @@ public:
 
 	void OnReload();
 	void OnReloadFinished();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerReload();
 	
 	UFUNCTION() 
 	void OnRep_BurstCounter(); 
+
+	UFUNCTION()
+	void OnRep_bPendingReload();
 	
 	FVector GetMuzzleLocation() const; 
 	FVector GetMuzzleDirection() const;

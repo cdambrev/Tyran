@@ -78,6 +78,13 @@ void AWeapon::OnUnEquip()
 		GetWorldTimerManager().ClearTimer(EquipFinishedTimerHandle);
 	}
 
+	if (bPendingReload) {
+		StopWeaponAnimation(ReloadAnim);
+		bPendingReload = false;
+
+		GetWorldTimerManager().ClearTimer(ReloadFinishedTimerHandle);
+	}
+
 	DetermineWeaponState();
 }
 
@@ -167,9 +174,7 @@ float AWeapon::PlayWeaponAnimation(UAnimMontage* Animation, float InPlayRate /*=
 {
 	float Duration = 0.0f;
 	if (MyPawn) {
-		if (Animation) {
-			Duration = MyPawn->PlayAnimMontage(Animation, InPlayRate, StartSectionName);
-		}
+		Duration = MyPawn->PlayAnimMontage(Animation, InPlayRate, StartSectionName);
 	}
 
 	return Duration;
@@ -309,7 +314,7 @@ void AWeapon::StopSimulatingWeaponFire() {
 	}
 }
 
-FVector AWeapon::GetMuzzleLocation() const { 
+FVector AWeapon::GetMuzzleLocation() const {
 	return Mesh->GetSocketLocation(MuzzleAttachPoint); 
 } 
 
@@ -369,6 +374,7 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 
 	DOREPLIFETIME(AWeapon, MyPawn);
 	DOREPLIFETIME(AWeapon, MagazineCurrent);
+	DOREPLIFETIME(AWeapon, bPendingReload);
 }
 
 void AWeapon::OnRep_MyPawn() {
@@ -398,6 +404,14 @@ void AWeapon::OnReload()
 	}
 }
 
+bool AWeapon::ServerReload_Validate() {
+	return true;
+}
+
+void AWeapon::ServerReload_Implementation() {
+	OnReload();
+}
+
 void AWeapon::OnReloadFinished()
 {
 	bPendingReload = false;
@@ -423,4 +437,17 @@ void AWeapon::OnRep_BurstCounter() {
 	} else { 
 		StopSimulatingWeaponFire(); 
 	} 
+}
+
+void AWeapon::OnRep_bPendingReload()
+{
+	if (bPendingReload)
+	{
+		PlayWeaponAnimation(ReloadAnim);
+		//OnReload();
+	}
+	/*else
+	{
+		OnReloadFinished();
+	}*/
 }

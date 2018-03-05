@@ -37,8 +37,20 @@ void ATyranController::initOnRevolutionnaireClient_Implementation()
 	revUI = CreateWidget<UUserWidget>(GetGameInstance(), revolutionnaireUIClass);
 	revUI->AddToViewport(9999);
 	captureMap = GetWorld()->SpawnActor<ACaptureMiniMap>(defaultCapture);
-	if (captureMap)
-		captureMap->update();
+	updateMap();
+}
+
+void ATyranController::Tick(float DeltaSeconds)
+{
+	if (!isTyran && revUI && captureMap) {
+		if (updateMapNextTick) {
+			updateMap();
+			setMapUpdateState(false);
+		}
+
+		moveMiniMap();
+	}
+	
 }
 
 void ATyranController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -52,16 +64,26 @@ void ATyranController::SetPawn(APawn * InPawn)
 	Super::SetPawn(InPawn);
 }
 
-void ATyranController::updateSelfMap() {
+void ATyranController::updateMap_Implementation() {
 	if (captureMap && revUI) {
 		captureMap->update();
-		UImage * img = Cast<UImage>(revUI->GetWidgetFromName(TEXT("MiniMap")));
-		img->SetBrushFromTexture(captureMap->GetTextureAtLocation(GetPawn()->GetActorLocation()));
 	}
 	
-		
-//	UImage * img = Cast<UImage>(revUI->WidgetTree->FindWidget("MiniMap"));
-//	img->SetBrushFromMaterial(capture->GetMaterialAtLocation(GetPawn()->GetActorLocation()));
+}
+
+void ATyranController::setMapUpdateState_Implementation(bool updateNextTick) {
+	updateMapNextTick = updateNextTick;
+}
+
+void ATyranController::moveMiniMap() {
+	if (captureMap && revUI) {
+		UImage * img = Cast<UImage>(revUI->GetWidgetFromName(TEXT("MiniMap")));
+		if (GetPawn()) {
+			img->SetBrushFromTexture(captureMap->GetTextureAtLocation(GetPawn()->GetActorLocation()));
+		}
+			
+	}
+
 }
 
 ATyranController::ATyranController() {
