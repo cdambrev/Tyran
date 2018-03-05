@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TyranHUD.h"
-#include <Color.h>
 #include <ConstructorHelpers.h>
 
 
@@ -17,9 +16,6 @@ ATyranHUD::ATyranHUD() {
 	
 	ConstructorHelpers::FClassFinder<UUserWidget> defaultUIHelper(TEXT("/Game/UI/ManagerInterface"));
 	defaultUIClass = defaultUIHelper.Class;
-}
-
-void ATyranHUD::DrawHUD() {
 }
 
 void ATyranHUD::BeginPlay() {

@@ -39,6 +39,12 @@ ATyranGameMode::ATyranGameMode()
 		TyranHUD = HUDTyranBPClass.Class;
 	}
 	
+	//static ConstructorHelpers::FClassFinder<ATyranHUD> HUDRevBPClass(TEXT("/Game/UI/BP_RevHUD"));
+	//if (HUDRevBPClass.Class != NULL)
+	//{
+	//	RevHUD = HUDRevBPClass.Class;
+	//}
+
 
 	tyranController = nullptr;
 }
@@ -63,6 +69,7 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 		}
 		else {
 			player->setTyran(false);
+			//player->ClientSetHUD(RevHUD);
 			ATyranCharacter * revChar = GetWorld()->SpawnActor<ATyranCharacter>(defaultRebelPawn, FTransform((*spawnPoints)->GetActorLocation()));
 			player->Possess(revChar);
 			

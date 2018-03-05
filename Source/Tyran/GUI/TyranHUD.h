@@ -42,8 +42,6 @@ public:
 
 	void BeginPlay() override;
 
-	virtual void DrawHUD() override;
-
 	void displayGuardOrder(FVector2D position);
 
 	void removeGuardOrder();
