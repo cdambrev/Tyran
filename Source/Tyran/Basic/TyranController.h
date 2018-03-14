@@ -18,7 +18,6 @@ class TYRAN_API ATyranController : public APlayerController
 {
 	GENERATED_BODY()
 public:
-	TSubclassOf<UUserWidget> managerUIClass;
 	TSubclassOf<UUserWidget> revolutionnaireUIClass;
 	
 	UPROPERTY()
@@ -29,6 +28,9 @@ public:
 
 	UPROPERTY()
 		ACaptureMiniMap * captureMap;
+
+private:
+	bool updateMapNextTick = true;
 
 public:
 	ATyranController();
@@ -48,5 +50,13 @@ public:
 	UFUNCTION(Reliable, Client)
 	void initOnRevolutionnaireClient();
 
-	void updateSelfMap();
+	UFUNCTION(Reliable, Client)
+	void updateMap();
+
+	UFUNCTION(Reliable, Client)
+	void setMapUpdateState(bool updateNextTick);
+
+	void moveMiniMap();
+
+	void Tick(float DeltaSeconds) override;
 };

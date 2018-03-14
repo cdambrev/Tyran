@@ -712,10 +712,6 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	ATyranController * controller = Cast<ATyranController>(GetController());
-	if (controller)
-		controller->updateSelfMap();
-
 	if (!isAlwaysVisible) {
 		if (timeSinceLastView < timeBeforeDisapear) {
 			++timeSinceLastView;
