@@ -92,12 +92,12 @@ void AAssaultRifle::ProcessInstantHit(const FHitResult & Impact, const FVector &
 		// Si nous sommes client et frappons quelque chose contrôlé par le serveur 
 		if (Impact.GetActor() && Impact.GetActor()->GetRemoteRole() == ROLE_Authority) { 
 			// Avertir le serveur de notre frappe pour valider et appliquer le dommage. 
-			ServerNotifyHit(Impact, /*Origin, */ShootDir); 
+			ServerNotifyHit(Impact, ShootDir); 
 		} else if (Impact.GetActor() == nullptr) { 
-			if (Impact.bBlockingHit) { 
-				ServerNotifyHit(Impact, /*Origin, */ShootDir); 
+			if (Impact.bBlockingHit) {
+				ServerNotifyHit(Impact, ShootDir);
 			} else { 
-				ServerNotifyMiss(/*Origin, */ShootDir); 
+				ServerNotifyMiss(ShootDir); 
 			}
 		}
 	} 
@@ -109,7 +109,7 @@ bool AAssaultRifle::ServerNotifyHit_Validate(const FHitResult Impact, /*FVector_
 	return true; 
 }
 
-void AAssaultRifle::ServerNotifyHit_Implementation(const FHitResult Impact,/* FVector_NetQuantizeNormal Origin,*/ FVector_NetQuantizeNormal ShootDir) {
+void AAssaultRifle::ServerNotifyHit_Implementation(const FHitResult Impact, FVector_NetQuantizeNormal ShootDir) {
 	// Si nous avons un instigateur, nous calculons le produit vectoriel entre la vue et le tir. 
 	if (Instigator && (Impact.GetActor() || Impact.bBlockingHit)) {
 		const FVector Origin = GetMuzzleLocation(); 

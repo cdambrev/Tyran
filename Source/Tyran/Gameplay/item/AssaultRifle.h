@@ -17,19 +17,6 @@ class TYRAN_API AAssaultRifle : public AWeapon
 	UPROPERTY(EditDefaultsOnly) 
 	FName RifleAttachPoint;
 
-	// *** Variables pour tir et dommages 
-	UPROPERTY(EditDefaultsOnly) 
-	float HitDamage; 
-	
-	UPROPERTY(EditDefaultsOnly) 
-	TSubclassOf<class UDamageType> DamageType; 
-	
-	UPROPERTY(EditDefaultsOnly) 
-	float WeaponRange; 
-
-	UPROPERTY(EditDefaultsOnly)
-	float Accuracy;
-
 	FVector SpreadVector;
 	
 	/* Verification d'un «hit»: déclencheur pour 
