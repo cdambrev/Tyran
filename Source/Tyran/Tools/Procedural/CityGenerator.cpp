@@ -3,6 +3,7 @@
 #include "CityGenerator.h"
 #include "EngineUtils.h"
 #include "proceduralRoad.h"
+#include "Gameplay/TyranOnly/Placeable_Object/BuildingSlot.h"
 #include "UObject/ConstructorHelpers.h"
 
 
@@ -12,15 +13,15 @@ ACityGenerator::ACityGenerator()
 	PrimaryActorTick.bCanEverTick = false;
 
 	nbIterationsBigRoadsGeneration = 2;
-	nbIterationsRoadsGeneration = 6;
-	nbIterationsPathsGeneration = 10;
+	nbIterationsRoadsGeneration = 2;
+	nbIterationsPathsGeneration = 3;
 
 	lastElementId = 0;
-	BigRoadLengthMin = 80000;
-	RoadLengthMin = 10000;
-	PathLengthMin = 3100;
-	BigRoadLengthMax = 120000;
-	RoadLengthMax = 20000;
+	BigRoadLengthMin = 20000;
+	RoadLengthMin = 12000;
+	PathLengthMin = 4000;
+	BigRoadLengthMax = 40000;
+	RoadLengthMax = 30000;
 	PathLengthMax = 10000;
 
 	BigCrossRoadBigRoadAmountMin = 1;
@@ -30,25 +31,25 @@ ACityGenerator::ACityGenerator()
 	BigCrossRoadPathAmountMin = 0;
 	BigCrossRoadPathAmountMax = 2;
 
-	SquaredMergeBigCrossroadDistance = 6000 * 6000;
-	SquaredMergeCrossroadDistance = 6000 * 6000;
-	SquaredMergeCrossPathDistance = 3000 * 3000;
+	SquaredMergeBigCrossroadDistance = 12000 * 12000;
+	SquaredMergeCrossroadDistance = 11900 * 11900;
+	SquaredMergeCrossPathDistance = 3900 * 3900;
 	minAngleBetweenRoads = PI / 5;
 	numberOfTryOnAngleFail = 50;
 
-	BigCrossroadRadius = 1000.0f;
-	CrossroadRadius = 800.0f;
-	CrossPathRadius = 400.0f;
+	BigCrossroadRadius = 2000.0f;
+	CrossroadRadius = 1600.0f;
+	CrossPathRadius = 800.0f;
 
-	halfSizeBigRoad = 500;
-	halfSizeRoad = 300;
-	halfSizePath = 200;
+	halfSizeBigRoad = 700;
+	halfSizeRoad = 500;
+	halfSizePath = 300;
 	sideHeightBigRoad = 10;
 	sideHeightRoad = 10;
 	sideHeightPath = 10;
-	sideSizeBigRoad = 200;
-	sideSizeRoad = 100;
-	sideSizePath = 100;
+	sideSizeBigRoad = 400;
+	sideSizeRoad = 300;
+	sideSizePath = 200;
 
 	static ConstructorHelpers::FClassFinder<ABuildingSlot> buildSlotHelper(TEXT("/Game/Blueprints/BP_BuildingSlot"));
 	buildSlot = buildSlotHelper.Class;
@@ -59,6 +60,7 @@ void ACityGenerator::BeginPlay()
 {
 	Super::BeginPlay();
 	generateRoads();
+	placeBuildingSlots();
 	buildRoads();
 	buildCrossroads();
 }
@@ -100,7 +102,7 @@ void ACityGenerator::seedFromCrossRoad(Crossroad * c, float lengthMin, float len
 		bool done = false;
 		while (count < numberOfTryOnAngleFail && !done) {
 			float Angles[] = {90, 180, 270};
-			int choice = FMath::RandRange(0, 2);
+			int choice = FMath::RandRange(0, 3);
 			float angle = Angles[choice];
 			float roadLength = FMath::RandRange(lengthMin, lengthMax);
 			FVector2D dir(c->dirX, c->dirY);
@@ -160,6 +162,101 @@ void ACityGenerator::splitRoads(int roadLevel, int crossroadLevel, float squared
 					c->connected.Add(r);
 					c->connected.Add(nR);
 				}
+			}
+		}
+	}
+}
+
+bool ACityGenerator::pointIsLeftOf(FVector2D p1, FVector2D p2, FVector2D p)
+{
+	float a = (-(p2.Y - p1.Y));
+	float b = (p2.X - p1.X);
+	return (a * p.X + b * p.Y + (-(a*p1.X + b*p1.Y)) >= 0);
+}
+
+bool ACityGenerator::pointIsInRectangle(FVector2D p, Rectangle rec)
+{
+	return pointIsLeftOf(rec.p1, rec.p2, p) && pointIsLeftOf(rec.p2, rec.p3, p) && pointIsLeftOf(rec.p3, rec.p4, p) && pointIsLeftOf(rec.p4, rec.p1, p);
+}
+
+bool ACityGenerator::rectanglesOverlap(Rectangle r1, Rectangle r2)
+{
+	return pointIsInRectangle(r1.p1, r2) ||
+		pointIsInRectangle(r1.p2, r2) ||
+		pointIsInRectangle(r1.p3, r2) ||
+		pointIsInRectangle(r1.p4, r2) ||
+		pointIsInRectangle(r2.p1, r1) ||
+		pointIsInRectangle(r2.p2, r1) ||
+		pointIsInRectangle(r2.p3, r1) ||
+		pointIsInRectangle(r2.p4, r1);
+}
+
+void ACityGenerator::placeBuildingSlots()
+{
+	for (Road * r : roads) {
+		float halfSize;
+		float sideHeight;
+		float sideSize;
+		if (r->level == 3) {
+			halfSize = halfSizeBigRoad;
+			sideHeight = sideHeightBigRoad;
+			sideSize = sideSizeBigRoad;
+		}
+		else if (r->level == 2) {
+			halfSize = halfSizeRoad;
+			sideHeight = sideHeightRoad;
+			sideSize = sideSizeRoad;
+		}
+		else {
+			halfSize = halfSizePath;
+			sideHeight = sideHeightPath;
+			sideSize = sideSizePath;
+		}
+		FVector dir{ r->endPoint->posX - r->beginPoint->posX, r->endPoint->posY - r->beginPoint->posY, 0 };
+		float length = dir.Size();
+		dir.Normalize();
+		FVector right = dir.RotateAngleAxis(90, FVector{ 0.0f,0.0f,1.0f });
+		FVector basePos{ r->beginPoint->posX, r->beginPoint->posY, GetActorTransform().GetLocation().Z + sideHeight };
+		FRotator rot = right.Rotation();
+		float relativePos = 1000;
+		while (relativePos < length - 1000) {
+			FVector pos = basePos + relativePos * dir + (halfSize + sideSize + 1000) * right;
+			Rectangle nBR{ (pos + 1000 * dir - 1000 * right), (pos - 1000 * dir - 1000 * right), (pos - 1000 * dir + 1000 * right), (pos + 1000 * dir + 1000 * right) };
+			FTransform trans{ rot,pos,FVector{1,1,1} };
+			bool ok = true;
+			for (TTuple<ABuildingSlot *,Rectangle> bs : slots) {
+				if (rectanglesOverlap(bs.Value, nBR)) {
+					ok = false;
+				}
+			}
+			if (ok) {
+				auto build = GetWorld()->SpawnActor<ABuildingSlot>(buildSlot, trans);
+				slots.Add(TTuple<ABuildingSlot *, Rectangle>{build, nBR});
+				relativePos += 2000;
+			}
+			else {
+				relativePos += 100;
+			}
+		}
+		rot = (-right).Rotation();
+		relativePos = 1000;
+		while (relativePos < length - 1000) {
+			FVector pos = basePos + relativePos * dir - (halfSize + sideSize + 1000) * right;
+			Rectangle nBR{ (pos + 1000 * dir - 1000 * right), (pos - 1000 * dir - 1000 * right), (pos - 1000 * dir + 1000 * right), (pos + 1000 * dir + 1000 * right) };
+			FTransform trans{ rot,pos,FVector{1,1,1} };
+			bool ok = true;
+			for (TTuple<ABuildingSlot *, Rectangle> bs : slots) {
+				if (rectanglesOverlap(bs.Value, nBR)) {
+					ok = false;
+				}
+			}
+			if (ok) {
+				auto build = GetWorld()->SpawnActor<ABuildingSlot>(buildSlot, trans);
+				slots.Add(TTuple<ABuildingSlot *, Rectangle>{build, nBR});
+				relativePos += 2000;
+			}
+			else {
+				relativePos += 100;
 			}
 		}
 	}
