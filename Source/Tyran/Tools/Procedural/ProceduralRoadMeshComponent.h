@@ -21,20 +21,11 @@ public:
 	UProceduralRoadMeshComponent();
 
 	class UBodySetup* ModelBodySetup;
-	/**	 Interface for retrieving triangle mesh collision data from the implementing object
-	*
-	* @param CollisionData - structure given by the caller to be filled with tri mesh collision data
-	* @return true if successful, false if unable to successfully fill in data structure
-	*/
+
 	virtual bool GetPhysicsTriMeshData(struct FTriMeshCollisionData* CollisionData, bool InUseAllTriData) override;
 
-	/**	 Interface for checking if the implementing objects contains triangle mesh collision data
-	*
-	* @return true if the implementing object contains triangle mesh data, false otherwise
-	*/
 	virtual bool ContainsPhysicsTriMeshData(bool InUseAllTriData) const override;
 
-	/** Do we want to create a negative version of this mesh */
 	virtual bool WantsNegXTriMesh() override { return false; };
 
 	void setCustomTriangles(TArray<FCustomMeshTriangle> triangles);
