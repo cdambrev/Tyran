@@ -16,8 +16,8 @@ AAssaultRifle::AAssaultRifle()
 	MinimumProjectileSpawnDistance = 800; 
 	TracerRoundInterval = 3;
 	Accuracy = 20.0f;
-	MagazineSize = 3000;
-	MagazineCurrent = 3000;
+	MagazineSize = 30;
+	MagazineCurrent = 30;
 
 	StorageSlot = EInventorySlot::Primary; 
 	AmmoType = EAmmoType::AssaultRifle;
@@ -205,13 +205,11 @@ void AAssaultRifle::DealDamage(const FHitResult & Impact, const FVector & ShootD
 
 void AAssaultRifle::SimulateInstantHit(const FVector & Origin)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Entre dans SimulateInstantHit"));
 	const FVector StartTrace = Origin; 
 	const FVector AimDir = GetAdjustedAim(); 
 	const FVector EndTrace = StartTrace + (AimDir * WeaponRange); 
 	const FHitResult Impact = WeaponTrace(StartTrace, EndTrace); 
 	if (Impact.bBlockingHit) { 
-		UE_LOG(LogTemp, Warning, TEXT("Spawn les effets"));
 		SpawnImpactEffectsMulticast(Impact);
 		SpawnTrailEffectsMulticast(Impact.ImpactPoint);
 	} else { 
@@ -298,7 +296,6 @@ void AAssaultRifle::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 void AAssaultRifle::OnRep_HitLocation()
 {
 	// À jouer sur tous les clients distants
-	UE_LOG(LogTemp, Warning, TEXT("On rep Hit location"));
 	SimulateInstantHit(HitOriginNotify);
 }
 

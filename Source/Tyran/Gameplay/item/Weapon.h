@@ -223,8 +223,5 @@ public:
 	UFUNCTION() 
 	void OnRep_MyPawn();
 
-	/* LOOT */
-	/*void OnBeginFocus() override;
-	void OnEndFocus() override;
-	void OnUsed(APawn* InstigatorPawn) override;*/
+	int getMagCurrent();
 };

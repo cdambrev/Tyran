@@ -795,6 +795,11 @@ void ATyranCharacter::setTemporarilyStun(float second)
 
 }
 
+int ATyranCharacter::getMagCurrent()
+{
+	return CurrentWeapon->getMagCurrent();
+}
+
 void ATyranCharacter::setTemporarilyStunDelayedImplementation()
 {
 	isStun = false;

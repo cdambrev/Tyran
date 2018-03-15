@@ -265,7 +265,11 @@ void AWeapon::HandleFiring() {
 			BurstCounter++; 
 		} 
 		MagazineCurrent--;
-	} 
+	}
+	else if (MagazineCurrent == 0)
+	{
+		OnReload();
+	}
 	if (MyPawn && MyPawn->IsLocallyControlled()) { 
 		if (Role < ROLE_Authority) { 
 			ServerHandleFiring(); 
@@ -408,9 +412,14 @@ void AWeapon::OnRep_MyPawn() {
 	}
 }
 
+int AWeapon::getMagCurrent()
+{
+	return MagazineCurrent;
+}
+
 void AWeapon::OnReload()
 {
-	if (MyPawn->Ammunition[AmmoType] > 0 && MagazineCurrent < MagazineSize)
+	if (MyPawn->Ammunition[AmmoType] > 0 && MagazineCurrent < MagazineSize && !bPendingReload)
 	{
 		bPendingReload = true;
 
