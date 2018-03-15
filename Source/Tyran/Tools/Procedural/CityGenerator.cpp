@@ -101,7 +101,7 @@ void ACityGenerator::seedFromCrossRoad(Crossroad * c, float lengthMin, float len
 		int count = 0;
 		bool done = false;
 		while (count < numberOfTryOnAngleFail && !done) {
-			float Angles[] = {90, 180, 270};
+			float Angles[] = { 90, 180, 270 };
 			int choice = FMath::RandRange(0, 3);
 			float angle = Angles[choice];
 			float roadLength = FMath::RandRange(lengthMin, lengthMax);
@@ -169,26 +169,45 @@ void ACityGenerator::splitRoads(int roadLevel, int crossroadLevel, float squared
 
 bool ACityGenerator::pointIsLeftOf(FVector2D p1, FVector2D p2, FVector2D p)
 {
-	float a = (-(p2.Y - p1.Y));
+	/*float a = (-(p2.Y - p1.Y));
 	float b = (p2.X - p1.X);
-	return (a * p.X + b * p.Y + (-(a*p1.X + b*p1.Y)) >= 0);
+	return (a * p.X + b * p.Y + (-(a*p1.X + b*p1.Y)) >= 0);*/
+	return FVector2D::CrossProduct(p2 - p1,p - p1) >= 0;
 }
 
-bool ACityGenerator::pointIsInRectangle(FVector2D p, Rectangle rec)
+bool ACityGenerator::checkSeparationLine(Rectangle r1, Rectangle r2, FVector2D bEdge, FVector2D eEdge)
 {
-	return pointIsLeftOf(rec.p1, rec.p2, p) && pointIsLeftOf(rec.p2, rec.p3, p) && pointIsLeftOf(rec.p3, rec.p4, p) && pointIsLeftOf(rec.p4, rec.p1, p);
+	bool val = pointIsLeftOf(bEdge, eEdge, r1.p1);
+	return pointIsLeftOf(bEdge, eEdge, r1.p2) == val && pointIsLeftOf(bEdge, eEdge, r1.p3) == val && pointIsLeftOf(bEdge, eEdge, r1.p4) == val
+		&& pointIsLeftOf(bEdge, eEdge, r2.p1) != val
+		&& pointIsLeftOf(bEdge, eEdge, r2.p2) != val
+		&& pointIsLeftOf(bEdge, eEdge, r2.p3) != val
+		&& pointIsLeftOf(bEdge, eEdge, r2.p4) != val;
 }
+
+/*bool ACityGenerator::pointIsInRectangle(FVector2D p, Rectangle rec)
+{
+	return pointIsLeftOf(rec.p2, rec.p1, p) && pointIsLeftOf(rec.p3, rec.p2, p) && pointIsLeftOf(rec.p4, rec.p3, p) && pointIsLeftOf(rec.p1, rec.p4, p);
+}*/
 
 bool ACityGenerator::rectanglesOverlap(Rectangle r1, Rectangle r2)
 {
-	return pointIsInRectangle(r1.p1, r2) ||
-		pointIsInRectangle(r1.p2, r2) ||
-		pointIsInRectangle(r1.p3, r2) ||
-		pointIsInRectangle(r1.p4, r2) ||
-		pointIsInRectangle(r2.p1, r1) ||
-		pointIsInRectangle(r2.p2, r1) ||
-		pointIsInRectangle(r2.p3, r1) ||
-		pointIsInRectangle(r2.p4, r1);
+	/*	return pointIsInRectangle(r1.p1, r2) ||
+			pointIsInRectangle(r1.p2, r2) ||
+			pointIsInRectangle(r1.p3, r2) ||
+			pointIsInRectangle(r1.p4, r2) ||
+			pointIsInRectangle(r2.p1, r1) ||
+			pointIsInRectangle(r2.p2, r1) ||
+			pointIsInRectangle(r2.p3, r1) ||
+			pointIsInRectangle(r2.p4, r1);*/
+	return checkSeparationLine(r1, r2, r1.p1, r1.p2) ||
+		checkSeparationLine(r1, r2, r1.p2, r1.p3) ||
+		checkSeparationLine(r1, r2, r1.p3, r1.p4) ||
+		checkSeparationLine(r1, r2, r1.p4, r1.p1) ||
+		checkSeparationLine(r1, r2, r2.p1, r2.p2) ||
+		checkSeparationLine(r1, r2, r2.p2, r2.p3) ||
+		checkSeparationLine(r1, r2, r2.p3, r2.p4) ||
+		checkSeparationLine(r1, r2, r2.p4, r2.p1);
 }
 
 void ACityGenerator::placeBuildingSlots()
@@ -221,12 +240,43 @@ void ACityGenerator::placeBuildingSlots()
 		float relativePos = 1000;
 		while (relativePos < length - 1000) {
 			FVector pos = basePos + relativePos * dir + (halfSize + sideSize + 1000) * right;
-			Rectangle nBR{ (pos + 1000 * dir - 1000 * right), (pos - 1000 * dir - 1000 * right), (pos - 1000 * dir + 1000 * right), (pos + 1000 * dir + 1000 * right) };
+			Rectangle nBR{ (pos + 999 * dir - 999 * right), (pos - 999 * dir - 999 * right), (pos - 999 * dir + 999 * right), (pos + 999 * dir + 999 * right) };
 			FTransform trans{ rot,pos,FVector{1,1,1} };
 			bool ok = true;
 			for (TTuple<ABuildingSlot *,Rectangle> bs : slots) {
 				if (rectanglesOverlap(bs.Value, nBR)) {
 					ok = false;
+				}
+			}
+			if (ok) {
+				for (Road * r2 : roads) {
+					float halfSize2;
+					float sideHeight2;
+					float sideSize2;
+					if (r2->level == 3) {
+						halfSize2 = halfSizeBigRoad-1;
+						sideHeight2 = sideHeightBigRoad-1;
+						sideSize2 = sideSizeBigRoad-1;
+					}
+					else if (r2->level == 2) {
+						halfSize2 = halfSizeRoad-1;
+						sideHeight2 = sideHeightRoad-1;
+						sideSize2 = sideSizeRoad-1;
+					}
+					else {
+						halfSize2 = halfSizePath-1;
+						sideHeight2 = sideHeightPath-1;
+						sideSize2 = sideSizePath-1;
+					}
+					FVector dir2{ r2->endPoint->posX - r2->beginPoint->posX, r2->endPoint->posY - r2->beginPoint->posY, 0 };
+					dir2.Normalize();
+					FVector right2 = dir2.RotateAngleAxis(90, FVector{ 0.0f,0.0f,1.0f });
+					FVector begPoint{ r2->beginPoint->posX, r2->beginPoint->posY, 0.0f };
+					FVector endPoint{ r2->endPoint->posX, r2->endPoint->posY, 0.0f };
+					Rectangle roadRec{endPoint + right*(halfSize2 + sideSize2),endPoint - right*(halfSize2 + sideSize2), begPoint - right*(halfSize2 + sideSize2), begPoint + right * (halfSize2 + sideSize2) };
+					if (rectanglesOverlap(roadRec, nBR)) {
+						ok = false;
+					}
 				}
 			}
 			if (ok) {

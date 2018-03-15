@@ -155,7 +155,7 @@ protected:
 	void seedFromCrossRoad(Crossroad * c, float lengthMin, float lengthMax, int amountMin, int amountMax, int roadLevel, float squaredMergeDistance);
 	void splitRoads(int roadLevel, int crossroadLevel, float squaredMergeDistance);
 	bool pointIsLeftOf(FVector2D p1, FVector2D p2, FVector2D p);
-	bool pointIsInRectangle(FVector2D p, Rectangle rec);
+	bool checkSeparationLine(Rectangle r1, Rectangle R2, FVector2D begin, FVector2D end);
 	bool rectanglesOverlap(Rectangle r1, Rectangle r2);
 	void placeBuildingSlots();
 
