@@ -16,8 +16,8 @@ AAssaultRifle::AAssaultRifle()
 	MinimumProjectileSpawnDistance = 800; 
 	TracerRoundInterval = 3;
 	Accuracy = 20.0f;
-	MagazineSize = 30;
-	MagazineCurrent = 30;
+	MagazineSize = 3000;
+	MagazineCurrent = 3000;
 
 	StorageSlot = EInventorySlot::Primary; 
 	AmmoType = EAmmoType::AssaultRifle;
@@ -155,11 +155,11 @@ void AAssaultRifle::ServerNotifyMiss_Implementation(/*FVector_NetQuantizeNormal 
 	const FVector Origin = GetMuzzleLocation();
 
 	// Sur les clients distants 
-	HitOriginNotify = Origin; 
+	//HitOriginNotify = Origin; 
 	const FVector EndTrace = Origin + (ShootDir * WeaponRange); 
 
 	if (GetNetMode() != NM_DedicatedServer) { 
-		SpawnTrailEffects(EndTrace); 
+		SpawnTrailEffectsMulticast(EndTrace); 
 	}
 }
 
@@ -172,12 +172,11 @@ void AAssaultRifle::ProcessInstantHitConfirmed(const FHitResult & Impact, const 
 	
 	// Jouer l'effet visuel sur les clients distants 
 	if (Role == ROLE_Authority) { 
-		HitOriginNotify = Origin; 
-	} 
-	
-	// Jouer l'effet visuel localement 
-	if (GetNetMode() != NM_DedicatedServer) { 
-		SimulateInstantHit(Origin); 
+		//HitOriginNotify = Origin;
+		SimulateInstantHit(Origin);
+	}
+	else {
+		SimulateInstantHitServer(Origin);
 	}
 }
 
@@ -206,19 +205,35 @@ void AAssaultRifle::DealDamage(const FHitResult & Impact, const FVector & ShootD
 
 void AAssaultRifle::SimulateInstantHit(const FVector & Origin)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Entre dans SimulateInstantHit"));
 	const FVector StartTrace = Origin; 
 	const FVector AimDir = GetAdjustedAim(); 
 	const FVector EndTrace = StartTrace + (AimDir * WeaponRange); 
 	const FHitResult Impact = WeaponTrace(StartTrace, EndTrace); 
 	if (Impact.bBlockingHit) { 
-		SpawnImpactEffects(Impact); 
-		SpawnTrailEffects(Impact.ImpactPoint); 
+		UE_LOG(LogTemp, Warning, TEXT("Spawn les effets"));
+		SpawnImpactEffectsMulticast(Impact);
+		SpawnTrailEffectsMulticast(Impact.ImpactPoint);
 	} else { 
-		SpawnTrailEffects(EndTrace); 
+		SpawnTrailEffectsMulticast(EndTrace);
 	}
 }
 
-void AAssaultRifle::SpawnImpactEffects(const FHitResult & Impact)
+bool AAssaultRifle::SimulateInstantHitServer_Validate(const FVector & Origin) {
+	return true;
+}
+
+void AAssaultRifle::SimulateInstantHitServer_Implementation(const FVector & Origin) {
+	SimulateInstantHit(Origin);
+}
+
+
+bool AAssaultRifle::SpawnImpactEffectsMulticast_Validate(const FHitResult & Impact) {
+	return true;
+}
+
+
+void AAssaultRifle::SpawnImpactEffectsMulticast_Implementation (const FHitResult & Impact)
 {
 	if (ImpactTemplate && Impact.bBlockingHit) { 
 		/* Cette prépare un acteur à apparaître (spawn), mais demandera un autre appel pour finir 
@@ -237,7 +252,11 @@ void AAssaultRifle::SpawnImpactEffects(const FHitResult & Impact)
 	}
 }
 
-void AAssaultRifle::SpawnTrailEffects(const FVector & EndPoint)
+bool AAssaultRifle::SpawnTrailEffectsMulticast_Validate(const FVector & EndPoint) {
+	return true;
+}
+
+void AAssaultRifle::SpawnTrailEffectsMulticast_Implementation(const FVector & EndPoint)
 {
 	// Conserver le compte pour les effets 
 	BulletsShotCount++;
@@ -273,12 +292,13 @@ void AAssaultRifle::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps); 
 
-	DOREPLIFETIME_CONDITION(AAssaultRifle, HitOriginNotify, COND_SkipOwner);
+	//DOREPLIFETIME_CONDITION(AAssaultRifle, HitOriginNotify, COND_SkipOwner);
 }
 
 void AAssaultRifle::OnRep_HitLocation()
 {
 	// À jouer sur tous les clients distants
+	UE_LOG(LogTemp, Warning, TEXT("On rep Hit location"));
 	SimulateInstantHit(HitOriginNotify);
 }
 

@@ -30,7 +30,7 @@ class TYRAN_API AAssaultRifle : public AWeapon
 	UPROPERTY(EditDefaultsOnly) 
 	float ClientSideHitLeeway; 
 	
-	UPROPERTY(Transient, ReplicatedUsing = OnRep_HitLocation) 
+	//UPROPERTY(Transient, ReplicatedUsing = OnRep_HitLocation) 
 	FVector HitOriginNotify;
 
 	/* Effet joué lorsqu'une surface est atteinte. */
@@ -78,8 +78,15 @@ public:
 	void DealDamage(const FHitResult& Impact, const FVector& ShootDir);
 
 	void SimulateInstantHit(const FVector& Origin);
-	void SpawnImpactEffects(const FHitResult& Impact);
-	void SpawnTrailEffects(const FVector& EndPoint);
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void SimulateInstantHitServer(const FVector& Origin);
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void SpawnImpactEffectsMulticast(const FHitResult& Impact);
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void SpawnTrailEffectsMulticast(const FVector& EndPoint);
 
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override; 
 	

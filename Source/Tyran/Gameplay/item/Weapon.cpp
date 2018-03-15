@@ -251,9 +251,13 @@ void AWeapon::OnBurstFinished() {
 
 void AWeapon::HandleFiring() {
 	if (CanFire()) {
-		if (GetNetMode() != NM_DedicatedServer) {
-			SimulateWeaponFire(); 
-		} 
+		if (Role == ROLE_Authority) {
+			SimulateWeaponFire();
+		}
+		else
+		{
+			SimulateWeaponFireServer();
+		}
 		if (MyPawn && MyPawn->IsLocallyControlled()) {
 			FireWeapon(); 
 
@@ -297,22 +301,39 @@ bool AWeapon::CanFire() const {
 }
 
 void AWeapon::SimulateWeaponFire() { 
-	if (MuzzleFX) { 
-		MuzzlePSC = UGameplayStatics::SpawnEmitterAttached(MuzzleFX, Mesh, MuzzleAttachPoint); 
-	} 
+	SpawnMuzzleEffectsMulticast();
 	
-	if (!bPlayingFireAnim) { 
-		PlayWeaponAnimation(FireAnim); 
-		bPlayingFireAnim = true; 
-	} 
+	//if (!bPlayingFireAnim) { 
+	//	PlayWeaponAnimation(FireAnim); 
+	//	bPlayingFireAnim = true; 
+	//} 
 	//PlayWeaponSound(FireSound); 
 }
 
+bool AWeapon::SimulateWeaponFireServer_Validate() {
+	return true;
+}
+
+void AWeapon::SimulateWeaponFireServer_Implementation() {
+	SimulateWeaponFire();
+}
+
+bool AWeapon::SpawnMuzzleEffectsMulticast_Validate() {
+	return true;
+}
+
+void AWeapon::SpawnMuzzleEffectsMulticast_Implementation() {
+	if (MuzzleFX) {
+		MuzzlePSC = UGameplayStatics::SpawnEmitterAttached(MuzzleFX, Mesh, MuzzleAttachPoint);
+	}
+}
+
+
 void AWeapon::StopSimulatingWeaponFire() {
-	if (bPlayingFireAnim) {
+	/*if (bPlayingFireAnim) {
 		StopWeaponAnimation(FireAnim);
 		bPlayingFireAnim = false;
-	}
+	}*/
 }
 
 FVector AWeapon::GetMuzzleLocation() const {

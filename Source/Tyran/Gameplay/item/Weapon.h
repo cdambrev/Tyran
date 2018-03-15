@@ -182,8 +182,13 @@ public:
 	virtual void HandleFiring(); // Pourra être surchargée dans les armes 
 	bool CanFire() const; 
 	
-	virtual void SimulateWeaponFire(); 
-	virtual void StopSimulatingWeaponFire(); 
+	virtual void SimulateWeaponFire();
+	virtual void StopSimulatingWeaponFire();
+	UFUNCTION(Reliable, Server, WithValidation)
+	void SimulateWeaponFireServer();
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void SpawnMuzzleEffectsMulticast();
 	
 	/* Avec PURE_VIRTUAL, nous n'avons pas à implanter la fonction ici, 
 	nous l'implanterons dans les classes dérivées */ 
