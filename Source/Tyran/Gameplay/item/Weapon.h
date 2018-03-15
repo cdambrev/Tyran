@@ -105,6 +105,19 @@ protected:
 	UPROPERTY(Transient, Replicated)
 	int MagazineCurrent;
 
+	// *** Variables pour tir et dommages 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UDamageType> DamageType;
+
+	UPROPERTY(EditDefaultsOnly)
+	float WeaponRange;
+
+	UPROPERTY(EditDefaultsOnly)
+	float Accuracy;
+
+	UPROPERTY(EditDefaultsOnly)
+	float HitDamage;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

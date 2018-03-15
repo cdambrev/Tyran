@@ -156,10 +156,22 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	AActor* getFocus();
 
+	UFUNCTION(BlueprintCallable)
+	void modificationOffensifCheckedInfo();
+	
+	UFUNCTION(BlueprintCallable)
+	void modificationDefensifCheckedInfo();
+	
+	UFUNCTION(BlueprintCallable)
+	void modificationTenirPosCheckedInfo();
+	
+	UFUNCTION(BlueprintCallable)
+	void modificationFuiteCheckedInfo();
+
 	void mouseRaycast(FHitResult & hitResult, ECollisionChannel colChannel);
 
-
 	void addPatrolPoint(FVector v);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

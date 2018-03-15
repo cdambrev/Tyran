@@ -15,8 +15,11 @@ class TYRAN_API ATyranHUD : public AHUD
 {
 	GENERATED_BODY()
 private:
+	// widget par défaut
+	UUserWidget* defaultUIWidget;
+	TSubclassOf<UUserWidget> defaultUIClass;
+
 	// widget pour les ordres des gardes
-	UUserWidget* guardOrderWidget;
 	TSubclassOf<UUserWidget> guardUIClass;
 
 	// widget pour les patrolPoints
@@ -24,23 +27,58 @@ private:
 	TSubclassOf<UUserWidget> patrolPointsModeUIClass;
 
 	// pour les infos sur les gardes
-	UUserWidget* guardInfo;
 	TSubclassOf<UUserWidget> guardInfoUIClass;
 
-public:
-		ATyranHUD();
+protected:	
+	UPROPERTY(BlueprintReadOnly)
+	UUserWidget* guardOrderWidget;
 	
-		virtual void DrawHUD() override;
+	UPROPERTY(BlueprintReadOnly)
+	UUserWidget* guardInfo;
 
-		void displayGuardOrder(FVector2D position);
+public:
 
-		void removeGuardOrder();
+	ATyranHUD();
 
-		void displayPatrolPointsMode();
+	void BeginPlay() override;
 
-		void removePatrolPointsMode();
+	void displayGuardOrder(FVector2D position);
 
-		void displayGuardInfo();
+	void removeGuardOrder();
 
-		void removeGuardInfo();
+	void displayPatrolPointsMode();
+
+	void removePatrolPointsMode();
+
+	void displayGuardInfo();
+
+	void removeGuardInfo();
+
+	void displayDefaultUI();
+
+	void removeDefaultUI();
+
+	void modificationGuardInfoOffensif();
+	void modificationGuardInfoDefensif();
+	void modificationGuardInfoTenirPos();
+	void modificationGuardInfoFuite();
+	
+	// Create Event
+	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
+		void OnVisibleGuardOrder();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
+		void OnVisibleGuardInfo();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
+		void OnModificationGuardInfoOffensif();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
+		void OnModificationGuardInfoDefensif();
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
+		void OnModificationGuardInfoTenirPos();
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
+		void OnModificationGuardInfoFuite();
 };

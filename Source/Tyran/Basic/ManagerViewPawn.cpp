@@ -200,16 +200,22 @@ void AManagerViewPawn::enterPlaceMode(TSubclassOf<APlaceableObject> object, TSub
 
 void AManagerViewPawn::offensifChecked() {
 	offensifCheckedServ(static_cast<AGuardCharacter*>(focus));
+	modificationOffensifCheckedInfo();
 }
 
 void AManagerViewPawn::defensifChecked() {
 	defensifCheckedServ(static_cast<AGuardCharacter*>(focus));
+	modificationDefensifCheckedInfo();
 }
+
 void AManagerViewPawn::tenirPositionChecked() {
 	tenirPositionCheckedServ(static_cast<AGuardCharacter*>(focus));
+	modificationTenirPosCheckedInfo();
 }
+
 void AManagerViewPawn::fuiteAutoriseChecked(bool isChecked) {
 	fuiteAutoriseCheckedServ(static_cast<AGuardCharacter*>(focus), isChecked);
+	modificationFuiteCheckedInfo();
 }
 
 bool AManagerViewPawn::offensifCheckedServ_Validate(AGuardCharacter* guard) {
@@ -588,4 +594,17 @@ bool AManagerViewPawn::clickOnGuard(FVector& mouseLocation, FVector& mouseDirect
 
 AActor* AManagerViewPawn::getFocus() {
 	return focus;
+}
+
+void AManagerViewPawn::modificationOffensifCheckedInfo() {
+	static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->modificationGuardInfoOffensif();
+}
+void AManagerViewPawn::modificationDefensifCheckedInfo() {
+	static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->modificationGuardInfoDefensif();
+}
+void AManagerViewPawn::modificationTenirPosCheckedInfo() {
+	static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->modificationGuardInfoTenirPos();
+}
+void AManagerViewPawn::modificationFuiteCheckedInfo() {
+	static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->modificationGuardInfoFuite();
 }
