@@ -18,6 +18,7 @@
 #include "Gameplay/item/WeaponLoot.h"
 #include "TimerManager.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -67,9 +68,13 @@ ATyranCharacter::ATyranCharacter()
 	PelvisAttachPoint = TEXT("PelvisSocket"); 
 	SpineAttachPoint = TEXT("SpineSocket");
 
+	// FPS camera
+	FPSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FPSCamera"));
+	FPSCamera->SetupAttachment(GetMesh(), WeaponAttachPoint);
+	FPSCamera->SetRelativeLocationAndRotation(FVector{ 0,0,20 }, FQuat{ FVector{0,0,1}, PI/2.0 });
+	FPSCamera->Deactivate();
+
 	bWantsToFire = false;
-
-
 
 	isVisible = false;
 
@@ -225,10 +230,11 @@ void ATyranCharacter::EquipWeapon(AWeapon * Weapon)
 {
 	if (Weapon) {
 		if (Role == ROLE_Authority) { 
-			SetCurrentWeapon(Weapon); 
+			SetCurrentWeapon(Weapon);
 		} else { 
 			ServerEquipWeapon(Weapon); 
 		} 
+
 	}
 }
 
@@ -508,6 +514,11 @@ void ATyranCharacter::OnCrouchToggle()
 void ATyranCharacter::OnStartAim()
 {
 	isAiming = true;
+	if (IsLocallyControlled())
+	{
+		FollowCamera->Deactivate();
+		FPSCamera->Activate();
+	}
 	if (Role < ROLE_Authority)
 	{
 		ServerOnStartAim();
@@ -517,6 +528,11 @@ void ATyranCharacter::OnStartAim()
 void ATyranCharacter::OnStopAim()
 {
 	isAiming = false;
+	if (IsLocallyControlled())
+	{
+		FollowCamera->Activate();
+		FPSCamera->Deactivate();
+	}
 	if (Role < ROLE_Authority)
 	{
 		ServerOnStopAim();

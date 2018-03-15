@@ -3,6 +3,7 @@
 #include "Weapon.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "kismet/GameplayStatics.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values
 AWeapon::AWeapon()

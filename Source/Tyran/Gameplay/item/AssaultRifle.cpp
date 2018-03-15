@@ -2,6 +2,7 @@
 
 #include "AssaultRifle.h"
 #include "ImpactEffect.h"
+#include "Camera/CameraComponent.h"
 
 #define COLLISION_WEAPON ECC_GameTraceChannel3
 
@@ -21,7 +22,7 @@ AAssaultRifle::AAssaultRifle()
 	StorageSlot = EInventorySlot::Primary; 
 	AmmoType = EAmmoType::AssaultRifle;
 	RifleAttachPoint = TEXT("RifleSocket"); 
-	
+
 	//GetWeaponMesh()->AddLocalRotation(FRotator(0, 0, -90)); 
 }
 
