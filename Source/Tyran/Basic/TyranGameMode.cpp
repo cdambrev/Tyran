@@ -47,6 +47,11 @@ ATyranGameMode::ATyranGameMode()
 
 
 	tyranController = nullptr;
+
+	heatMap = new HeatMap();
+
+	PrimaryActorTick.bStartWithTickEnabled = true;
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
@@ -74,4 +79,14 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 			player->Possess(revChar);
 		}
 	}
+}
+
+void ATyranGameMode::Tick(float DeltaTime)
+{
+	heatMap->update(DeltaTime);
+}
+
+void ATyranGameMode::BeginPlay()
+{
+	heatMap->init(GetWorld());
 }

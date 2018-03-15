@@ -8,6 +8,7 @@
 #include "Basic/TyranController.h"
 #include "GUI/TyranHUD.h"
 //#include "GUI/RevHUD.h"
+#include "AI/HeatMap.h"
 #include "TyranGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -16,6 +17,8 @@ class ATyranGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
+	HeatMap * heatMap;
+
 	UPROPERTY(EditAnywhere)
 	TSet<TSubclassOf<ALoot>> availableLoot;
 
@@ -37,6 +40,15 @@ public:
 	ATyranGameMode();
 	
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	virtual void Tick(float DeltaTime) override;
+
+	virtual void BeginPlay() override;
+
+	UFUNCTION(BluePrintCallable) 
+	UTexture2D * getHeatMapTex(){
+		return heatMap->getTexture();
+	}
 };
 
 
