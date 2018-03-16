@@ -32,17 +32,20 @@ EBTNodeResult::Type UShootBTTaskNodeUtility::ExecuteTask(UBehaviorTreeComponent 
 			//guardRotator.Add(0, -10*produitMixte, 0);
 			//Cast<ATyranCharacter>(AIGuardController->GetPawn())->SetActorRotation(guardRotator);
 		}
+		else
+		{
+			if (Cast<ATyranCharacter>(AIGuardController->GetPawn())->getMagCurrent() > 0)
+			{
+				Cast<ATyranCharacter>(AIGuardController->GetPawn())->OnStartFire();
+				Cast<ATyranCharacter>(AIGuardController->GetPawn())->OnStopFire();
+			}
+			else
+			{
+				Cast<ATyranCharacter>(AIGuardController->GetPawn())->OnReload();
+			}
+		}
 	}
 
-	if (Cast<ATyranCharacter>(AIGuardController->GetPawn())->getMagCurrent() > 0)
-	{
-		Cast<ATyranCharacter>(AIGuardController->GetPawn())->OnStartFire();
-		Cast<ATyranCharacter>(AIGuardController->GetPawn())->OnStopFire();
-	}
-	else
-	{
-		Cast<ATyranCharacter>(AIGuardController->GetPawn())->OnReload();
-	}
 	NodeResult = EBTNodeResult::Succeeded;
 	return NodeResult;
 }

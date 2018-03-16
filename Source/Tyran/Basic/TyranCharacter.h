@@ -31,6 +31,13 @@ class ATyranCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
+	/** Aim camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* AimCameraBoom;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* AimCamera;
+
 	/** FPS camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FPSCamera;
@@ -89,7 +96,10 @@ public:
 protected:
 	/* Point d'attache pour les items en main et actifs */ 
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
-	FName WeaponAttachPoint; 
+	FName WeaponAttachPoint_Rifle; 
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
+	FName WeaponAttachPoint_Handgun;
 	
 	/* Point d'attache pour les items à la ceinture. */ 
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets") 
@@ -98,6 +108,10 @@ protected:
 	/* Point d'attache pour l'arme principale */
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
 	FName SpineAttachPoint;
+
+	/* Point d'attache pour les items en main et actifs */
+	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
+	FName HeadAttachPoint;
 
 	/* Distance pour lacher un objet d'inventaire. */
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory") 
@@ -184,14 +198,13 @@ public:
 
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
-
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	/* Retourne le point d'attache (socket) pour correspondre au socket du squelette */ 
-	FName GetInventoryAttachPoint(EInventorySlot Slot) const;
+	FName GetInventoryAttachPoint(EInventorySlot Slot, EWeaponType WeaponType) const;
 
 	void AddWeapon(class AWeapon* Weapon);
 
@@ -261,8 +274,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Tyran")
 	void setVisible(bool b);
-
-
 
 	UFUNCTION(BlueprintCallable, Category="Tyran")
 	void setViewedThisTick();

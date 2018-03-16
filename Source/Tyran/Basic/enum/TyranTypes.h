@@ -16,3 +16,10 @@ enum class EAmmoType : uint8 {
 	Pistol,
 	SniperRifle
 };
+
+enum class EWeaponType : uint8 {
+	AssaultRifle,
+	Shotgun,
+	Pistol,
+	SniperRifle
+};

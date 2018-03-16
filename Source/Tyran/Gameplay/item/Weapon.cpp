@@ -4,6 +4,9 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
+#include "ImpactEffect.h"
+
+#define COLLISION_WEAPON ECC_GameTraceChannel3
 
 // Sets default values
 AWeapon::AWeapon()
@@ -329,6 +332,7 @@ bool AWeapon::SpawnMuzzleEffectsMulticast_Validate() {
 void AWeapon::SpawnMuzzleEffectsMulticast_Implementation() {
 	if (MuzzleFX) {
 		MuzzlePSC = UGameplayStatics::SpawnEmitterAttached(MuzzleFX, Mesh, MuzzleAttachPoint);
+		MuzzlePSC->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
 	}
 }
 
@@ -377,9 +381,9 @@ void AWeapon::AttachMeshToPawn(EInventorySlot Slot)
 		DetachMeshFromPawn();
 
 		USkeletalMeshComponent* PawnMesh = MyPawn->GetMesh();
-		FName AttachPoint = MyPawn->GetInventoryAttachPoint(Slot);
+		FName AttachPoint = MyPawn->GetInventoryAttachPoint(Slot, WeaponType);
 		Mesh->SetHiddenInGame(false);
-		// On le rend visible 
+		// On le rend visible
 		Mesh->AttachToComponent(PawnMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, AttachPoint);
 	}
 }
@@ -481,4 +485,272 @@ void AWeapon::OnRep_bPendingReload()
 	{
 		OnReloadFinished();
 	}*/
+}
+
+FVector AWeapon::GetAdjustedAim() const
+{
+	APlayerController* const PC = Instigator ? Cast<APlayerController>(Instigator->Controller) : nullptr;
+	FVector FinalAim = FVector::ZeroVector;
+
+	if (PC) {
+		FVector CamLoc;
+		FRotator CamRot;
+		PC->GetPlayerViewPoint(CamLoc, CamRot);
+		FinalAim = CamRot.Vector();
+	}
+	else if (Instigator) {
+		FinalAim = Instigator->GetBaseAimRotation().Vector();
+	}
+
+	FinalAim += SpreadVector;
+	FinalAim.Normalize();
+
+	return FinalAim;
+}
+
+FVector AWeapon::GetCameraDamageStartLocation(const FVector & AimDir) const
+{
+	APlayerController* PC = MyPawn ? Cast<APlayerController>(MyPawn->Controller) : nullptr;
+	FVector OutStartTrace = FVector::ZeroVector;
+
+	if (PC) {
+		FRotator dummyRot;
+		PC->GetPlayerViewPoint(OutStartTrace, dummyRot);
+
+		// Ajuster la trace pour qu'il n'y ait rien qui bloque le rayon entre la caméra et le
+		// personnage, on calcule ensuite la distance à partir du point de départ ajusté. 
+		OutStartTrace = OutStartTrace + AimDir * ((Instigator->GetActorLocation() - OutStartTrace) | AimDir);
+	}
+
+	return OutStartTrace;
+}
+
+FHitResult AWeapon::WeaponTrace(const FVector & TraceFrom, const FVector & TraceTo) const
+{
+	FCollisionQueryParams TraceParams(TEXT("WeaponTrace"), true, Instigator);
+	TraceParams.bTraceAsyncScene = true;
+	TraceParams.bReturnPhysicalMaterial = true;
+	FHitResult Hit(ForceInit);
+	GetWorld()->LineTraceSingleByChannel(Hit, TraceFrom, TraceTo, COLLISION_WEAPON, TraceParams);
+
+	return Hit;
+}
+
+void AWeapon::ProcessInstantHit(const FHitResult & Impact, const FVector & Origin, const FVector & ShootDir)
+{
+	if (MyPawn && MyPawn->IsLocallyControlled() && GetNetMode() == NM_Client) {
+		// Si nous sommes client et frappons quelque chose contrôlé par le serveur 
+		if (Impact.GetActor() && Impact.GetActor()->GetRemoteRole() == ROLE_Authority) {
+			// Avertir le serveur de notre frappe pour valider et appliquer le dommage. 
+			ServerNotifyHit(Impact, ShootDir);
+		}
+		else if (Impact.GetActor() == nullptr) {
+			if (Impact.bBlockingHit) {
+				ServerNotifyHit(Impact, ShootDir);
+			}
+			else {
+				ServerNotifyMiss(ShootDir);
+			}
+		}
+	}
+	// Traiter une frappe confirmée. 
+	//ProcessInstantHitConfirmed(Impact, Origin, ShootDir);
+}
+
+bool AWeapon::ServerNotifyHit_Validate(const FHitResult Impact, /*FVector_NetQuantizeNormal Origin, */FVector_NetQuantizeNormal ShootDir) {
+	return true;
+}
+
+void AWeapon::ServerNotifyHit_Implementation(const FHitResult Impact, FVector_NetQuantizeNormal ShootDir) {
+	// Si nous avons un instigateur, nous calculons le produit vectoriel entre la vue et le tir. 
+	if (Instigator && (Impact.GetActor() || Impact.bBlockingHit)) {
+		const FVector Origin = GetMuzzleLocation();
+		const FVector ViewDir = (Impact.Location - Origin).GetSafeNormal();
+
+		const float ViewDotHitDir = FVector::DotProduct(Instigator->GetViewRotation().Vector(), ViewDir);
+		if (ViewDotHitDir > AllowedViewDotHitDir) {
+			if (Impact.GetActor() == nullptr) {
+				if (Impact.bBlockingHit) {
+					ProcessInstantHitConfirmed(Impact, Origin, ShootDir);
+				}
+			}
+			// On espère que les trucs statiques soient OK mais de toute façon, ils 
+			// ont peu ou pas d'impacts sur le gameplay 
+			else if (Impact.GetActor()->IsRootComponentStatic() || Impact.GetActor()->IsRootComponentStationary()) {
+				ProcessInstantHitConfirmed(Impact, Origin, ShootDir);
+			}
+			else {
+				const FBox HitBox = Impact.GetActor()->GetComponentsBoundingBox();
+				FVector BoxExtent = 0.5 * (HitBox.Max - HitBox.Min);
+				BoxExtent *= ClientSideHitLeeway;
+				BoxExtent.X = FMath::Max(20.0f, BoxExtent.X);
+				BoxExtent.Y = FMath::Max(20.0f, BoxExtent.Y);
+				BoxExtent.Z = FMath::Max(20.0f, BoxExtent.Z);
+				const FVector BoxCenter = (HitBox.Min + HitBox.Max) * 0.5;
+
+				// Si nous sommes dans la zone d'impact 
+				if (FMath::Abs(Impact.Location.Z - BoxCenter.Z) < BoxExtent.Z &&
+					FMath::Abs(Impact.Location.X - BoxCenter.X) < BoxExtent.X &&
+					FMath::Abs(Impact.Location.Y - BoxCenter.Y) < BoxExtent.Y) {
+					ProcessInstantHitConfirmed(Impact, Origin, ShootDir);
+				}
+			}
+		}
+	}
+}
+
+bool AWeapon::ServerNotifyMiss_Validate(/*FVector_NetQuantizeNormal Origin, */FVector_NetQuantizeNormal ShootDir) {
+	return true;
+}
+
+void AWeapon::ServerNotifyMiss_Implementation(/*FVector_NetQuantizeNormal Origin, */FVector_NetQuantizeNormal ShootDir) {
+	const FVector Origin = GetMuzzleLocation();
+
+	// Sur les clients distants 
+	//HitOriginNotify = Origin; 
+	const FVector EndTrace = Origin + (ShootDir * WeaponRange);
+
+	if (GetNetMode() != NM_DedicatedServer) {
+		SpawnTrailEffectsMulticast(EndTrace);
+	}
+}
+
+void AWeapon::ProcessInstantHitConfirmed(const FHitResult & Impact, const FVector & Origin, const FVector & ShootDir)
+{
+	// Traiter les dommages 
+	if (ShouldDealDamage(Impact.GetActor())) {
+		DealDamage(Impact, ShootDir);
+	}
+
+	// Jouer l'effet visuel sur les clients distants 
+	if (Role == ROLE_Authority) {
+		//HitOriginNotify = Origin;
+		SimulateInstantHit(Origin);
+	}
+	else {
+		SimulateInstantHitServer(Origin);
+	}
+}
+
+bool AWeapon::ShouldDealDamage(AActor * TestActor) const
+{
+	// Si nous sommes sur le serveur ou que le client local a priorité sur le serveur, 
+	// Nous devons enregistrer le dommage 
+	if (TestActor) {
+		if (GetNetMode() != NM_Client || TestActor->Role == ROLE_Authority || TestActor->bTearOff) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void AWeapon::DealDamage(const FHitResult & Impact, const FVector & ShootDir)
+{
+	FPointDamageEvent PointDmg;
+	PointDmg.DamageTypeClass = DamageType;
+	PointDmg.HitInfo = Impact;
+	PointDmg.ShotDirection = ShootDir;
+	PointDmg.Damage = HitDamage;
+
+	Impact.GetActor()->TakeDamage(PointDmg.Damage, PointDmg, MyPawn->Controller, this);
+}
+
+void AWeapon::SimulateInstantHit(const FVector & Origin)
+{
+	const FVector StartTrace = Origin;
+	const FVector AimDir = GetAdjustedAim();
+	const FVector EndTrace = StartTrace + (AimDir * WeaponRange);
+	const FHitResult Impact = WeaponTrace(StartTrace, EndTrace);
+	if (Impact.bBlockingHit) {
+		SpawnImpactEffectsMulticast(Impact);
+		SpawnTrailEffectsMulticast(Impact.ImpactPoint);
+	}
+	else {
+		SpawnTrailEffectsMulticast(EndTrace);
+	}
+}
+
+bool AWeapon::SimulateInstantHitServer_Validate(const FVector & Origin) {
+	return true;
+}
+
+void AWeapon::SimulateInstantHitServer_Implementation(const FVector & Origin) {
+	SimulateInstantHit(Origin);
+}
+
+
+bool AWeapon::SpawnImpactEffectsMulticast_Validate(const FHitResult & Impact) {
+	return true;
+}
+
+
+void AWeapon::SpawnImpactEffectsMulticast_Implementation(const FHitResult & Impact)
+{
+	if (ImpactTemplate && Impact.bBlockingHit) {
+		/* Cette prépare un acteur à apparaître (spawn), mais demandera un autre appel pour finir
+		le processus de création (d'incarnation?). Nous devons manipuler certaines propriétés
+		avant d'entrer dans le niveau */
+		AImpactEffect* EffectActor = GetWorld()->SpawnActorDeferred<AImpactEffect>
+			(ImpactTemplate, FTransform(Impact.ImpactPoint.Rotation(), Impact.ImpactPoint),
+				nullptr,
+				nullptr,
+				ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+		if (EffectActor) {
+			EffectActor->SurfaceHit = Impact;
+			UGameplayStatics::FinishSpawningActor(EffectActor, FTransform(Impact.ImpactNormal.Rotation(), Impact.ImpactPoint));
+		}
+	}
+}
+
+bool AWeapon::SpawnTrailEffectsMulticast_Validate(const FVector & EndPoint) {
+	return true;
+}
+
+void AWeapon::SpawnTrailEffectsMulticast_Implementation(const FVector & EndPoint)
+{
+	// Conserver le compte pour les effets 
+	BulletsShotCount++;
+
+	const FVector Origin = GetMuzzleLocation();
+	FVector ShootDir = EndPoint - Origin;
+
+	// Faire apparaître l'effet seulement si une distance minimale est respectée. 
+	if (ShootDir.Size() < MinimumProjectileSpawnDistance)
+		return;
+
+	if (BulletsShotCount % TracerRoundInterval == 0) {
+		if (TracerFX) {
+			ShootDir.Normalize();
+			UParticleSystemComponent* TrailPSC = UGameplayStatics::SpawnEmitterAtLocation(this, TracerFX, Origin, ShootDir.Rotation());
+			//emitter->SetRelativeScale3D(FVector(0.05, 0.05, 0.05));
+		}
+	}
+	else {
+		// Ignorer les trainées lorsqu'elles sont créées par nous. 
+		ATyranCharacter* OwningPawn = MyPawn;
+		if (OwningPawn && OwningPawn->IsLocallyControlled())
+			return;
+
+		if (TrailFX) {
+			UParticleSystemComponent* TrailPSC = UGameplayStatics::SpawnEmitterAtLocation(this, TrailFX, Origin);
+			if (TrailPSC) {
+				TrailPSC->SetVectorParameter(TrailTargetParam, EndPoint);
+				//TrailPSC->SetRelativeScale3D(FVector(0.05, 0.05, 0.05));
+			}
+		}
+	}
+}
+
+void AWeapon::UpdateSpreadVector()
+{
+	// Dispersion
+	float SpreadFactor = 1.0f / Accuracy;
+	if (MyPawn->isAiming)
+		SpreadFactor /= 8;
+
+	float x = FMath::RandRange(-SpreadFactor, SpreadFactor);
+	float y = FMath::RandRange(-SpreadFactor, SpreadFactor);
+	float z = FMath::RandRange(-SpreadFactor, SpreadFactor);
+	SpreadVector = FVector{ x,y,z };
 }
