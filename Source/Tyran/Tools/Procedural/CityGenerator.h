@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Gameplay/TyranOnly/Placeable_Object/BuildingSlot.h"
+#include "Runtime/Core/Public/Math/RandomStream.h"
 #include "CityGenerator.generated.h"
 
 UCLASS()
@@ -70,6 +71,11 @@ public:
 	TArray<Crossroad *> crossroads;
 	TArray<Road *> roads;
 	TArray<TTuple<ABuildingSlot *, Rectangle>> slots;
+
+	UPROPERTY(EditAnywhere)
+	int seed;
+
+	FRandomStream randStream;
 
 	UPROPERTY(EditAnywhere)
 	int nbIterationsBigRoadsGeneration;
@@ -154,9 +160,10 @@ protected:
 	bool checkExistingRoads(Crossroad * c1, Crossroad * c2);
 	void seedFromCrossRoad(Crossroad * c, float lengthMin, float lengthMax, int amountMin, int amountMax, int roadLevel, float squaredMergeDistance);
 	void splitRoads(int roadLevel, int crossroadLevel, float squaredMergeDistance);
-	bool pointIsLeftOf(FVector2D p1, FVector2D p2, FVector2D p);
-	bool checkSeparationLine(Rectangle r1, Rectangle R2, FVector2D begin, FVector2D end);
-	bool rectanglesOverlap(Rectangle r1, Rectangle r2);
+	bool pointIsLeftOf(FVector2D& p1, FVector2D& p2, FVector2D& p);
+	bool pointIsRightOf(FVector2D& p1, FVector2D& p2, FVector2D& p);
+	bool checkSeparationLine(Rectangle& r1, Rectangle& R2, FVector2D& begin, FVector2D& end);
+	bool rectanglesOverlap(Rectangle& r1, Rectangle& r2);
 	void placeBuildingSlots();
 
 public:	
