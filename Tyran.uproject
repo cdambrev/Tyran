@@ -14,5 +14,11 @@
 				"CustomMeshComponent"
 			]
 		}
+	],
+	"Plugins": [
+		{
+			"Name": "HoudiniEngine",
+			"Enabled": true
+		}
 	]
 }

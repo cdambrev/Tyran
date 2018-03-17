@@ -19,6 +19,7 @@
 #include "TimerManager.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Gameplay/InteractComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -191,7 +192,16 @@ ALoot * ATyranCharacter::GetLootInView()
 	FHitResult Hit(ForceInit);
 	bool succes = GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, TraceParams);
 	
-	//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f); 
+	//
+	UInteractComponent* interactComponent;
+	if (succes && Hit.GetActor()) {
+		interactComponent = Hit.GetActor()->FindComponentByClass<UInteractComponent>();
+		if(interactComponent != nullptr){
+			//interactComponent->setCharacter(this);
+			interactComponent->interactFunction(this);
+		}
+	}
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f); 
 	
 	return Cast<ALoot>(Hit.GetActor());
 }

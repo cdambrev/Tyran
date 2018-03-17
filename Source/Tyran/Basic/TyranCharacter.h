@@ -177,7 +177,7 @@ protected:
 	
 
 	class ALoot* GetLootInView();
-
+	//bool GetInteractObjectInView();
 
 
 public:

@@ -12,44 +12,54 @@ UInteractComponent::UInteractComponent()
 
 	// ...
 }
-void UInteractComponent::initFunctionPointer(void(*FunctionOnUsed))
-{
-	//OnUsed = Cast<void(APawn*)>(FunctionOnUsed);
-}
+//void UInteractComponent::initFunctionPointer(void(*functionOnUsed)(ATyranCharacter*))
+//{
+//	OnUsed = functionOnUsed;
+//}
+//
+//void UInteractComponent::initFunctionPointer(void(*functionOnUsed)(ATyranCharacter*), void(*functionOnBeginFocus)(), void(*functionOnEndFocus)())
+//{
+//	OnUsed = functionOnUsed;
+//	OnBeginFocus = functionOnBeginFocus;
+//	OnEndFocus = functionOnEndFocus;
+//
+//}
+//
+//void UInteractComponent::setFunctionOnUsed(void(*functionOnUsed)(ATyranCharacter*))
+//{
+//	OnUsed = functionOnUsed;
+//}
+//
+//void UInteractComponent::setFunctionOnBeginFocus(void(*functionOnBeginFocus)())
+//{
+//	OnBeginFocus = functionOnBeginFocus;
+//}
+//
+//void UInteractComponent::setFunctionOnEndFocus(void(*functionOnEndFocus)())
+//{
+//	OnEndFocus = functionOnEndFocus;
+//}
 
-void UInteractComponent::initFunctionPointer(void(*FunctionOnUsed), void(*FunctionOnBeginFocus), void(*FunctionOnEndFocus))
-{
+//void UInteractComponent::setCharacter(ATyranCharacter* character) {
+//	this->character = character;
+//}
 
-}
 
-void UInteractComponent::setFunctionOnUsed(void(*Function))
-{
-}
-
-void UInteractComponent::setFunctionOnBeginFocus(void(*Function))
-{
-	//OnBeginFocus = static_cast<(*void)>(Function);
-}
-
-void UInteractComponent::setFunctionOnEndFocus(void(*Function))
-{
-
-}
-
-void UInteractComponent::OnBeginFocus_Default()
-{
-
-}
-
-void UInteractComponent::OnEndFocus_Default(void)
-{
-
-}
-
-void UInteractComponent::OnUsed_Default(APawn * InstigatorPawn)
-{
-
-}
+//
+//void (UInteractComponent::*OnBeginFocus_Default)()
+//{
+//
+//};
+//
+//void (UInteractComponent::*OnEndFocus_Default)()
+//{
+//
+//};
+//
+//void (UInteractComponent::*OnUsed_Default)(ATyranCharacter * InstigatorPawn)
+//{
+//
+//};
 
 
 
@@ -58,15 +68,15 @@ void UInteractComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (!OnBeginFocus) {
-		//OnBeginFocus = OnBeginFocus_Default;
-	}
-	if (!OnEndFocus) {
-		//OnEndFocus = OnEndFocus_Default;
-	}
-	if (!OnUsed) {
-		//OnUsed = Cast<void(APawn*)>(OnUsed_Default);
-	}
+	//if (!OnBeginFocus) {
+	//	OnBeginFocus = OnBeginFocus_Default;
+	//}
+	//if (!OnEndFocus) {
+	//	OnEndFocus = OnEndFocus_Default;
+	//}
+	//if (!OnUsed) {
+	//	OnUsed = OnUsed_Default;
+	//}
 	
 }
 
