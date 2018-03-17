@@ -15,8 +15,14 @@ class TYRAN_API ATyranGameState : public AGameStateBase
 {
 	GENERATED_BODY()
 
-public:
+protected:
 	FTimerHandle endOfGameTimer;
+
+public:
+	ATyranGameState();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timer")
+	float gameDuration;
 
 	virtual void BeginPlay() override;
 	void OnEndOfGame();

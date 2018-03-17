@@ -6,8 +6,12 @@
 #include <TimerManager.h>
 #include <Engine/World.h>
 
+ATyranGameState::ATyranGameState() {
+	gameDuration = FTimespan{ 0,5,0 }.GetTotalSeconds();
+}
+
 void ATyranGameState::BeginPlay() {
-	GetWorldTimerManager().SetTimer(endOfGameTimer, this, &ATyranGameState::OnEndOfGame, 10.f, false, -1.f);
+	GetWorldTimerManager().SetTimer(endOfGameTimer, this, &ATyranGameState::OnEndOfGame, gameDuration, false, -1.f);
 }
 
 
