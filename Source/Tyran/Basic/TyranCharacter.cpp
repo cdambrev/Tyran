@@ -568,8 +568,8 @@ void ATyranCharacter::OnReload()
 
 void ATyranCharacter::OnDeath()
 {
-	currState = EStateRev::MORT;
 	isDead = true;
+	setDead();
 	MulticastStopAnim(HitAnim);
 	while (Inventory.Num() > 0)
 	{

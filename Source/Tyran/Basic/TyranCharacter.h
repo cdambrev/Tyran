@@ -226,6 +226,30 @@ public:
 	void DropWeapon();
 	void RemoveWeapon(class AWeapon* Weapon);
 
+	void setDead() {
+		currState = EStateRev::MORT;
+	}
+
+	void setAgonisant() {
+		currState = EStateRev::AGONISANT;
+	}
+
+	void setADecouvert() {
+		currState = EStateRev::ADECOUVERT;
+	}
+
+	void setACouvert() {
+		currState = EStateRev::ACOUVERT;
+	}
+
+	void setTirACouvert() {
+		currState = EStateRev::TIRANTACOUVERT;
+	}
+
+	EStateRev getState() {
+		return currState;
+	}
+
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerUse();
 
@@ -262,7 +286,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Tyran")
 	void setVisible(bool b);
-
 
 
 	UFUNCTION(BlueprintCallable, Category="Tyran")
