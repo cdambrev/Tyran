@@ -115,7 +115,7 @@ protected:
 	bool bWantsToFire;
 
 	bool bHasNewFocus; // Seulement vrai lors de la première image avec un nouveau focus.
-	class ALoot* FocusedLoot;
+	class UInteractComponent* FocusedLoot;
 
 	// Distance maximale de focus sur les objets.
 	UPROPERTY(EditDefaultsOnly, Category = "ObjectInteraction") 
@@ -176,8 +176,8 @@ protected:
 	// AActor
 	
 
-	class ALoot* GetLootInView();
-	//bool GetInteractObjectInView();
+	class UInteractComponent* GetLootInView();
+
 
 
 public:

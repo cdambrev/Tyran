@@ -19,7 +19,7 @@
 #include "TimerManager.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Gameplay/InteractComponent.h"
+#include "Gameplay/Interaction/InteractComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -170,7 +170,7 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 }
 
 
-ALoot * ATyranCharacter::GetLootInView()
+UInteractComponent * ATyranCharacter::GetLootInView()
 {
 	FVector CamLoc;
 	FRotator CamRot; 
@@ -193,17 +193,13 @@ ALoot * ATyranCharacter::GetLootInView()
 	bool succes = GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, TraceParams);
 	
 	//
-	UInteractComponent* interactComponent;
 	if (succes && Hit.GetActor()) {
-		interactComponent = Hit.GetActor()->FindComponentByClass<UInteractComponent>();
-		if(interactComponent != nullptr){
-			//interactComponent->setCharacter(this);
-			interactComponent->interactFunction(this);
+		if(UInteractComponent* interactComponent = Hit.GetActor()->FindComponentByClass<UInteractComponent>()){
+			return interactComponent;
 		}
 	}
-	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f); 
-	
-	return Cast<ALoot>(Hit.GetActor());
+	//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f); 
+	return nullptr;
 }
 
 
@@ -552,9 +548,9 @@ void ATyranCharacter::OnStopAim()
 void ATyranCharacter::Use()
 {
 	if (Role == ROLE_Authority) {
-		ALoot* Loot = GetLootInView();
-		if (Loot) {
-			Loot->OnUsed(this);
+		UInteractComponent* interactComponent = GetLootInView();
+		if (interactComponent) {
+			interactComponent->OnUsed(this);
 		}
 	}
 	else
@@ -751,10 +747,10 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 	}
 
 	if (Controller && Controller->IsLocalController()) {
-		ALoot* Loot = GetLootInView();
+		UInteractComponent* interactComponent = GetLootInView();
 		
 		// Terminer le focus sur l'objet précédent 
-		if (FocusedLoot != Loot) {
+		if (FocusedLoot != interactComponent) {
 			if (FocusedLoot) {
 				FocusedLoot->OnEndFocus();
 			} 
@@ -763,12 +759,12 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 		} 
 		
 		// Assigner le nouveau focus (peut être nul ) 
-		FocusedLoot = Loot;
+		FocusedLoot = interactComponent;
 		
 		// Démarrer un nouveau focus si Usable != null; 
-		if (Loot) {
+		if (interactComponent) {
 			if (bHasNewFocus) { 
-				Loot->OnBeginFocus();
+				interactComponent->OnBeginFocus();
 				bHasNewFocus = false; 
 				
 				// Pour débogage, vous pourrez l'oter par la suite 
