@@ -7,11 +7,13 @@
 #include "EngineUtils.h"
 #include "Runtime/Engine/Classes/GameFramework/PlayerStart.h"
 #include "ManagerPlayerState.h"
+#include "TyranGameState.h"
 
 ATyranGameMode::ATyranGameMode()
 {
 
 	DefaultPawnClass = NULL;
+	GameStateClass = ATyranGameState::StaticClass();
 
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPersonCPP/Blueprints/ThirdPersonCharacter"));

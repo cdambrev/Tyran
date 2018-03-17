@@ -59,4 +59,6 @@ public:
 	void moveMiniMap();
 
 	void Tick(float DeltaSeconds) override;
+
+	void EndOfGame();
 };

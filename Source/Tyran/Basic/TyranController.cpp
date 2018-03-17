@@ -9,6 +9,7 @@
 #include "Runtime/UMG/Public/Blueprint/WidgetTree.h"
 #include <Image.h>
 //#include "Runtime/UMG/Public/Blueprint/UserWidget.h"
+#include "GUI/TyranHUD.h"
 
 void ATyranController::setTyran(bool b)
 {
@@ -98,4 +99,12 @@ ATyranController::ATyranController() {
 		defaultCapture = captureMapClass.Class;
 	}
 
+}
+
+void ATyranController::EndOfGame() {
+	AHUD* hud = GetHUD();
+	if (hud && hud->IsA(ATyranHUD::StaticClass())) {
+		ATyranHUD* thud = static_cast<ATyranHUD*>(hud);
+		thud->OnEndOfGame();
+	}
 }

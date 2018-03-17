@@ -26,6 +26,11 @@ private:
 	UUserWidget* patrolPointsMode;
 	TSubclassOf<UUserWidget> patrolPointsModeUIClass;
 
+
+	// widget pour la fin du jeu
+	UUserWidget* endOfGameUIWidget;
+	TSubclassOf<UUserWidget> endOfGameUIClass;
+
 	// pour les infos sur les gardes
 	TSubclassOf<UUserWidget> guardInfoUIClass;
 
@@ -81,4 +86,8 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
 		void OnModificationGuardInfoFuite();
+
+	void OnEndOfGame();
+
+	void removeAllPermanently();
 };

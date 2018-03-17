@@ -16,6 +16,9 @@ ATyranHUD::ATyranHUD() {
 	
 	ConstructorHelpers::FClassFinder<UUserWidget> defaultUIHelper(TEXT("/Game/UI/ManagerInterface"));
 	defaultUIClass = defaultUIHelper.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> endOfGameUIHelper(TEXT("/Game/UI/EndOfGame"));
+	endOfGameUIClass = endOfGameUIHelper.Class;
 }
 
 void ATyranHUD::BeginPlay() {
@@ -96,4 +99,31 @@ void ATyranHUD::modificationGuardInfoTenirPos() {
 }
 void ATyranHUD::modificationGuardInfoFuite() {
 	OnModificationGuardInfoFuite();
+}
+
+
+void ATyranHUD::OnEndOfGame() {
+	removeAllPermanently();
+	endOfGameUIWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), endOfGameUIClass);
+	endOfGameUIWidget->AddToViewport(9998);
+
+}
+
+void ATyranHUD::removeAllPermanently() {
+	if (defaultUIWidget)
+	{
+		defaultUIWidget->RemoveFromParent();
+	}
+	if (patrolPointsMode)
+	{
+		patrolPointsMode->RemoveFromParent();
+	}
+	if (guardOrderWidget)
+	{
+		guardOrderWidget->RemoveFromParent();
+	}
+	if (guardInfo)
+	{
+		guardInfo->RemoveFromParent();
+	}
 }

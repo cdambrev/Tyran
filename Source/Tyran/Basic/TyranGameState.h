@@ -15,4 +15,9 @@ class TYRAN_API ATyranGameState : public AGameStateBase
 {
 	GENERATED_BODY()
 
+public:
+	FTimerHandle endOfGameTimer;
+
+	virtual void BeginPlay() override;
+	void OnEndOfGame();
 };
