@@ -19,6 +19,9 @@ ATyranHUD::ATyranHUD() {
 
 	ConstructorHelpers::FClassFinder<UUserWidget> endOfGameUIHelper(TEXT("/Game/UI/EndOfGame"));
 	endOfGameUIClass = endOfGameUIHelper.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> timerUIHelper(TEXT("/Game/UI/Timer"));
+	timerUIClass = timerUIHelper.Class;
 }
 
 void ATyranHUD::BeginPlay() {
@@ -40,6 +43,11 @@ void ATyranHUD::BeginPlay() {
 	guardOrderWidget->SetVisibility(ESlateVisibility::Hidden);
 	guardOrderWidget->AddToViewport(9999);
 	guardOrderWidget->bIsFocusable = true;
+
+
+	// default UI
+	timerUIWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), timerUIClass);
+	timerUIWidget->AddToViewport(9998);
 
 	// affichage des informations sur le garde
 	//guardInfo = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), guardInfoUIClass);

@@ -17,3 +17,7 @@ void ATyranGameState::OnEndOfGame() {
 		It->EndOfGame();
 	}
 }
+
+FTimespan ATyranGameState::getTimeLeft() {
+	return FTimespan{ 0, 0, static_cast<int32>(GetWorldTimerManager().GetTimerRemaining(endOfGameTimer)) };
+}

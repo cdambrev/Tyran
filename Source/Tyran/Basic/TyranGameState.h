@@ -20,4 +20,7 @@ public:
 
 	virtual void BeginPlay() override;
 	void OnEndOfGame();
+
+	UFUNCTION(BlueprintCallable)
+	FTimespan getTimeLeft();
 };

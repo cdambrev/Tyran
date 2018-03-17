@@ -26,6 +26,9 @@ private:
 	UUserWidget* patrolPointsMode;
 	TSubclassOf<UUserWidget> patrolPointsModeUIClass;
 
+	// widget pour le timer
+	UUserWidget* timerUIWidget;
+	TSubclassOf<UUserWidget> timerUIClass;
 
 	// widget pour la fin du jeu
 	UUserWidget* endOfGameUIWidget;
