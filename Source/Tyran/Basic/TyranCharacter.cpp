@@ -18,6 +18,7 @@
 #include "Gameplay/item/WeaponLoot.h"
 #include "TimerManager.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -67,9 +68,13 @@ ATyranCharacter::ATyranCharacter()
 	PelvisAttachPoint = TEXT("PelvisSocket"); 
 	SpineAttachPoint = TEXT("SpineSocket");
 
+	// FPS camera
+	FPSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FPSCamera"));
+	FPSCamera->SetupAttachment(GetMesh(), WeaponAttachPoint);
+	FPSCamera->SetRelativeLocationAndRotation(FVector{ 0,0,20 }, FQuat{ FVector{0,0,1}, PI/2.0 });
+	FPSCamera->Deactivate();
+
 	bWantsToFire = false;
-
-
 
 	isVisible = false;
 
@@ -149,15 +154,10 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 	if (ActualDamage > 0.f && !isDead)
 	{
-		/*if (Role == ROLE_Authority) {
-			PlayAnimMontage(HitAnim, 1.0f, NAME_None);
-		}
-		else {*/
-			MulticastPlayAnim(HitAnim);
-		//}
-		float Duration = 
 
-		Health -= ActualDamage;
+		MulticastPlayAnim(HitAnim);
+
+		//Health -= ActualDamage;
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
 		if (Health <= 0.f)
 		{
@@ -230,10 +230,11 @@ void ATyranCharacter::EquipWeapon(AWeapon * Weapon)
 {
 	if (Weapon) {
 		if (Role == ROLE_Authority) { 
-			SetCurrentWeapon(Weapon); 
+			SetCurrentWeapon(Weapon);
 		} else { 
 			ServerEquipWeapon(Weapon); 
 		} 
+
 	}
 }
 
@@ -513,6 +514,11 @@ void ATyranCharacter::OnCrouchToggle()
 void ATyranCharacter::OnStartAim()
 {
 	isAiming = true;
+	if (IsLocallyControlled())
+	{
+		FollowCamera->Deactivate();
+		FPSCamera->Activate();
+	}
 	if (Role < ROLE_Authority)
 	{
 		ServerOnStartAim();
@@ -522,6 +528,11 @@ void ATyranCharacter::OnStartAim()
 void ATyranCharacter::OnStopAim()
 {
 	isAiming = false;
+	if (IsLocallyControlled())
+	{
+		FollowCamera->Activate();
+		FPSCamera->Deactivate();
+	}
 	if (Role < ROLE_Authority)
 	{
 		ServerOnStopAim();
@@ -782,6 +793,11 @@ void ATyranCharacter::setTemporarilyStun(float second)
 	isStun = true;
 	GetWorldTimerManager().SetTimer(UnusedHandle, this, &ATyranCharacter::setTemporarilyStunDelayedImplementation, second, false);
 
+}
+
+int ATyranCharacter::getMagCurrent()
+{
+	return CurrentWeapon->getMagCurrent();
 }
 
 void ATyranCharacter::setTemporarilyStunDelayedImplementation()

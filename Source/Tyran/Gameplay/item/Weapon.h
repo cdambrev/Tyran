@@ -105,6 +105,19 @@ protected:
 	UPROPERTY(Transient, Replicated)
 	int MagazineCurrent;
 
+	// *** Variables pour tir et dommages 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UDamageType> DamageType;
+
+	UPROPERTY(EditDefaultsOnly)
+	float WeaponRange;
+
+	UPROPERTY(EditDefaultsOnly)
+	float Accuracy;
+
+	UPROPERTY(EditDefaultsOnly)
+	float HitDamage;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -169,8 +182,13 @@ public:
 	virtual void HandleFiring(); // Pourra être surchargée dans les armes 
 	bool CanFire() const; 
 	
-	virtual void SimulateWeaponFire(); 
-	virtual void StopSimulatingWeaponFire(); 
+	virtual void SimulateWeaponFire();
+	virtual void StopSimulatingWeaponFire();
+	UFUNCTION(Reliable, Server, WithValidation)
+	void SimulateWeaponFireServer();
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void SpawnMuzzleEffectsMulticast();
 	
 	/* Avec PURE_VIRTUAL, nous n'avons pas à implanter la fonction ici, 
 	nous l'implanterons dans les classes dérivées */ 
@@ -205,8 +223,5 @@ public:
 	UFUNCTION() 
 	void OnRep_MyPawn();
 
-	/* LOOT */
-	/*void OnBeginFocus() override;
-	void OnEndFocus() override;
-	void OnUsed(APawn* InstigatorPawn) override;*/
+	int getMagCurrent();
 };

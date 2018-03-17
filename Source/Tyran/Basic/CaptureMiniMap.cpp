@@ -16,7 +16,7 @@ ACaptureMiniMap::ACaptureMiniMap() {
 	GetCaptureComponent2D()->SetRelativeLocation(FVector(0.0f, 0.0f, 2500.0f));
 	GetCaptureComponent2D()->TextureTarget = renderTarget;
 
-	tex = CreateDefaultSubobject<UTexture2D>(TEXT("TextureMap"));
+	//tex = CreateDefaultSubobject<UTexture2D>(TEXT("TextureMap"));
 	tex = UTexture2D::CreateTransient(128,128);
 	
 }

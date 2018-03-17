@@ -31,6 +31,10 @@ class ATyranCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
+	/** FPS camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* FPSCamera;
+
 public:
 	ATyranCharacter();
 
@@ -162,9 +166,6 @@ protected:
 	// Quand la touche Use est appuyée 
 	void Use();
 
-	// Quand la touche Reload est appuyée 
-	void OnReload();
-
 	// "Et là IL MEUUUUUUUURT !"
 	void OnDeath();
 
@@ -205,6 +206,9 @@ public:
 	void OnStartFire(); 
 	
 	void OnStopFire();
+
+	// Quand la touche Reload est appuyée 
+	void OnReload();
 
 	void StartWeaponFire(); 
 	
@@ -273,6 +277,8 @@ public:
 	void setTemporarilyVisible(float second);
 
 	void setTemporarilyStun(float second);
+
+	int getMagCurrent();
 protected:
 	void setTemporarilyVisibleDelayedImplementation();
 

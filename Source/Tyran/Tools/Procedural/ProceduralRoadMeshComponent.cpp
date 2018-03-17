@@ -20,7 +20,7 @@ bool UProceduralRoadMeshComponent::GetPhysicsTriMeshData(FTriMeshCollisionData *
 		CollisionData->Indices.Add(Triangle);
 	}
 
-	CollisionData->bFlipNormals = true;
+	CollisionData->bFlipNormals = false;
 	return true;
 }
 
