@@ -90,4 +90,6 @@ void ATyranGameMode::BeginPlay()
 {
 	heatMap->init(GetWorld());
 	heatMap->addHeatSource(FVector2D{ 189.0f, 267.0f });
+	heatMap->addHeatSource(FVector2D{ 5000.0f, 267.0f });
+	heatMap->addHeatSource(FVector2D{ 189.0f, 10000.0f });
 }
