@@ -55,6 +55,10 @@ ACityGenerator::ACityGenerator()
 
 	static ConstructorHelpers::FClassFinder<ABuildingSlot> buildSlotHelper(TEXT("/Game/Blueprints/BP_BuildingSlot"));
 	buildSlot = buildSlotHelper.Class;
+	static ConstructorHelpers::FClassFinder<AActor> bunkerHelper(TEXT("/Game/Objects/Buildings/TyranQG"));
+	bunker = bunkerHelper.Class;
+
+	bunkerRec = Rectangle{ FVector{ 2500,2500,0 }, FVector{ 2500,-2500,0 }, FVector{ -2500,-2500,0 }, FVector{ -2500,2500,0 } };
 }
 
 // Called when the game starts or when spawned
@@ -62,6 +66,12 @@ void ACityGenerator::BeginPlay()
 {
 	Super::BeginPlay();
 	randStream = FRandomStream(seed);
+	if (Role == ROLE_Authority) {
+		auto qg = GetWorld()->SpawnActor<AActor>(bunker, FTransform(FVector{0.0f,0.0f,0.0f}));
+	}
+	crossroads.Add(new Crossroad{ 2600.0f,0.0f,3 });
+	crossroads.Add(new Crossroad{ -2600.0f,0.0f,3 });
+	crossroads.Add(new Crossroad{ 0.0f,2600.0f,3 });
 	generateRoads();
 	if (Role == ROLE_Authority) {
 		placeBuildingSlots();
@@ -71,7 +81,6 @@ void ACityGenerator::BeginPlay()
 }
 
 void ACityGenerator::generateRoads() {
-	crossroads.Add(new Crossroad{ 0.0f,0.0f,3 });
 	for (int i = 0; i < nbIterationsBigRoadsGeneration; ++i) {
 		TArray<ACityGenerator::Crossroad *> tempCrossroads{ crossroads };
 		for (auto c : tempCrossroads) {
@@ -116,7 +125,7 @@ void ACityGenerator::seedFromCrossRoad(Crossroad * c, float lengthMin, float len
 			float crossY = c->posY + roadLength*rDir.Y;
 			Crossroad * mC = getOverlappingCrossRoad(crossX, crossY, squaredMergeDistance);
 			if (mC) {
-				if (checkExistingRoads(c, mC)) {
+				if (checkExistingRoads(c, mC, roadLevel)) {
 					Road * road = new Road(c, mC, roadLevel);
 					roads.Add(road);
 					c->connected.Add(road);
@@ -129,7 +138,7 @@ void ACityGenerator::seedFromCrossRoad(Crossroad * c, float lengthMin, float len
 			}
 			else {
 				Crossroad * nC = new Crossroad(crossX, crossY, roadLevel, rDir.X, rDir.Y);
-				if (checkExistingRoads(c, nC)) {
+				if (checkExistingRoads(c, nC, roadLevel)) {
 					crossroads.Add(nC);
 					Road * road = new Road(c, nC, roadLevel);
 					roads.Add(road);
@@ -256,6 +265,9 @@ void ACityGenerator::placeBuildingSlots()
 					ok = false;
 				}
 			}
+			if (rectanglesOverlap(bunkerRec, nBR)) {
+				ok = false;
+			}
 			if (ok) {
 				for (Road * r2 : roads) {
 					float halfSize2;
@@ -307,6 +319,9 @@ void ACityGenerator::placeBuildingSlots()
 				if (rectanglesOverlap(bs.Value, nBR)) {
 					ok = false;
 				}
+			}
+			if (rectanglesOverlap(bunkerRec, nBR)) {
+				ok = false;
 			}
 			if (ok) {
 				for (Road * r2 : roads) {
@@ -423,7 +438,7 @@ ACityGenerator::Crossroad * ACityGenerator::getOverlappingCrossRoad(float x, flo
 	return nullptr;
 }
 
-bool ACityGenerator::checkExistingRoads(ACityGenerator::Crossroad * c1, ACityGenerator::Crossroad * c2) {
+bool ACityGenerator::checkExistingRoads(ACityGenerator::Crossroad * c1, ACityGenerator::Crossroad * c2, int level) {
 	//Check for minimal angle
 	FVector2D dir{ c2->posX - c1->posX, c2->posY - c1->posY };
 	dir.Normalize();
@@ -457,7 +472,7 @@ bool ACityGenerator::checkExistingRoads(ACityGenerator::Crossroad * c1, ACityGen
 		}
 	}
 	//Check for crossing roads
-	for (Road * r : roads) {
+	/*for (Road * r : roads) {
 		float Ix = c2->posX - c1->posX;
 		float Iy = c2->posY - c1->posY;
 		float Jx = r->endPoint->posX - r->beginPoint->posX;
@@ -471,6 +486,63 @@ bool ACityGenerator::checkExistingRoads(ACityGenerator::Crossroad * c1, ACityGen
 				// position d'intersection : c1 + m * J);
 			}
 		}
+	}*/
+	float halfSize;
+	float sideHeight;
+	float sideSize;
+	if (level == 3) {
+		halfSize = halfSizeBigRoad - 1;
+		sideHeight = sideHeightBigRoad - 1;
+		sideSize = sideSizeBigRoad - 1;
+	}
+	else if (level == 2) {
+		halfSize = halfSizeRoad - 1;
+		sideHeight = sideHeightRoad - 1;
+		sideSize = sideSizeRoad - 1;
+	}
+	else {
+		halfSize = halfSizePath - 1;
+		sideHeight = sideHeightPath - 1;
+		sideSize = sideSizePath - 1;
+	}
+	FVector2D right = dir.GetRotated(90.0f);
+	FVector right3D = FVector(right.X, right.Y, 0.0f);
+	FVector begPoint{ c1->posX, c1->posY, 0.0f };
+	FVector endPoint{ c2->posX, c2->posY, 0.0f };
+	Rectangle roadRec{ endPoint + right3D*(halfSize + sideSize),endPoint - right3D*(halfSize + sideSize), begPoint - right3D*(halfSize + sideSize), begPoint + right3D * (halfSize + sideSize) };
+
+	for (Road * r2 : roads) {
+		float halfSize2;
+		float sideHeight2;
+		float sideSize2;
+		if (r2->level == 3) {
+			halfSize2 = halfSizeBigRoad - 1;
+			sideHeight2 = sideHeightBigRoad - 1;
+			sideSize2 = sideSizeBigRoad - 1;
+		}
+		else if (r2->level == 2) {
+			halfSize2 = halfSizeRoad - 1;
+			sideHeight2 = sideHeightRoad - 1;
+			sideSize2 = sideSizeRoad - 1;
+		}
+		else {
+			halfSize2 = halfSizePath - 1;
+			sideHeight2 = sideHeightPath - 1;
+			sideSize2 = sideSizePath - 1;
+		}
+		FVector dir2{ r2->endPoint->posX - r2->beginPoint->posX, r2->endPoint->posY - r2->beginPoint->posY, 0 };
+		dir2.Normalize();
+		FVector right2 = dir2.RotateAngleAxis(90, FVector{ 0.0f,0.0f,1.0f });
+		FVector begPoint2{ r2->beginPoint->posX, r2->beginPoint->posY, 0.0f };
+		FVector endPoint2{ r2->endPoint->posX, r2->endPoint->posY, 0.0f };
+		Rectangle roadRec2{ endPoint2 + right2*(halfSize2 + sideSize2),endPoint2 - right2*(halfSize2 + sideSize2), begPoint2 - right2*(halfSize2 + sideSize2), begPoint2 + right2 * (halfSize2 + sideSize2) };
+		if (c1 != r2->beginPoint && c1 != r2->endPoint && c2 != r2->beginPoint && c2 != r2->endPoint && rectanglesOverlap(roadRec, roadRec2)) {
+			return false;
+		}
+	}
+	//Check for bunker
+	if (rectanglesOverlap(roadRec, bunkerRec)) {
+		return false;
 	}
 	return true;
 }

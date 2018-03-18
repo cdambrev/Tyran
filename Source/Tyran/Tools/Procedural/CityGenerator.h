@@ -52,6 +52,7 @@ public:
 		FVector2D p2;
 		FVector2D p3;
 		FVector2D p4;
+		Rectangle() = default;
 		Rectangle(FVector _p1, FVector _p2, FVector _p3, FVector _p4) {
 			p1.X = _p1.X;
 			p1.Y = _p1.Y;
@@ -71,6 +72,7 @@ public:
 	TArray<Crossroad *> crossroads;
 	TArray<Road *> roads;
 	TArray<TTuple<ABuildingSlot *, Rectangle>> slots;
+	Rectangle bunkerRec;
 
 	UPROPERTY(EditAnywhere)
 	int seed;
@@ -150,6 +152,7 @@ public:
 	float sideHeightPath;
 
 	TSubclassOf<ABuildingSlot> buildSlot;
+	TSubclassOf<AActor> bunker;
 
 protected:
 	virtual void BeginPlay() override;
@@ -157,7 +160,7 @@ protected:
 	void buildRoads();
 	void buildCrossroads();
 	Crossroad * getOverlappingCrossRoad(float x, float y, float squaredDistance);
-	bool checkExistingRoads(Crossroad * c1, Crossroad * c2);
+	bool checkExistingRoads(Crossroad * c1, Crossroad * c2, int level);
 	void seedFromCrossRoad(Crossroad * c, float lengthMin, float lengthMax, int amountMin, int amountMax, int roadLevel, float squaredMergeDistance);
 	void splitRoads(int roadLevel, int crossroadLevel, float squaredMergeDistance);
 	bool pointIsLeftOf(FVector2D& p1, FVector2D& p2, FVector2D& p);
