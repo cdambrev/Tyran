@@ -170,7 +170,7 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 }
 
 
-UInteractComponent * ATyranCharacter::GetLootInView()
+UInteractComponent * ATyranCharacter::GetInteractionInView()
 {
 	FVector CamLoc;
 	FRotator CamRot; 
@@ -183,7 +183,7 @@ UInteractComponent * ATyranCharacter::GetLootInView()
 	const FVector Direction = CamRot.Vector(); 
 	const FVector TraceEnd = TraceStart + (Direction * MaxUseDistance); 
 	
-	FCollisionQueryParams TraceParams(FName(TEXT("TraceLoot")), true, this); 
+	FCollisionQueryParams TraceParams(FName(TEXT("TraceInteraction")), true, this); 
 	TraceParams.bTraceAsyncScene = true; 
 	TraceParams.bReturnPhysicalMaterial = false; 
 	TraceParams.bTraceComplex = false; 
@@ -548,7 +548,7 @@ void ATyranCharacter::OnStopAim()
 void ATyranCharacter::Use()
 {
 	if (Role == ROLE_Authority) {
-		UInteractComponent* interactComponent = GetLootInView();
+		UInteractComponent* interactComponent = GetInteractionInView();
 		if (interactComponent) {
 			interactComponent->OnUsed(this);
 		}
@@ -747,19 +747,19 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 	}
 
 	if (Controller && Controller->IsLocalController()) {
-		UInteractComponent* interactComponent = GetLootInView();
+		UInteractComponent* interactComponent = GetInteractionInView();
 		
 		// Terminer le focus sur l'objet précédent 
-		if (FocusedLoot != interactComponent) {
-			if (FocusedLoot) {
-				FocusedLoot->OnEndFocus();
+		if (FocusedInteraction != interactComponent) {
+			if (FocusedInteraction) {
+				FocusedInteraction->OnEndFocus();
 			} 
 
 			bHasNewFocus = true; 
 		} 
 		
 		// Assigner le nouveau focus (peut être nul ) 
-		FocusedLoot = interactComponent;
+		FocusedInteraction = interactComponent;
 		
 		// Démarrer un nouveau focus si Usable != null; 
 		if (interactComponent) {
