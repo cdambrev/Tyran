@@ -4,12 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include <functional>
 #include "Basic/TyranCharacter.h"
 #include "InteractComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(abstract, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TYRAN_API UInteractComponent : public UActorComponent
 {
 	GENERATED_BODY()

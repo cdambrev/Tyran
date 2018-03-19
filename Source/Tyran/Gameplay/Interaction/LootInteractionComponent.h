@@ -15,16 +15,15 @@ class TYRAN_API ULootInteractionComponent : public UInteractComponent
 {
 	GENERATED_BODY()
 
-
 protected:	
 	virtual void BeginPlay() override;
 public:
 	class ALoot* loot;
 	/* Le joueur regarde l'objet */
-	void OnBeginFocus() ;
+	virtual void OnBeginFocus() ;
 
 	/* Le joueur arrête de regarder l'objet */
-	void OnEndFocus() ;
+	virtual void OnEndFocus() ;
 
 	/* Appelé quand le joueur interagit avec l'objet */
 	void OnUsed(ATyranCharacter* InstigatorPawn);
