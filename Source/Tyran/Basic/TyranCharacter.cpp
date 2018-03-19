@@ -569,6 +569,8 @@ void ATyranCharacter::OnReload()
 void ATyranCharacter::OnDeath()
 {
 	isDead = true;
+
+	setDead();
 	MulticastStopAnim(HitAnim);
 	while (Inventory.Num() > 0)
 	{
@@ -689,6 +691,7 @@ void ATyranCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ATyranCharacter, CurrentWeapon);
 	DOREPLIFETIME(ATyranCharacter, Health);
 	DOREPLIFETIME(ATyranCharacter, isDead);
+	DOREPLIFETIME(ATyranCharacter, currState);
 	DOREPLIFETIME(ATyranCharacter, isAiming);
 	DOREPLIFETIME_CONDITION(ATyranCharacter, CrouchButtonDown, COND_SkipOwner);
 }

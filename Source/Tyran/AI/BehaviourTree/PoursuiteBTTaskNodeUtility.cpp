@@ -4,6 +4,7 @@
 #include "AI/AIGuardController.h"
 #include "runtime/AIModule/Classes/BehaviorTree/BlackboardComponent.h" 
 #include "Runtime/AIModule/Classes/BrainComponent.h" 
+#include "Basic/GuardCharacter.h"
 
 EBTNodeResult::Type UPoursuiteBTTaskNodeUtility::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
@@ -31,9 +32,9 @@ void UPoursuiteBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerCo
 {
 	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
 	AActor* HeroCharacterActor = Cast<AActor>(AIGuardController->GetBlackboardComponent()->GetValueAsObject("TargetActorToFollow"));
-
-	if (HeroCharacterActor)
-		utility = 1.0f - 500.f/(FVector::Distance(HeroCharacterActor->GetActorLocation(), AIGuardController->GetPawn()->GetActorLocation()));
+	AGuardCharacter * guard = Cast<AGuardCharacter>(AIGuardController->GetPawn());
+	if (HeroCharacterActor && guard->modeGuard != ModeGuard::TENIRPOSITION )
+		utility = 1.0f - 500/(FVector::Distance(HeroCharacterActor->GetActorLocation(), AIGuardController->GetPawn()->GetActorLocation()));
 	else
 		utility = 0.0f;
 	//1 - distance voulue/ distance a la cible actuelle

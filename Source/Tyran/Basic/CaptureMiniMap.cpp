@@ -16,7 +16,6 @@ ACaptureMiniMap::ACaptureMiniMap() {
 	GetCaptureComponent2D()->SetRelativeLocation(FVector(0.0f, 0.0f, 2500.0f));
 	GetCaptureComponent2D()->TextureTarget = renderTarget;
 
-	//tex = CreateDefaultSubobject<UTexture2D>(TEXT("TextureMap"));
 	tex = UTexture2D::CreateTransient(128,128);
 	
 }
@@ -29,7 +28,7 @@ void ACaptureMiniMap::update() {
 	for (int i = 0; i < MapTexData.Num(); ++i) {
 		FColor c = MapTexData[i];
 		FColor res = FColor(0, 0, 0);
-		float z = c.R / 255.0f + c.G / 65025.0f + c.B / 16581375.0f + c.A / 4228250625.0f;
+		float z = c.R / 255.0f + c.G / 65025.0f + c.B / 16581375.0f + c.A / 4228250625.0f; // Formule pour avoir le Z buffer à partir du RGBA
 		if (z < 0.0158f) {
 			if (z > 0.001)
 				res = FColor(0, 0, 128);
