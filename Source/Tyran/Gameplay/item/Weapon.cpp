@@ -3,6 +3,7 @@
 #include "Weapon.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "kismet/GameplayStatics.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -250,9 +251,13 @@ void AWeapon::OnBurstFinished() {
 
 void AWeapon::HandleFiring() {
 	if (CanFire()) {
-		if (GetNetMode() != NM_DedicatedServer) {
-			SimulateWeaponFire(); 
-		} 
+		if (Role == ROLE_Authority) {
+			SimulateWeaponFire();
+		}
+		else
+		{
+			SimulateWeaponFireServer();
+		}
 		if (MyPawn && MyPawn->IsLocallyControlled()) {
 			FireWeapon(); 
 
@@ -260,7 +265,11 @@ void AWeapon::HandleFiring() {
 			BurstCounter++; 
 		} 
 		MagazineCurrent--;
-	} 
+	}
+	else if (MagazineCurrent == 0)
+	{
+		OnReload();
+	}
 	if (MyPawn && MyPawn->IsLocallyControlled()) { 
 		if (Role < ROLE_Authority) { 
 			ServerHandleFiring(); 
@@ -296,22 +305,39 @@ bool AWeapon::CanFire() const {
 }
 
 void AWeapon::SimulateWeaponFire() { 
-	if (MuzzleFX) { 
-		MuzzlePSC = UGameplayStatics::SpawnEmitterAttached(MuzzleFX, Mesh, MuzzleAttachPoint); 
-	} 
+	SpawnMuzzleEffectsMulticast();
 	
-	if (!bPlayingFireAnim) { 
-		PlayWeaponAnimation(FireAnim); 
-		bPlayingFireAnim = true; 
-	} 
+	//if (!bPlayingFireAnim) { 
+	//	PlayWeaponAnimation(FireAnim); 
+	//	bPlayingFireAnim = true; 
+	//} 
 	//PlayWeaponSound(FireSound); 
 }
 
+bool AWeapon::SimulateWeaponFireServer_Validate() {
+	return true;
+}
+
+void AWeapon::SimulateWeaponFireServer_Implementation() {
+	SimulateWeaponFire();
+}
+
+bool AWeapon::SpawnMuzzleEffectsMulticast_Validate() {
+	return true;
+}
+
+void AWeapon::SpawnMuzzleEffectsMulticast_Implementation() {
+	if (MuzzleFX) {
+		MuzzlePSC = UGameplayStatics::SpawnEmitterAttached(MuzzleFX, Mesh, MuzzleAttachPoint);
+	}
+}
+
+
 void AWeapon::StopSimulatingWeaponFire() {
-	if (bPlayingFireAnim) {
+	/*if (bPlayingFireAnim) {
 		StopWeaponAnimation(FireAnim);
 		bPlayingFireAnim = false;
-	}
+	}*/
 }
 
 FVector AWeapon::GetMuzzleLocation() const {
@@ -386,9 +412,14 @@ void AWeapon::OnRep_MyPawn() {
 	}
 }
 
+int AWeapon::getMagCurrent()
+{
+	return MagazineCurrent;
+}
+
 void AWeapon::OnReload()
 {
-	if (MyPawn->Ammunition[AmmoType] > 0 && MagazineCurrent < MagazineSize)
+	if (MyPawn->Ammunition[AmmoType] > 0 && MagazineCurrent < MagazineSize && !bPendingReload)
 	{
 		bPendingReload = true;
 

@@ -38,4 +38,7 @@ public:
 
 	UFUNCTION(Reliable, Client)
 	void updateMap();
+
+	void EndOfGame();
+
 };

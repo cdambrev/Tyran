@@ -7,9 +7,8 @@
 #include "Basic/Enum/TyranTypes.h"
 #include "Net/UnrealNetwork.h"
 #include "Basic/Enum/Alignement.h"
+#include "Enum/StateRev.h"
 #include "TyranCharacter.generated.h"
-
-
 
 /*
 UENUM(BlueprintType)
@@ -30,6 +29,10 @@ class ATyranCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
+	/** FPS camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* FPSCamera;
 
 public:
 	ATyranCharacter();
@@ -60,7 +63,6 @@ public:
 	bool isStun;
 
 
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Replicated)
 	bool isVisible;
 
@@ -83,6 +85,9 @@ public:
 	bool isAiming;
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Etat")
+	EStateRev currState = EStateRev::ADECOUVERT;
+	
 	/* Point d'attache pour les items en main et actifs */ 
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
 	FName WeaponAttachPoint; 
@@ -162,9 +167,6 @@ protected:
 	// Quand la touche Use est appuyée 
 	void Use();
 
-	// Quand la touche Reload est appuyée 
-	void OnReload();
-
 	// "Et là IL MEUUUUUUUURT !"
 	void OnDeath();
 
@@ -206,6 +208,9 @@ public:
 	
 	void OnStopFire();
 
+	// Quand la touche Reload est appuyée 
+	void OnReload();
+
 	void StartWeaponFire(); 
 	
 	void StopWeaponFire();
@@ -220,6 +225,30 @@ public:
 
 	void DropWeapon();
 	void RemoveWeapon(class AWeapon* Weapon);
+
+	void setDead() {
+		currState = EStateRev::MORT;
+	}
+
+	void setAgonisant() {
+		currState = EStateRev::AGONISANT;
+	}
+
+	void setADecouvert() {
+		currState = EStateRev::ADECOUVERT;
+	}
+
+	void setACouvert() {
+		currState = EStateRev::ACOUVERT;
+	}
+
+	void setTirACouvert() {
+		currState = EStateRev::TIRANTACOUVERT;
+	}
+
+	EStateRev getState() {
+		return currState;
+	}
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerUse();
@@ -259,7 +288,6 @@ public:
 	void setVisible(bool b);
 
 
-
 	UFUNCTION(BlueprintCallable, Category="Tyran")
 	void setViewedThisTick();
 
@@ -273,6 +301,8 @@ public:
 	void setTemporarilyVisible(float second);
 
 	void setTemporarilyStun(float second);
+
+	int getMagCurrent();
 protected:
 	void setTemporarilyVisibleDelayedImplementation();
 

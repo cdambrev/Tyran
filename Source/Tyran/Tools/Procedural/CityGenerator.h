@@ -46,12 +46,30 @@ public:
 		}
 	};
 
+	struct Rectangle {
+		FVector2D p1;
+		FVector2D p2;
+		FVector2D p3;
+		FVector2D p4;
+		Rectangle(FVector _p1, FVector _p2, FVector _p3, FVector _p4) {
+			p1.X = _p1.X;
+			p1.Y = _p1.Y;
+			p2.X = _p2.X;
+			p2.Y = _p2.Y;
+			p3.X = _p3.X;
+			p3.Y = _p3.Y;
+			p4.X = _p4.X;
+			p4.Y = _p4.Y;
+		}
+	};
+
 	ACityGenerator();
 
 	int lastElementId;
 
 	TArray<Crossroad *> crossroads;
 	TArray<Road *> roads;
+	TArray<TTuple<ABuildingSlot *, Rectangle>> slots;
 
 	UPROPERTY(EditAnywhere)
 	int nbIterationsBigRoadsGeneration;
@@ -136,6 +154,10 @@ protected:
 	bool checkExistingRoads(Crossroad * c1, Crossroad * c2);
 	void seedFromCrossRoad(Crossroad * c, float lengthMin, float lengthMax, int amountMin, int amountMax, int roadLevel, float squaredMergeDistance);
 	void splitRoads(int roadLevel, int crossroadLevel, float squaredMergeDistance);
+	bool pointIsLeftOf(FVector2D p1, FVector2D p2, FVector2D p);
+	bool pointIsInRectangle(FVector2D p, Rectangle rec);
+	bool rectanglesOverlap(Rectangle r1, Rectangle r2);
+	void placeBuildingSlots();
 
 public:	
 	virtual void Tick(float DeltaTime) override;

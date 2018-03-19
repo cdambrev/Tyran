@@ -10,6 +10,7 @@
 #include <Image.h>
 #include "GUI/RevHUD.h"
 //#include "Runtime/UMG/Public/Blueprint/UserWidget.h"
+#include "GUI/TyranHUD.h"
 
 void ATyranController::setTyran(bool b)
 {
@@ -60,4 +61,14 @@ ATyranController::ATyranController() {
 void ATyranController::updateMap_Implementation() {
 	if(GetHUD())
 		Cast<ARevHUD>(GetHUD())->setMapUpdateState(true);
+
+}
+
+void ATyranController::EndOfGame() {
+	AHUD* hud = GetHUD();
+	if (hud && hud->IsA(ATyranHUD::StaticClass())) {
+		ATyranHUD* thud = static_cast<ATyranHUD*>(hud);
+		thud->OnEndOfGame();
+	}
+
 }
