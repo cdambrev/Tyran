@@ -332,7 +332,12 @@ bool AWeapon::SpawnMuzzleEffectsMulticast_Validate() {
 void AWeapon::SpawnMuzzleEffectsMulticast_Implementation() {
 	if (MuzzleFX) {
 		MuzzlePSC = UGameplayStatics::SpawnEmitterAttached(MuzzleFX, Mesh, MuzzleAttachPoint);
-		MuzzlePSC->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
+
+		// TODO: Trouver une meilleure solution
+		if (WeaponType == EWeaponType::Pistol)
+		{
+			MuzzlePSC->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
+		}
 	}
 }
 
@@ -355,6 +360,11 @@ FVector AWeapon::GetMuzzleDirection() const {
 EAmmoType AWeapon::GetAmmoType()
 {
 	return AmmoType;
+}
+
+EWeaponType AWeapon::GetWeaponType()
+{
+	return WeaponType;
 }
 
 // Called every frame

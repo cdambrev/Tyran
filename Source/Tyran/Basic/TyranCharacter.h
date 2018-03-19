@@ -290,6 +290,9 @@ public:
 	void setTemporarilyStun(float second);
 
 	int getMagCurrent();
+
+	UFUNCTION(BlueprintCallable)
+	EWeaponType GetCurrentWeaponType();
 protected:
 	void setTemporarilyVisibleDelayedImplementation();
 

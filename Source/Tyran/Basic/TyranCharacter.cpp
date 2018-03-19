@@ -426,7 +426,7 @@ void ATyranCharacter::DropWeapon()
 		/* Lui appliquer une petite force pour que l'arme tourne un peu lorsque lachee. */ 
 		UStaticMeshComponent* MeshComp = NewWeaponLoot->GetMeshComponent();
 		if (MeshComp) { 
-			MeshComp->AddTorque(FVector(1, 1, 1) * 4000000); 
+			MeshComp->AddTorqueInRadians(FVector(1, 1, 1) * 4000000); 
 		} 
 		
 		RemoveWeapon(CurrentWeapon); 
@@ -829,6 +829,14 @@ void ATyranCharacter::setTemporarilyStun(float second)
 int ATyranCharacter::getMagCurrent()
 {
 	return CurrentWeapon->getMagCurrent();
+}
+
+EWeaponType ATyranCharacter::GetCurrentWeaponType()
+{
+	if (CurrentWeapon)
+		return CurrentWeapon->GetWeaponType();
+
+	return EWeaponType::None;
 }
 
 void ATyranCharacter::setTemporarilyStunDelayedImplementation()

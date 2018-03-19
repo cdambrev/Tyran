@@ -17,7 +17,9 @@ enum class EAmmoType : uint8 {
 	SniperRifle
 };
 
+UENUM(BlueprintType)
 enum class EWeaponType : uint8 {
+	None,
 	AssaultRifle,
 	Shotgun,
 	Pistol,

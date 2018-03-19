@@ -254,6 +254,7 @@ public:
 	FVector GetMuzzleDirection() const;
 
 	EAmmoType GetAmmoType();
+	EWeaponType GetWeaponType();
 
 	/** Obtenir le mesh de l'arme */ 
 	UFUNCTION(BlueprintCallable, Category = "Game|Weapon") 
