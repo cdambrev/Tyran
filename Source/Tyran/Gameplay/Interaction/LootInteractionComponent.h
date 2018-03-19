@@ -9,12 +9,17 @@
 /**
  * 
  */
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class TYRAN_API ULootInteractionComponent : public UInteractComponent
 {
 	GENERATED_BODY()
-	
 
+
+protected:	
+	virtual void BeginPlay() override;
+public:
+	class ALoot* loot;
 	/* Le joueur regarde l'objet */
 	void OnBeginFocus() ;
 
