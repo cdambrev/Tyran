@@ -221,7 +221,7 @@ public:
 	void OnBurstFinished(); 
 	
 	virtual void HandleFiring(); // Pourra être surchargée dans les armes 
-	bool CanFire() const; 
+	virtual bool CanFire() const; 
 	
 	virtual void SimulateWeaponFire();
 	virtual void StopSimulatingWeaponFire();

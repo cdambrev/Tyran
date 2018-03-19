@@ -21,6 +21,39 @@ APistol::APistol()
 	//RifleAttachPoint = TEXT("RifleSocket"); 
 }
 
+bool APistol::CanFire() const
+{
+	bool bPawnCanFire = MyPawn && MyPawn->CanFire();
+	bool bStateOK = CurrentState == EWeaponState::Idle;
+	return bPawnCanFire && bStateOK;
+}
+
+void APistol::HandleFiring()
+{
+	if (MagazineCurrent > 0) {
+		if (Role == ROLE_Authority) {
+			SimulateWeaponFire();
+		}
+		else
+		{
+			SimulateWeaponFireServer();
+		}
+		if (MyPawn && MyPawn->IsLocallyControlled()) {
+			FireWeapon();
+
+			// Mettre à jour l'effet sur les objets distants 
+			BurstCounter++;
+		}
+		MagazineCurrent--;
+	}
+	else
+	{
+		OnReload();
+	}
+
+	LastFireTime = GetWorld()->GetTimeSeconds();
+}
+
 void APistol::FireWeapon()
 {
 	UpdateSpreadVector();

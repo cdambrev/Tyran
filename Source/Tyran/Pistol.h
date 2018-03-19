@@ -17,6 +17,8 @@ class TYRAN_API APistol : public AWeapon
 public:
 	APistol();
 
+	virtual bool CanFire() const override;
+	virtual void HandleFiring() override;
 	virtual void FireWeapon() override;
 
 protected:
