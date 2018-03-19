@@ -26,7 +26,8 @@ public:
 		int nbTargetPoint = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "variables custom")
-		float acceptanceRadius = 1000;
+		float acceptanceRadius = 100;
+		//float acceptanceRadius = 1000;
 
 	/** Sera utilisé par la tâche UpdateNextTargetPointBTTaskNode du Behavior Tree pour actualiser le chemin de patrouille */
 	UFUNCTION(BlueprintCallable, Category = "Fonctions custom")

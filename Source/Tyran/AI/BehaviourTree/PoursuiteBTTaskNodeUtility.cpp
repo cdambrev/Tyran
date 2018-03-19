@@ -10,7 +10,7 @@ EBTNodeResult::Type UPoursuiteBTTaskNodeUtility::ExecuteTask(UBehaviorTreeCompon
 	//UE_LOG(LogTemp, Warning, TEXT("Pursue"));
 	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
 	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
-	if (AIGuardController->MoveToEnemy() == EPathFollowingRequestResult::RequestSuccessful)
+	if (AIGuardController->MoveToEnemy() == EPathFollowingRequestResult::RequestSuccessful && checkVisibility(OwnerComp))
 		NodeResult = EBTNodeResult::Succeeded;
 	else
 		NodeResult = EBTNodeResult::Failed;
@@ -42,21 +42,22 @@ void UPoursuiteBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerCo
 }
 
 
-bool UPoursuiteBTTaskNodeUtility::checkVisibility(AActor * actor) {
+bool UPoursuiteBTTaskNodeUtility::checkVisibility(UBehaviorTreeComponent & OwnerComp) {
 	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
-	FVector dir = actor->GetActorLocation() - GetComponentTransform().GetLocation();
+	AActor* HeroCharacterActor = Cast<AActor>(AIGuardController->GetBlackboardComponent()->GetValueAsObject("TargetActorToFollow"));
+	FVector dir = HeroCharacterActor->GetActorLocation() - AIGuardController->GetPawn()->GetActorLocation();
 	dir.Normalize();
-	float cosA = FVector::DotProduct(GetComponentTransform().GetRotation().GetForwardVector(), dir);
-	if (cosA > cos(PI*(angleOfVision * 2) / 360)) {
+	//float cosA = FVector::DotProduct(AIGuardController->GetPawn()->GetViewRotation()->GetForwardVector(), dir);
+	//if (cosA > cos(PI*(angleOfVision * 2) / 360)) {
 		FCollisionObjectQueryParams objectQueryParams{};
 		FCollisionQueryParams queryParams{};
-		queryParams.AddIgnoredActor(GetOwner());
+		queryParams.AddIgnoredActor(AIGuardController->GetPawn());
 		FHitResult resultHit{};
-		if (GetWorld()->LineTraceSingleByObjectType(resultHit, GetComponentTransform().GetLocation(), actor->GetActorLocation(), objectQueryParams, queryParams)) {
-			if (&(*resultHit.Actor) == actor) {
+		if (GetWorld()->LineTraceSingleByObjectType(resultHit, AIGuardController->GetPawn()->GetActorLocation(), HeroCharacterActor->GetActorLocation(), objectQueryParams, queryParams)) {
+			if (&(*resultHit.Actor) == HeroCharacterActor) {
 				return true;
 			}
 		}
-	}
+	//}
 	return false;
 }

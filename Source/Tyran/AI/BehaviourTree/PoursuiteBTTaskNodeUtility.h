@@ -14,7 +14,7 @@ class TYRAN_API UPoursuiteBTTaskNodeUtility : public UBTTaskNodeUtility
 {
 	GENERATED_BODY()
 private:
-	bool checkVisibility(AActor * actor);
+	bool checkVisibility(UBehaviorTreeComponent & OwnerComp);
 
 public:
 	/* Sera appelée au démarrage de la tâche et devra retourner Succeeded, Failed ou InProgress */
