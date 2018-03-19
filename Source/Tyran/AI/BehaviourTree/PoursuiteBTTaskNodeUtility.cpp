@@ -33,7 +33,7 @@ void UPoursuiteBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerCo
 	AActor* HeroCharacterActor = Cast<AActor>(AIGuardController->GetBlackboardComponent()->GetValueAsObject("TargetActorToFollow"));
 
 	if (HeroCharacterActor)
-		utility = 1.0f - 500/(FVector::Distance(HeroCharacterActor->GetActorLocation(), AIGuardController->GetPawn()->GetActorLocation()));
+		utility = 1.0f - 500.f/(FVector::Distance(HeroCharacterActor->GetActorLocation(), AIGuardController->GetPawn()->GetActorLocation()));
 	else
 		utility = 0.0f;
 	//1 - distance voulue/ distance a la cible actuelle
@@ -42,3 +42,21 @@ void UPoursuiteBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerCo
 }
 
 
+bool UPoursuiteBTTaskNodeUtility::checkVisibility(AActor * actor) {
+	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
+	FVector dir = actor->GetActorLocation() - GetComponentTransform().GetLocation();
+	dir.Normalize();
+	float cosA = FVector::DotProduct(GetComponentTransform().GetRotation().GetForwardVector(), dir);
+	if (cosA > cos(PI*(angleOfVision * 2) / 360)) {
+		FCollisionObjectQueryParams objectQueryParams{};
+		FCollisionQueryParams queryParams{};
+		queryParams.AddIgnoredActor(GetOwner());
+		FHitResult resultHit{};
+		if (GetWorld()->LineTraceSingleByObjectType(resultHit, GetComponentTransform().GetLocation(), actor->GetActorLocation(), objectQueryParams, queryParams)) {
+			if (&(*resultHit.Actor) == actor) {
+				return true;
+			}
+		}
+	}
+	return false;
+}

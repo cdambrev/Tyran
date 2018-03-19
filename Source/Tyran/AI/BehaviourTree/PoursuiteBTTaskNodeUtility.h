@@ -13,7 +13,10 @@ UCLASS()
 class TYRAN_API UPoursuiteBTTaskNodeUtility : public UBTTaskNodeUtility
 {
 	GENERATED_BODY()
-	
+private:
+	bool checkVisibility(AActor * actor);
+
+public:
 	/* Sera appelée au démarrage de la tâche et devra retourner Succeeded, Failed ou InProgress */
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
