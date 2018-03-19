@@ -7,7 +7,7 @@
 #include "Gameplay/item/Loot.h"
 #include "Basic/TyranController.h"
 #include "GUI/TyranHUD.h"
-//#include "GUI/RevHUD.h"
+#include "GUI/RevHUD.h"
 #include "TyranGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -31,12 +31,13 @@ public:
 	UPROPERTY()
 	TSubclassOf<ATyranHUD> TyranHUD;
 	
-	//UPROPERTY()
-	//TSubclassOf<ARevHUD> RevHUD;
+	UPROPERTY()
+	TSubclassOf<ARevHUD> RevHUD;
 
 	ATyranGameMode();
 	
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+
 };
 
 

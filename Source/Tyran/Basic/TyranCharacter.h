@@ -7,9 +7,8 @@
 #include "Basic/Enum/TyranTypes.h"
 #include "Net/UnrealNetwork.h"
 #include "Basic/Enum/Alignement.h"
+#include "Enum/StateRev.h"
 #include "TyranCharacter.generated.h"
-
-
 
 /*
 UENUM(BlueprintType)
@@ -71,7 +70,6 @@ public:
 	bool isStun;
 
 
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Replicated)
 	bool isVisible;
 
@@ -94,6 +92,9 @@ public:
 	bool isAiming;
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Etat")
+	EStateRev currState = EStateRev::ADECOUVERT;
+	
 	/* Point d'attache pour les items en main et actifs */ 
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
 	FName WeaponAttachPoint_Rifle; 
@@ -237,6 +238,30 @@ public:
 
 	void DropWeapon();
 	void RemoveWeapon(class AWeapon* Weapon);
+
+	void setDead() {
+		currState = EStateRev::MORT;
+	}
+
+	void setAgonisant() {
+		currState = EStateRev::AGONISANT;
+	}
+
+	void setADecouvert() {
+		currState = EStateRev::ADECOUVERT;
+	}
+
+	void setACouvert() {
+		currState = EStateRev::ACOUVERT;
+	}
+
+	void setTirACouvert() {
+		currState = EStateRev::TIRANTACOUVERT;
+	}
+
+	EStateRev getState() {
+		return currState;
+	}
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerUse();

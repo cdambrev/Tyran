@@ -1,0 +1,70 @@
+
+*
+{
+	color:white;
+	padding: 10px;
+}
+
+#menu
+{
+	display: inline-flex;
+}
+
+.labelmenu
+{
+	margin:0;
+	padding: 0;
+}
+/*===================================*/
+/*====== CATERGORIES ================*/
+/*===================================*/
+.ia, .iaCheck
+{
+	background: rgba(0,0,160,255);
+}
+
+
+.hud, .hudCheck
+{
+	background: rgba(160,0,0,255);
+}
+
+.tyran, .tyranCheck
+{
+	background: rgba(0,160,0,255);
+}
+
+/*===================================*/
+
+
+
+.hidden
+{
+	display: none;
+}
+
+.heure{
+	width: 10%;
+	text-align: center;
+	background-color: white;
+	color:black;
+}
+
+table
+{
+	width: 100%;
+	background: rgb(60,60,60);
+	
+}
+
+th
+{
+	font-weight: normal;
+	text-align: left;
+
+}
+
+tr
+{
+	background:rgb(127,127,127);
+}
