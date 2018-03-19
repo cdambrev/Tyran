@@ -558,6 +558,7 @@ void ATyranCharacter::OnReload()
 void ATyranCharacter::OnDeath()
 {
 	isDead = true;
+
 	MulticastStopAnim(HitAnim);
 	while (Inventory.Num() > 0)
 	{

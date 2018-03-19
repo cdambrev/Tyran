@@ -5,11 +5,12 @@
 #include "runtime/AIModule/Classes/BehaviorTree/BlackboardComponent.h" 
 #include "Runtime/AIModule/Classes/BrainComponent.h" 
 #include "Basic/GuardCharacter.h"
-
+#include "Tools/Debug/DebugTools.h"
 
 EBTNodeResult::Type UShootBTTaskNodeUtility::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Shoot"));
+	Debugger::get().addTextLog("Shoot","ia");
 	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
 	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
 	Cast<ATyranCharacter>(AIGuardController->GetPawn())->OnStartFire();
