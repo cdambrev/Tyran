@@ -11,8 +11,8 @@
 class TYRAN_API HeatMap
 {
 private:
-	const uint16 maxSource = 32768;
-	const uint16 maxPropagation = 16384;
+	const float maxSource = 2.0f;
+	const float maxPropagation = 1.0f;
 
 	UTexture2D * map;
 	int dimension;
@@ -26,7 +26,7 @@ public:
 
 	void update(float deltaTime);
 	void addHeatSource(FVector2D pos);
-	void setHeatAtPoint(FVector2D position, uint16 val);
+	void setHeatAtPoint(FVector2D position, float val);
 	void init(UWorld * world);
 
 	HeatMap();
