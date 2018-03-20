@@ -39,9 +39,9 @@ ACityGenerator::ACityGenerator()
 	minAngleBetweenRoads = PI / 5;
 	numberOfTryOnAngleFail = 50;
 
-	BigCrossroadRadius = 2000.0f;
-	CrossroadRadius = 1600.0f;
-	CrossPathRadius = 800.0f;
+	BigCrossroadRadius = 3000.0f;
+	CrossroadRadius = 3000.0f;
+	CrossPathRadius = 3000.0f;
 
 	halfSizeBigRoad = 700;
 	halfSizeRoad = 500;
@@ -254,8 +254,8 @@ void ACityGenerator::placeBuildingSlots()
 		FVector right = dir.RotateAngleAxis(90, FVector{ 0.0f,0.0f,1.0f });
 		FVector basePos{ r->beginPoint->posX, r->beginPoint->posY, GetActorTransform().GetLocation().Z + sideHeight };
 		FRotator rot = right.Rotation();
-		float relativePos = 1000;
-		while (relativePos < length - 1000) {
+		float relativePos = 0;
+		while (relativePos < length) {
 			FVector pos = basePos + relativePos * dir + (halfSize + sideSize + 1000) * right;
 			Rectangle nBR{ (pos + 1000 * dir - 1000 * right), (pos - 1000 * dir - 1000 * right), (pos - 1000 * dir + 1000 * right), (pos + 1000 * dir + 1000 * right) };
 			FTransform trans{ rot,pos,FVector{1,1,1} };
@@ -309,8 +309,8 @@ void ACityGenerator::placeBuildingSlots()
 			}
 		}
 		rot = (-right).Rotation();
-		relativePos = 1000;
-		while (relativePos < length - 1000) {
+		relativePos = 0;
+		while (relativePos < length) {
 			FVector pos = basePos + relativePos * dir - (halfSize + sideSize + 1000) * right;
 			Rectangle nBR{ (pos + 1000 * dir - 1000 * right), (pos - 1000 * dir - 1000 * right), (pos - 1000 * dir + 1000 * right), (pos + 1000 * dir + 1000 * right) };
 			FTransform trans{ rot,pos,FVector{ 1,1,1 } };
@@ -369,7 +369,7 @@ void ACityGenerator::placeBuildingSlots()
 void ACityGenerator::buildRoads() {
 	for (auto r : roads) {
 		auto road = GetWorld()->SpawnActor<AproceduralRoad>(AproceduralRoad::StaticClass(), GetActorTransform());
-		road->initValues(halfSizeBigRoad, halfSizeRoad, halfSizePath, sideSizeBigRoad, sideSizeRoad, sideSizePath, sideHeightBigRoad, sideHeightRoad, sideHeightPath);
+		road->initValues(halfSizeBigRoad, halfSizeRoad, halfSizePath, sideSizeBigRoad, sideSizeRoad, sideSizePath, sideHeightBigRoad, sideHeightRoad, sideHeightPath, roadMaterial, sideMaterial);
 		float bRadius;
 		float eRadius;
 		if (r->beginPoint->level == 3) {
@@ -406,7 +406,7 @@ void ACityGenerator::buildCrossroads()
 {
 	for (auto c : crossroads) {
 		auto cross = GetWorld()->SpawnActor<AproceduralRoad>(AproceduralRoad::StaticClass(), GetActorTransform());
-		cross->initValues(halfSizeBigRoad, halfSizeRoad, halfSizePath, sideSizeBigRoad, sideSizeRoad, sideSizePath, sideHeightBigRoad, sideHeightRoad, sideHeightPath);
+		cross->initValues(halfSizeBigRoad, halfSizeRoad, halfSizePath, sideSizeBigRoad, sideSizeRoad, sideSizePath, sideHeightBigRoad, sideHeightRoad, sideHeightPath, roadMaterial, sideMaterial);
 		float radius;
 		if (c->level == 3) {
 			radius = BigCrossroadRadius;

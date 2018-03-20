@@ -77,6 +77,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	int seed;
 
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface * roadMaterial;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface * sideMaterial;
+
 	FRandomStream randStream;
 
 	UPROPERTY(EditAnywhere)
