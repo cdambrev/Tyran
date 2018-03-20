@@ -18,6 +18,10 @@ enum class EAlignement : uint8 {
 	A_REVOLUTIONNAIRE UMETA(DisplayName="Revolutionnaire")
 };*/
 
+
+//class forwarding
+class UInteractionComponent;
+
 UCLASS(config=Game)
 class ATyranCharacter : public ACharacter
 {
@@ -115,7 +119,7 @@ protected:
 	bool bWantsToFire;
 
 	bool bHasNewFocus; // Seulement vrai lors de la première image avec un nouveau focus.
-	class UInteractComponent* FocusedInteraction;
+	UInteractionComponent* FocusedInteraction;
 
 	// Distance maximale de focus sur les objets.
 	UPROPERTY(EditDefaultsOnly, Category = "ObjectInteraction") 
@@ -176,7 +180,7 @@ protected:
 	// AActor
 	
 
-	class UInteractComponent* GetInteractionInView();
+	UInteractionComponent* GetInteractionInView();
 
 
 

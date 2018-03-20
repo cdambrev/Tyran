@@ -19,7 +19,7 @@
 #include "TimerManager.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Gameplay/Interaction/InteractComponent.h"
+#include "Gameplay/Interaction/InteractionComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -170,7 +170,8 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 }
 
 
-UInteractComponent * ATyranCharacter::GetInteractionInView()
+
+UInteractionComponent * ATyranCharacter::GetInteractionInView()
 {
 	FVector CamLoc;
 	FRotator CamRot; 
@@ -194,13 +195,14 @@ UInteractComponent * ATyranCharacter::GetInteractionInView()
 	
 	//
 	if (succes && Hit.GetActor()) {
-		if(UInteractComponent* interactComponent = Hit.GetActor()->FindComponentByClass<UInteractComponent>()){
+		if(UInteractionComponent* interactComponent = Hit.GetActor()->FindComponentByClass<UInteractionComponent>()){
 			return interactComponent;
 		}
 	}
 	//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f); 
 	return nullptr;
 }
+
 
 
 FName ATyranCharacter::GetInventoryAttachPoint(EInventorySlot Slot) const
@@ -548,7 +550,7 @@ void ATyranCharacter::OnStopAim()
 void ATyranCharacter::Use()
 {
 	if (Role == ROLE_Authority) {
-		UInteractComponent* interactComponent = GetInteractionInView();
+		UInteractionComponent* interactComponent = GetInteractionInView();
 		if (interactComponent) {
 			interactComponent->OnUsed(this);
 		}
@@ -747,10 +749,10 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 	}
 
 	if (Controller && Controller->IsLocalController()) {
-		UInteractComponent* interactComponent = GetInteractionInView();
+		UInteractionComponent* interactionComponent = GetInteractionInView();
 		
 		// Terminer le focus sur l'objet précédent 
-		if (FocusedInteraction != interactComponent) {
+		if (FocusedInteraction != interactionComponent) {
 			if (FocusedInteraction) {
 				FocusedInteraction->OnEndFocus();
 			} 
@@ -759,12 +761,12 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 		} 
 		
 		// Assigner le nouveau focus (peut être nul ) 
-		FocusedInteraction = interactComponent;
+		FocusedInteraction = interactionComponent;
 		
 		// Démarrer un nouveau focus si Usable != null; 
-		if (interactComponent) {
+		if (interactionComponent) {
 			if (bHasNewFocus) { 
-				interactComponent->OnBeginFocus();
+				interactionComponent->OnBeginFocus();
 				bHasNewFocus = false; 
 				
 				// Pour débogage, vous pourrez l'oter par la suite 
