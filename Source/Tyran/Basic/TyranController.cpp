@@ -8,7 +8,9 @@
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetTree.h"
 #include <Image.h>
+#include "GUI/RevHUD.h"
 //#include "Runtime/UMG/Public/Blueprint/UserWidget.h"
+#include "GUI/TyranHUD.h"
 
 void ATyranController::setTyran(bool b)
 {
@@ -34,24 +36,9 @@ void ATyranController::initOnTyranClient_Implementation()
 void ATyranController::initOnRevolutionnaireClient_Implementation()
 
 {
-	revUI = CreateWidget<UUserWidget>(GetGameInstance(), revolutionnaireUIClass);
-	revUI->AddToViewport(9999);
-	captureMap = GetWorld()->SpawnActor<ACaptureMiniMap>(defaultCapture);
-	updateMap();
-}
-
-void ATyranController::Tick(float DeltaSeconds)
-{
-	if (!isTyran && revUI && captureMap) {
-		if (updateMapNextTick) {
-			updateMap();
-			setMapUpdateState(false);
-		}
-
-		moveMiniMap();
-	}
 	
 }
+
 
 void ATyranController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -64,38 +51,24 @@ void ATyranController::SetPawn(APawn * InPawn)
 	Super::SetPawn(InPawn);
 }
 
-void ATyranController::updateMap_Implementation() {
-	if (captureMap && revUI) {
-		captureMap->update();
-	}
-	
-}
 
-void ATyranController::setMapUpdateState_Implementation(bool updateNextTick) {
-	updateMapNextTick = updateNextTick;
-}
-
-void ATyranController::moveMiniMap() {
-	if (captureMap && revUI) {
-		UImage * img = Cast<UImage>(revUI->GetWidgetFromName(TEXT("MiniMap")));
-		if (GetPawn()) {
-			img->SetBrushFromTexture(captureMap->GetTextureAtLocation(GetPawn()->GetActorLocation()));
-		}
-			
-	}
-
-}
 
 ATyranController::ATyranController() {
 	isTyran = false;
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> revUIHelper(TEXT("/Game/UI/RevolutionnaireInterface"));
-	revolutionnaireUIClass = revUIHelper.Class;
+}
 
-	static ConstructorHelpers::FClassFinder<ACaptureMiniMap> captureMapClass(TEXT("/Game/UI/MiniMapCapture"));
-	if (captureMapClass.Class != NULL)
-	{
-		defaultCapture = captureMapClass.Class;
+void ATyranController::updateMap_Implementation() {
+	if(GetHUD())
+		Cast<ARevHUD>(GetHUD())->setMapUpdateState(true);
+
+}
+
+void ATyranController::EndOfGame() {
+	AHUD* hud = GetHUD();
+	if (hud && hud->IsA(ATyranHUD::StaticClass())) {
+		ATyranHUD* thud = static_cast<ATyranHUD*>(hud);
+		thud->OnEndOfGame();
 	}
 
 }
