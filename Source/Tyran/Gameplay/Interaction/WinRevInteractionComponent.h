@@ -9,12 +9,22 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class TYRAN_API UWinRevInteractionComponent : public UInteractionComponent
 {
 	GENERATED_BODY()
 	
-	
-	
+protected:
+	virtual void BeginPlay() override;
+public:
+	class UStaticMeshComponent* mesh; //temporaire juste pour highlight le cube 
+	/* Le joueur regarde l'objet */
+	virtual void OnBeginFocus() override;
+
+	/* Le joueur arrête de regarder l'objet */
+	virtual void OnEndFocus() override;
+
+	/* Appelé quand le joueur interagit avec l'objet */
+	virtual void OnUsed(ATyranCharacter* InstigatorPawn);
 	
 };
