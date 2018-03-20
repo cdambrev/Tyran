@@ -635,10 +635,10 @@ void AWeapon::ProcessInstantHitConfirmed(const FHitResult & Impact, const FVecto
 	// Jouer l'effet visuel sur les clients distants 
 	if (Role == ROLE_Authority) {
 		//HitOriginNotify = Origin;
-		SimulateInstantHit(Origin);
+		SimulateInstantHit(Origin, ShootDir);
 	}
 	else {
-		SimulateInstantHitServer(Origin);
+		SimulateInstantHitServer(Origin, ShootDir);
 	}
 }
 
@@ -665,10 +665,9 @@ void AWeapon::DealDamage(const FHitResult & Impact, const FVector & ShootDir)
 	Impact.GetActor()->TakeDamage(PointDmg.Damage, PointDmg, MyPawn->Controller, this);
 }
 
-void AWeapon::SimulateInstantHit(const FVector & Origin)
+void AWeapon::SimulateInstantHit(const FVector & Origin, const FVector & AimDir)
 {
 	const FVector StartTrace = Origin;
-	const FVector AimDir = GetAdjustedAim();
 	const FVector EndTrace = StartTrace + (AimDir * WeaponRange);
 	const FHitResult Impact = WeaponTrace(StartTrace, EndTrace);
 	if (Impact.bBlockingHit) {
@@ -680,12 +679,12 @@ void AWeapon::SimulateInstantHit(const FVector & Origin)
 	}
 }
 
-bool AWeapon::SimulateInstantHitServer_Validate(const FVector & Origin) {
+bool AWeapon::SimulateInstantHitServer_Validate(const FVector & Origin, const FVector & AimDir) {
 	return true;
 }
 
-void AWeapon::SimulateInstantHitServer_Implementation(const FVector & Origin) {
-	SimulateInstantHit(Origin);
+void AWeapon::SimulateInstantHitServer_Implementation(const FVector & Origin, const FVector & AimDir) {
+	SimulateInstantHit(Origin, AimDir);
 }
 
 

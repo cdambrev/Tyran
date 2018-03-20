@@ -284,10 +284,10 @@ public:
 	bool ShouldDealDamage(AActor* TestActor) const;
 	void DealDamage(const FHitResult& Impact, const FVector& ShootDir);
 
-	void SimulateInstantHit(const FVector& Origin);
+	void SimulateInstantHit(const FVector& Origin, const FVector & AimDir);
 
 	UFUNCTION(Reliable, Server, WithValidation)
-	void SimulateInstantHitServer(const FVector& Origin);
+	void SimulateInstantHitServer(const FVector& Origin, const FVector & AimDir);
 
 	UFUNCTION(Reliable, NetMulticast, WithValidation)
 	void SpawnImpactEffectsMulticast(const FHitResult& Impact);
@@ -296,5 +296,5 @@ public:
 	void SpawnTrailEffectsMulticast(const FVector& EndPoint);
 
 protected:
-	void UpdateSpreadVector();
+	virtual void UpdateSpreadVector();
 };
