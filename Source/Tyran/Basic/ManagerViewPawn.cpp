@@ -18,6 +18,8 @@
 #include "GUI/TyranHUD.h"
 #include "Gameplay/item/Trap/Trap.h"
 #include "TyranController.h"
+#include "GUI/RevHUD.h"
+#include "Tools/Debug/DebugTools.h"
 
 
 /***************/
@@ -407,14 +409,16 @@ void AManagerViewPawn::callBuildOnSlot_Implementation(ABuildingSlot * slot, TSub
 {
 	if (static_cast<AManagerPlayerState *>(GetController()->PlayerState)->spendMoney(static_cast<ABuilding *>(tBuildClass->ClassDefaultObject)->basePrice)) {
 		slot->build(tBuildClass);
-
+		Debugger::get().addTextLog("Construire : " + tBuildClass->GetName(), "tyran");
 		for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 		{
 			ATyranController * c = Cast<ATyranController>(Iterator->Get());
 			if (c)
 			{
-				if (!c->isTyran)
-					c->setMapUpdateState(true);
+				if (!c->isTyran) {
+					c->updateMap();
+				}
+					
 			}
 		}
 	}

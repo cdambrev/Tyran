@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "FleeBTTaskNodeUtility.h"
+#include "AI/AIGuardController.h"
+#include "Basic/GuardCharacter.h"
 
 
 EBTNodeResult::Type UFleeBTTaskNodeUtility::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
@@ -22,7 +24,11 @@ FString UFleeBTTaskNodeUtility::GetStaticDescription() const
 
 void UFleeBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerComp)
 {
-	utility = 0.0f;
+	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
+	AGuardCharacter * guard = Cast<AGuardCharacter>(AIGuardController->GetPawn());
+	utility = 1.0f * guard->fuiteAutorise;
+	
+	
 	clampUtility();
 }
 

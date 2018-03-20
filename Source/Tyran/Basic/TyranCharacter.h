@@ -7,9 +7,8 @@
 #include "Basic/Enum/TyranTypes.h"
 #include "Net/UnrealNetwork.h"
 #include "Basic/Enum/Alignement.h"
+#include "Enum/StateRev.h"
 #include "TyranCharacter.generated.h"
-
-
 
 /*
 UENUM(BlueprintType)
@@ -34,6 +33,13 @@ class ATyranCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
+	/** Aim camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* AimCameraBoom;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* AimCamera;
 
 	/** FPS camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -68,7 +74,6 @@ public:
 	bool isStun;
 
 
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Replicated)
 	bool isVisible;
 
@@ -91,9 +96,15 @@ public:
 	bool isAiming;
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Etat")
+	EStateRev currState = EStateRev::ADECOUVERT;
+	
 	/* Point d'attache pour les items en main et actifs */ 
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
-	FName WeaponAttachPoint; 
+	FName WeaponAttachPoint_Rifle; 
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
+	FName WeaponAttachPoint_Handgun;
 	
 	/* Point d'attache pour les items à la ceinture. */ 
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets") 
@@ -102,6 +113,10 @@ protected:
 	/* Point d'attache pour l'arme principale */
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
 	FName SpineAttachPoint;
+
+	/* Point d'attache pour les items en main et actifs */
+	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
+	FName HeadAttachPoint;
 
 	/* Distance pour lacher un objet d'inventaire. */
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory") 
@@ -188,14 +203,13 @@ public:
 
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
-
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	/* Retourne le point d'attache (socket) pour correspondre au socket du squelette */ 
-	FName GetInventoryAttachPoint(EInventorySlot Slot) const;
+	FName GetInventoryAttachPoint(EInventorySlot Slot, EWeaponType WeaponType) const;
 
 	void AddWeapon(class AWeapon* Weapon);
 
@@ -228,6 +242,30 @@ public:
 
 	void DropWeapon();
 	void RemoveWeapon(class AWeapon* Weapon);
+
+	void setDead() {
+		currState = EStateRev::MORT;
+	}
+
+	void setAgonisant() {
+		currState = EStateRev::AGONISANT;
+	}
+
+	void setADecouvert() {
+		currState = EStateRev::ADECOUVERT;
+	}
+
+	void setACouvert() {
+		currState = EStateRev::ACOUVERT;
+	}
+
+	void setTirACouvert() {
+		currState = EStateRev::TIRANTACOUVERT;
+	}
+
+	EStateRev getState() {
+		return currState;
+	}
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerUse();
@@ -266,8 +304,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Tyran")
 	void setVisible(bool b);
 
-
-
 	UFUNCTION(BlueprintCallable, Category="Tyran")
 	void setViewedThisTick();
 
@@ -283,6 +319,9 @@ public:
 	void setTemporarilyStun(float second);
 
 	int getMagCurrent();
+
+	UFUNCTION(BlueprintCallable)
+	EWeaponType GetCurrentWeaponType();
 protected:
 	void setTemporarilyVisibleDelayedImplementation();
 
