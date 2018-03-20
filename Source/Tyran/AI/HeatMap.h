@@ -4,12 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Runtime/Engine/Classes/Engine/Texture2D.h"
+#include "UObject/NoExportTypes.h"
+#include "HeatMap.generated.h"
 
 /**
  * 
  */
-class TYRAN_API HeatMap
+UCLASS()
+class TYRAN_API UHeatMap : public UObject
 {
+	GENERATED_BODY()
 private:
 	const float maxSource = 2.0f;
 	const float maxPropagation = 1.0f;
@@ -29,6 +33,9 @@ public:
 	void setHeatAtPoint(FVector2D position, float val);
 	void init(UWorld * world);
 
-	HeatMap();
-	~HeatMap();
+	UHeatMap();
+	~UHeatMap();
+	
+	
+	
 };

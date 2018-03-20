@@ -17,7 +17,7 @@ class ATyranGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
-	HeatMap * heatMap;
+	UHeatMap * heatMap;
 
 	UPROPERTY(EditAnywhere)
 	TSet<TSubclassOf<ALoot>> availableLoot;
