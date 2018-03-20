@@ -65,7 +65,7 @@ void UShootBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerComp)
 	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
 	AActor* HeroCharacterActor = Cast<AActor>(AIGuardController->GetBlackboardComponent()->GetValueAsObject("TargetActorToFollow"));
 
-	if (HeroCharacterActor)
+	if (HeroCharacterActor && checkVisibility(OwnerComp))
 		utility = 600 / (FVector::Distance(HeroCharacterActor->GetActorLocation(), AIGuardController->GetPawn()->GetActorLocation()));
 	else
 		utility = 0.0f;
@@ -74,3 +74,23 @@ void UShootBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerComp)
 	clampUtility();
 }
 
+bool UShootBTTaskNodeUtility::checkVisibility(UBehaviorTreeComponent & OwnerComp) {
+	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
+	AActor* HeroCharacterActor = Cast<AActor>(AIGuardController->GetBlackboardComponent()->GetValueAsObject("TargetActorToFollow"));
+	FVector dir = HeroCharacterActor->GetActorLocation() - AIGuardController->GetPawn()->GetActorLocation();
+	dir.Normalize();
+	// On ne vérifie pas l'angle de vision, normalement, car ca a déjà été vérifié en fixant si la cible est visible
+	//float cosA = FVector::DotProduct(AIGuardController->GetPawn()->GetViewRotation()->GetForwardVector(), dir);
+	//if (cosA > cos(PI*(angleOfVision * 2) / 360)) {
+	FCollisionObjectQueryParams objectQueryParams{};
+	FCollisionQueryParams queryParams{};
+	queryParams.AddIgnoredActor(AIGuardController->GetPawn());
+	FHitResult resultHit{};
+	if (GetWorld()->LineTraceSingleByObjectType(resultHit, AIGuardController->GetPawn()->GetActorLocation(), HeroCharacterActor->GetActorLocation(), objectQueryParams, queryParams)) {
+		if (&(*resultHit.Actor) == HeroCharacterActor) {
+			return true;
+		}
+	}
+	//}
+	return false;
+}

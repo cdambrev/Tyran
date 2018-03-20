@@ -14,7 +14,11 @@ class TYRAN_API UPoursuiteBTTaskNodeUtility : public UBTTaskNodeUtility
 {
 	GENERATED_BODY()
 private:
+	float distVoulue = 500;
+	float dist;
+	bool isVisibleByGuard;
 	bool checkVisibility(UBehaviorTreeComponent & OwnerComp);
+	AAIGuardController *AIGuardController;
 
 public:
 	/* Sera appelée au démarrage de la tâche et devra retourner Succeeded, Failed ou InProgress */
@@ -27,6 +31,5 @@ public:
 	virtual FString GetStaticDescription() const override;
 
 	virtual void CalculUtility(UBehaviorTreeComponent & OwnerComp) override;
-	
 	
 };

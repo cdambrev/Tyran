@@ -15,6 +15,7 @@ AGuardCharacter::AGuardCharacter() {
 }
 
 void AGuardCharacter::BeginPlay() {
+	Super::BeginPlay();
 	//static ConstructorHelpers::FObjectFinder<UObject> tyranViewFindHelper(TEXT("/Game/Blueprints/TyranViewComponent"));
 	//if (tyranViewFindHelper.Succeeded()) {
 	//	USpotLightComponent* tyranView = static_cast<USpotLightComponent*>(tyranViewFindHelper.Object);
