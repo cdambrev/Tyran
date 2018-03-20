@@ -2,6 +2,7 @@
 
 #include "WinRevInteractionComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Basic/TyranGameState.h"
 
 void UWinRevInteractionComponent::BeginPlay()
 {
@@ -23,5 +24,6 @@ void UWinRevInteractionComponent::OnEndFocus()
 
 void UWinRevInteractionComponent::OnUsed(ATyranCharacter* InstigatorPawn)
 {
-	InstigatorPawn->DropWeapon();
+	ATyranGameState* gamestate = Cast<ATyranGameState>(GetWorld()->GetGameState());
+	gamestate->RevWin();
 }

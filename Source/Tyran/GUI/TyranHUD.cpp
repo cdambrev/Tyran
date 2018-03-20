@@ -17,8 +17,11 @@ ATyranHUD::ATyranHUD() {
 	ConstructorHelpers::FClassFinder<UUserWidget> defaultUIHelper(TEXT("/Game/UI/ManagerInterface"));
 	defaultUIClass = defaultUIHelper.Class;
 
-	ConstructorHelpers::FClassFinder<UUserWidget> endOfGameUIHelper(TEXT("/Game/UI/EndOfGame"));
-	endOfGameUIClass = endOfGameUIHelper.Class;
+	ConstructorHelpers::FClassFinder<UUserWidget> endOfGameUIHelper(TEXT("/Game/UI/EndGame/TyranEndGameRevWin"));
+	EndGameRevWinUIclass = endOfGameUIHelper.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> endOfGameUIHelper2(TEXT("/Game/UI/EndGame/TyranEndGameTyranWin"));
+	EndGameTyranWinUIclass = endOfGameUIHelper2.Class;
 
 	ConstructorHelpers::FClassFinder<UUserWidget> timerUIHelper(TEXT("/Game/UI/Timer"));
 	timerUIClass = timerUIHelper.Class;
@@ -110,9 +113,16 @@ void ATyranHUD::modificationGuardInfoFuite() {
 }
 
 
-void ATyranHUD::OnEndOfGame() {
+void ATyranHUD::EndGameTyranWin() {
 	removeAllPermanently();
-	endOfGameUIWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), endOfGameUIClass);
+	endOfGameUIWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), EndGameTyranWinUIclass);
+	endOfGameUIWidget->AddToViewport(9998);
+
+}
+
+void ATyranHUD::EndGameRevWin() {
+	removeAllPermanently();
+	endOfGameUIWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), EndGameRevWinUIclass);
 	endOfGameUIWidget->AddToViewport(9998);
 
 }
@@ -135,3 +145,5 @@ void ATyranHUD::removeAllPermanently() {
 		guardInfo->RemoveFromParent();
 	}
 }
+
+

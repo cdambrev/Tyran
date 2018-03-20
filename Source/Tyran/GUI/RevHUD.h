@@ -22,6 +22,10 @@ private:
 	UUserWidget* defaultUIWidget;
 	bool updateMapNextTick = true;
 
+	// widget pour la fin du jeu
+	UUserWidget* endOfGameUIWidget;
+	TSubclassOf<UUserWidget> EndGameRevWinUIclass; 
+	TSubclassOf<UUserWidget> EndGameTyranWinUIclass;
 public:
 	UPROPERTY()
 		TSubclassOf<ACaptureMiniMap> defaultCapture;
@@ -44,6 +48,10 @@ public:
 
 	void removeDefaultUI();
 
+	void EndGameTyranWin();
+	void EndGameRevWin();
+
+	void removeAllPermanently();
 	void Tick(float DeltaSeconds) override;
 	
 };

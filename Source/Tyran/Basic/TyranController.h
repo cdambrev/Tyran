@@ -39,6 +39,8 @@ public:
 	UFUNCTION(Reliable, Client)
 	void updateMap();
 
-	void EndOfGame();
 
+	void EndGameTyranWin();
+
+	void EndGameRevWin();
 };

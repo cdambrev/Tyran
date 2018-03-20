@@ -64,11 +64,34 @@ void ATyranController::updateMap_Implementation() {
 
 }
 
-void ATyranController::EndOfGame() {
+void ATyranController::EndGameTyranWin() {
 	AHUD* hud = GetHUD();
-	if (hud && hud->IsA(ATyranHUD::StaticClass())) {
-		ATyranHUD* thud = static_cast<ATyranHUD*>(hud);
-		thud->OnEndOfGame();
+	if (hud) {
+		if (isTyran)
+		{
+			ATyranHUD* thud = static_cast<ATyranHUD*>(hud);
+			thud->EndGameTyranWin();
+		}
+		else {
+			ARevHUD* thud = static_cast<ARevHUD*>(hud);
+			thud->EndGameTyranWin();
+		}
+		
+	}
+}
+void ATyranController::EndGameRevWin() {
+	AHUD* hud = GetHUD();
+	if (hud) {
+		if (isTyran)
+		{
+			ATyranHUD* thud = static_cast<ATyranHUD*>(hud);
+			thud->EndGameRevWin();
+		}
+		else {
+			ARevHUD* thud = static_cast<ARevHUD*>(hud);
+			thud->EndGameRevWin();
+		}
+
 	}
 
 }
