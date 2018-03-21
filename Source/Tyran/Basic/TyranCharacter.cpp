@@ -19,6 +19,7 @@
 #include "TimerManager.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Gameplay/Interaction/InteractionComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -186,7 +187,8 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 }
 
 
-ALoot * ATyranCharacter::GetLootInView()
+
+UInteractionComponent * ATyranCharacter::GetInteractionInView()
 {
 	FVector CamLoc;
 	FRotator CamRot; 
@@ -199,7 +201,7 @@ ALoot * ATyranCharacter::GetLootInView()
 	const FVector Direction = CamRot.Vector(); 
 	const FVector TraceEnd = TraceStart + (Direction * MaxUseDistance); 
 	
-	FCollisionQueryParams TraceParams(FName(TEXT("TraceLoot")), true, this); 
+	FCollisionQueryParams TraceParams(FName(TEXT("TraceInteraction")), true, this); 
 	TraceParams.bTraceAsyncScene = true; 
 	TraceParams.bReturnPhysicalMaterial = false; 
 	TraceParams.bTraceComplex = false; 
@@ -208,10 +210,16 @@ ALoot * ATyranCharacter::GetLootInView()
 	FHitResult Hit(ForceInit);
 	bool succes = GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, TraceParams);
 	
+	//
+	if (succes && Hit.GetActor()) {
+		if(UInteractionComponent* interactComponent = Hit.GetActor()->FindComponentByClass<UInteractionComponent>()){
+			return interactComponent;
+		}
+	}
 	//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f); 
-	
-	return Cast<ALoot>(Hit.GetActor());
+	return nullptr;
 }
+
 
 
 FName ATyranCharacter::GetInventoryAttachPoint(EInventorySlot Slot, EWeaponType WeaponType) const
@@ -573,9 +581,9 @@ void ATyranCharacter::OnStopAim()
 void ATyranCharacter::Use()
 {
 	if (Role == ROLE_Authority) {
-		ALoot* Loot = GetLootInView();
-		if (Loot) {
-			Loot->OnUsed(this);
+		UInteractionComponent* interactComponent = GetInteractionInView();
+		if (interactComponent) {
+			interactComponent->OnUsed(this);
 		}
 	}
 	else
@@ -775,24 +783,24 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 	}
 
 	if (Controller && Controller->IsLocalController()) {
-		ALoot* Loot = GetLootInView();
+		UInteractionComponent* interactionComponent = GetInteractionInView();
 		
 		// Terminer le focus sur l'objet précédent 
-		if (FocusedLoot != Loot) {
-			if (FocusedLoot) {
-				FocusedLoot->OnEndFocus();
+		if (FocusedInteraction != interactionComponent) {
+			if (FocusedInteraction) {
+				FocusedInteraction->OnEndFocus();
 			} 
 
 			bHasNewFocus = true; 
 		} 
 		
 		// Assigner le nouveau focus (peut être nul ) 
-		FocusedLoot = Loot;
+		FocusedInteraction = interactionComponent;
 		
 		// Démarrer un nouveau focus si Usable != null; 
-		if (Loot) {
+		if (interactionComponent) {
 			if (bHasNewFocus) { 
-				Loot->OnBeginFocus();
+				interactionComponent->OnBeginFocus();
 				bHasNewFocus = false; 
 				
 				// Pour débogage, vous pourrez l'oter par la suite 
