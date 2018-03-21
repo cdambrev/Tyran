@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "InteractionComponent.h"
+#include "Components/TextRenderComponent.h"
+#include "Components/MaterialBillboardComponent.h"
 
 
 // Sets default values for this component's properties
@@ -10,15 +12,19 @@ UInteractionComponent::UInteractionComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	/*RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	
 	BillboardComponent = CreateDefaultSubobject<UMaterialBillboardComponent>(TEXT("Billboard"));
-	BillboardComponent->SetupAttachment(RootComponent);
+	BillboardComponent->AttachTo(this);
 
 	TextRender = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Text"));
-	TextRender->AttachTo(RootComponent);
+	TextRender->AttachTo(BillboardComponent);
 	TextRender->SetText(FText::FromString("Pickup Text"));
-	TextRender->HorizontalAlignment = EHorizTextAligment::EHTA_Center;
-	TextRender->VerticalAlignment = EVerticalTextAligment::EVRTA_TextCenter;*/
+	//TextRender->HorizontalAlignment = EHorizTextAligment::EHTA_Center;
+	//TextRender->VerticalAlignment = EVerticalTextAligment::EVRTA_TextCenter;
+
+	BillboardComponent->SetVisibility(true);
+	TextRender->SetVisibility(true);
+
 }
 
 
@@ -33,18 +39,20 @@ void UInteractionComponent::BeginPlay()
 
 void UInteractionComponent::OnBeginFocus()
 {
-
+	BillboardComponent->SetVisibility(true);
+	TextRender->SetVisibility(true);
 }
 
 void UInteractionComponent::OnEndFocus()
 {
-
+	BillboardComponent->SetVisibility(false);
+	TextRender->SetVisibility(false);
 }
 // Called every frame
 void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+//	FRotator billRotate = BillboardComponent->
 }
 

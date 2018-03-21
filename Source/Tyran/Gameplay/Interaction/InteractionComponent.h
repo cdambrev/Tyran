@@ -8,6 +8,7 @@
 #include "InteractionComponent.generated.h"
 
 
+
 UCLASS(abstract, ClassGroup=(Custom))
 class TYRAN_API UInteractionComponent : public USceneComponent
 {
@@ -24,9 +25,12 @@ protected:
 	virtual void BeginPlay() override;
 
 	//A UBillboardComponent to hold Icon sprite
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UMaterialBillboardComponent* BillboardComponent;
 	//Sprite for the Billboard Component
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UTextRenderComponent * TextRender;
+
 public:
 
 	/* Le joueur regarde l'objet */
