@@ -187,7 +187,7 @@ UHeatMap::UHeatMap()
 {
 	dimension = 1024;
 	pixelSize = 100;
-	region = FUpdateTextureRegion2D(0, 0, 0, 0, dimension, dimension);
+	//region = FUpdateTextureRegion2D(0, 0, 0, 0, dimension, dimension);
 	map = UTexture2D::CreateTransient(dimension, dimension, EPixelFormat::PF_R32_FLOAT);
 }
 

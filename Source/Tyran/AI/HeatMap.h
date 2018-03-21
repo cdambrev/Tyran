@@ -18,12 +18,14 @@ private:
 	const float maxSource = 2.0f;
 	const float maxPropagation = 1.0f;
 
-	UTexture2D * map;
 	int dimension;
 	float pixelSize;
-	FUpdateTextureRegion2D region;
+	//FUpdateTextureRegion2D region;
 
 public:
+	UPROPERTY()
+	UTexture2D * map;
+
 	UTexture2D * getTexture() {
 		return map;
 	}
@@ -35,7 +37,4 @@ public:
 
 	UHeatMap();
 	~UHeatMap();
-	
-	
-	
 };
