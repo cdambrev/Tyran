@@ -150,6 +150,148 @@ void AproceduralRoad::buildCross(ACityGenerator::Crossroad * c, float radius)
 
 	FVector center{ c->posX, c->posY, 0.0f };
 	if (roads.Num() == 1) {
+		//RoadLeft
+		points.Add(roads[0].Value.points[0]);
+		normals.Add(FVector{ 0.0f,0.0f,1.0f });
+		UV0.Add(FVector2D{ roads[0].Value.points[0].X / 1000,roads[0].Value.points[0].Y / 1000 });
+		colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
+		tangents.Add(FProcMeshTangent(0, 1, 0));
+
+		//RoadRight
+		points.Add(roads[0].Value.points[1]);
+		normals.Add(FVector{ 0.0f,0.0f,1.0f });
+		UV0.Add(FVector2D{ roads[0].Value.points[1].X / 1000,roads[0].Value.points[1].Y / 1000 });
+		colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
+		tangents.Add(FProcMeshTangent(0, 1, 0));
+
+		//RoadEndLeft
+		points.Add(center + roads[0].Value.halfSize * (-(roads[0].Value.right)));
+		normals.Add(FVector{ 0.0f,0.0f,1.0f });
+		UV0.Add(FVector2D{ points.Last().X / 1000,points.Last().Y / 1000 });
+		colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
+		tangents.Add(FProcMeshTangent(0, 1, 0));
+
+		//RoadEndRight
+		points.Add(center + roads[0].Value.halfSize * (roads[0].Value.right));
+		normals.Add(FVector{ 0.0f,0.0f,1.0f });
+		UV0.Add(FVector2D{ points.Last().X / 1000,points.Last().Y / 1000 });
+		colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
+		tangents.Add(FProcMeshTangent(0, 1, 0));
+
+		//SideLeftCenter
+		points.Add(roads[0].Value.points[2]);
+		normals.Add(FVector{ 0.0f,0.0f,1.0f });
+		UV0.Add(FVector2D{ roads[0].Value.points[2].X / 1000,roads[0].Value.points[2].Y / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
+		colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
+		tangents.Add(FProcMeshTangent(0, 1, 0));
+
+		//SideRightCenter
+		points.Add(roads[0].Value.points[3]);
+		normals.Add(FVector{ 0.0f,0.0f,1.0f });
+		UV0.Add(FVector2D{ roads[0].Value.points[3].X / 1000,roads[0].Value.points[3].Y / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
+		colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
+		tangents.Add(FProcMeshTangent(0, 1, 0));
+
+		//SideLeftExter
+		points.Add(roads[0].Value.points[4]);
+		normals.Add(FVector{ 0.0f,0.0f,1.0f });
+		UV0.Add(FVector2D{ roads[0].Value.points[4].X / 1000,roads[0].Value.points[4].Y / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
+		colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
+		tangents.Add(FProcMeshTangent(0, 1, 0));
+
+		//SideRightExter
+		points.Add(roads[0].Value.points[5]);
+		normals.Add(FVector{ 0.0f,0.0f,1.0f });
+		UV0.Add(FVector2D{ roads[0].Value.points[5].X / 1000,roads[0].Value.points[5].Y / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
+		colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
+		tangents.Add(FProcMeshTangent(0, 1, 0));
+
+		//SideInterEndLeft
+		points.Add(center + roads[0].Value.halfSize * (-(roads[0].Value.right)) + FVector(0.0f,0.0f,10.0f));
+		normals.Add(FVector{ 0.0f,0.0f,1.0f });
+		UV0.Add(FVector2D{ points.Last().X / 1000,points.Last().Y / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
+		colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
+		tangents.Add(FProcMeshTangent(0, 1, 0));
+
+		//SideInterEndRight
+		points.Add(center + roads[0].Value.halfSize * (roads[0].Value.right) + FVector(0.0f, 0.0f, 10.0f));
+		normals.Add(FVector{ 0.0f,0.0f,1.0f });
+		UV0.Add(FVector2D{ points.Last().X / 1000,points.Last().Y / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
+		colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
+		tangents.Add(FProcMeshTangent(0, 1, 0));
+
+		//SideExterEndLeft
+		points.Add(center + (roads[0].Value.halfSize + roads[0].Value.sideSize) * (-(roads[0].Value.right)) + FVector(0.0f, 0.0f, 10.0f) - roads[0].Value.sideSize * roads[0].Value.dir);
+		normals.Add(FVector{ 0.0f,0.0f,1.0f });
+		UV0.Add(FVector2D{ points.Last().X / 1000,points.Last().Y / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
+		colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
+		tangents.Add(FProcMeshTangent(0, 1, 0));
+
+		//SideExterEndRight
+		points.Add(center + (roads[0].Value.halfSize + roads[0].Value.sideSize) * (roads[0].Value.right) + FVector(0.0f, 0.0f, 10.0f) - roads[0].Value.sideSize * roads[0].Value.dir);
+		normals.Add(FVector{ 0.0f,0.0f,1.0f });
+		UV0.Add(FVector2D{ points.Last().X / 1000,points.Last().Y / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
+		colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
+		tangents.Add(FProcMeshTangent(0, 1, 0));
+
+		//Road
+		triangles.Add(0);
+		triangles.Add(3);
+		triangles.Add(1);
+
+		triangles.Add(0);
+		triangles.Add(2);
+		triangles.Add(3);
+
+		//SideTop
+		triangles2.Add(6);
+		triangles2.Add(8);
+		triangles2.Add(4);
+
+		triangles2.Add(6);
+		triangles2.Add(10);
+		triangles2.Add(8);
+
+		triangles2.Add(10);
+		triangles2.Add(11);
+		triangles2.Add(8);
+
+		triangles2.Add(8);
+		triangles2.Add(11);
+		triangles2.Add(9);
+
+		triangles2.Add(5);
+		triangles2.Add(9);
+		triangles2.Add(11);
+
+		triangles2.Add(5);
+		triangles2.Add(11);
+		triangles2.Add(7);
+
+		//SideSide
+		triangles2.Add(0);
+		triangles2.Add(4);
+		triangles2.Add(8);
+
+		triangles2.Add(0);
+		triangles2.Add(8);
+		triangles2.Add(2);
+
+		triangles2.Add(2);
+		triangles2.Add(8);
+		triangles2.Add(9);
+
+		triangles2.Add(2);
+		triangles2.Add(9);
+		triangles2.Add(3);
+
+		triangles2.Add(1);
+		triangles2.Add(3);
+		triangles2.Add(5);
+
+		triangles2.Add(3);
+		triangles2.Add(9);
+		triangles2.Add(5);
 
 	}
 	else {
@@ -189,28 +331,28 @@ void AproceduralRoad::buildCross(ACityGenerator::Crossroad * c, float radius)
 			//SideLeftCenter
 			points.Add(roads[i].Value.points[2]);
 			normals.Add(FVector{ 0.0f,0.0f,1.0f });
-			UV0.Add(FVector2D{ roads[i].Value.points[2].X / 1000,roads[i].Value.points[2].Y / 1000 });
+			UV0.Add(FVector2D{ roads[i].Value.points[2].X / 1000,roads[i].Value.points[2].Y / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
 			colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 			tangents.Add(FProcMeshTangent(0, 1, 0));
 
 			//SideRightCenter
 			points.Add(roads[i].Value.points[3]);
 			normals.Add(FVector{ 0.0f,0.0f,1.0f });
-			UV0.Add(FVector2D{ roads[i].Value.points[3].X / 1000,roads[i].Value.points[3].Y / 1000 });
+			UV0.Add(FVector2D{ roads[i].Value.points[3].X / 1000,roads[i].Value.points[3].Y / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
 			colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 			tangents.Add(FProcMeshTangent(0, 1, 0));
 
 			//SideLeftExter
 			points.Add(roads[i].Value.points[4]);
 			normals.Add(FVector{ 0.0f,0.0f,1.0f });
-			UV0.Add(FVector2D{ roads[i].Value.points[4].X / 1000,roads[i].Value.points[4].Y / 1000 });
+			UV0.Add(FVector2D{ roads[i].Value.points[4].X / 1000,roads[i].Value.points[4].Y / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
 			colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 			tangents.Add(FProcMeshTangent(0, 1, 0));
 
 			//SideRightExter
 			points.Add(roads[i].Value.points[5]);
 			normals.Add(FVector{ 0.0f,0.0f,1.0f });
-			UV0.Add(FVector2D{ roads[i].Value.points[5].X / 1000,roads[i].Value.points[5].Y / 1000 });
+			UV0.Add(FVector2D{ roads[i].Value.points[5].X / 1000,roads[i].Value.points[5].Y / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
 			colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 			tangents.Add(FProcMeshTangent(0, 1, 0));
 
@@ -223,14 +365,14 @@ void AproceduralRoad::buildCross(ACityGenerator::Crossroad * c, float radius)
 				points.Add(center + (roads[i].Value.halfSize + roads[i].Value.sideSize) * (-(roads[i].Value.right)));
 			}
 			normals.Add(FVector{ 0.0f,0.0f,1.0f });
-			UV0.Add(FVector2D{ points.Last().X / 1000,points.Last().Y / 1000 });
+			UV0.Add(FVector2D{ points.Last().X / 1000,points.Last().Y / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
 			colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 			tangents.Add(FProcMeshTangent(0, 1, 0));
 
 			//SideIntersectionInter
 			points.Add(points[points.Num() - 6] + FVector(0.0f,0.0f,10.0f));
 			normals.Add(FVector{ 0.0f,0.0f,1.0f });
-			UV0.Add(FVector2D{ points.Last().X / 1000,points.Last().Y / 1000 });
+			UV0.Add(FVector2D{ points.Last().X / 1000,points.Last().Y / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
 			colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 			tangents.Add(FProcMeshTangent(0, 1, 0));
 
@@ -338,25 +480,25 @@ void AproceduralRoad::buildParametrizedRoad(float startX, float startY, float en
 
 	points.Add(FVector{ startX - (halfSize * right.X), startY - (halfSize * right.Y), sizeWalkHeight });
 	normals.Add(FVector{ 0,0,1 });
-	UV0.Add(FVector2D{ (startX - (halfSize * right.X))/1000 , (startY - (halfSize * right.Y)) / 1000 });
+	UV0.Add(FVector2D{ (startX - (halfSize * right.X))/1000 , (startY - (halfSize * right.Y)) / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
 	colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 	tangents.Add(FProcMeshTangent(0, 1, 0));
 
 	points.Add(FVector{ startX + (halfSize * right.X), startY + (halfSize * right.Y), sizeWalkHeight });
 	normals.Add(FVector{ 0,0,1 });
-	UV0.Add(FVector2D{ (startX + (halfSize * right.X))/1000, (startY + (halfSize * right.Y)) / 1000 });
+	UV0.Add(FVector2D{ (startX + (halfSize * right.X))/1000, (startY + (halfSize * right.Y)) / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
 	colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 	tangents.Add(FProcMeshTangent(0, 1, 0));
 
 	points.Add(FVector{ startX - ((halfSize + sideWalkSize) * right.X), startY - ((halfSize + sideWalkSize)* right.Y), sizeWalkHeight });
 	normals.Add(FVector{ 0,0,1 });
-	UV0.Add(FVector2D{ (startX - ((halfSize + sideWalkSize) * right.X))/1000 ,(startY - ((halfSize + sideWalkSize)* right.Y)) / 1000 });
+	UV0.Add(FVector2D{ (startX - ((halfSize + sideWalkSize) * right.X))/1000 ,(startY - ((halfSize + sideWalkSize)* right.Y)) / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
 	colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 	tangents.Add(FProcMeshTangent(0, 1, 0));
 
 	points.Add(FVector{ startX + ((halfSize + sideWalkSize) * right.X), startY + ((halfSize + sideWalkSize) * right.Y), sizeWalkHeight });
 	normals.Add(FVector{ 0,0,1 });
-	UV0.Add(FVector2D{ (startX + ((halfSize + sideWalkSize) * right.X)) / 1000, (startY + ((halfSize + sideWalkSize) * right.Y))/1000 });
+	UV0.Add(FVector2D{ (startX + ((halfSize + sideWalkSize) * right.X)) / 1000, (startY + ((halfSize + sideWalkSize) * right.Y))/1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
 	colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 	tangents.Add(FProcMeshTangent(0, 1, 0));
 
@@ -376,25 +518,25 @@ void AproceduralRoad::buildParametrizedRoad(float startX, float startY, float en
 
 	points.Add(FVector{ endX - (halfSize * right.X), endY - (halfSize * right.Y), sizeWalkHeight });
 	normals.Add(FVector{ 0,0,1 });
-	UV0.Add(FVector2D{ (endX - (halfSize * right.X)) / 1000, (endY - (halfSize * right.Y)) / 1000 });
+	UV0.Add(FVector2D{ (endX - (halfSize * right.X)) / 1000, (endY - (halfSize * right.Y)) / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
 	colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 	tangents.Add(FProcMeshTangent(0, 1, 0));
 
 	points.Add(FVector{ endX + (halfSize * right.X), endY + (halfSize * right.Y), sizeWalkHeight });
 	normals.Add(FVector{ 0,0,1 });
-	UV0.Add(FVector2D{ (endX + (halfSize * right.X)) / 1000, (endY + (halfSize * right.Y)) / 1000 });
+	UV0.Add(FVector2D{ (endX + (halfSize * right.X)) / 1000, (endY + (halfSize * right.Y)) / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
 	colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 	tangents.Add(FProcMeshTangent(0, 1, 0));
 
 	points.Add(FVector{ endX - ((halfSize + sideWalkSize) * right.X), endY - ((halfSize + sideWalkSize)* right.Y), sizeWalkHeight });
 	normals.Add(FVector{ 0,0,1 });
-	UV0.Add(FVector2D{ (endX - ((halfSize + sideWalkSize) * right.X)) / 1000, (endY - ((halfSize + sideWalkSize)* right.Y)) / 1000 });
+	UV0.Add(FVector2D{ (endX - ((halfSize + sideWalkSize) * right.X)) / 1000, (endY - ((halfSize + sideWalkSize)* right.Y)) / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
 	colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 	tangents.Add(FProcMeshTangent(0, 1, 0));
 
 	points.Add(FVector{ endX + ((halfSize + sideWalkSize) * right.X), endY + ((halfSize + sideWalkSize) * right.Y), sizeWalkHeight });
 	normals.Add(FVector{ 0,0,1 });
-	UV0.Add(FVector2D{ (endX + ((halfSize + sideWalkSize) * right.X)) / 1000, (endY + ((halfSize + sideWalkSize) * right.Y)) / 1000 });
+	UV0.Add(FVector2D{ (endX + ((halfSize + sideWalkSize) * right.X)) / 1000, (endY + ((halfSize + sideWalkSize) * right.Y)) / 1000 }+FVector2D{ -10.0f/1000.0f, -10.0f / 1000.0f });
 	colors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 	tangents.Add(FProcMeshTangent(0, 1, 0));
 
