@@ -3,6 +3,10 @@
 #include "CityGenerator.h"
 #include "EngineUtils.h"
 #include "proceduralRoad.h"
+#include "Basic/TyranGameMode.h"
+#include "Basic/TyranController.h"
+#include "EngineUtils.h"
+#include "Basic/TyranCharacter.h"
 #include "Gameplay/TyranOnly/Placeable_Object/BuildingSlot.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -53,7 +57,7 @@ ACityGenerator::ACityGenerator()
 	sideSizeRoad = 300;
 	sideSizePath = 200;
 
-	static ConstructorHelpers::FClassFinder<ABuildingSlot> buildSlotHelper(TEXT("/Game/Blueprints/BP_BuildingSlot"));
+	static ConstructorHelpers::FClassFinder<ABuildingSlot> buildSlotHelper(TEXT("/Game/Objects/DefaultBuildingSlots/DefaultBuildingSlot"));
 	buildSlot = buildSlotHelper.Class;
 	static ConstructorHelpers::FClassFinder<AActor> bunkerHelper(TEXT("/Game/Objects/Buildings/TyranQG"));
 	bunker = bunkerHelper.Class;
@@ -75,6 +79,8 @@ void ACityGenerator::BeginPlay()
 	generateRoads();
 	if (Role == ROLE_Authority) {
 		placeBuildingSlots();
+		constructBuildings();
+		placeSpawnPoints();
 	}
 	buildRoads();
 	buildCrossroads();
@@ -362,6 +368,32 @@ void ACityGenerator::placeBuildingSlots()
 			else {
 				relativePos += 100;
 			}
+		}
+	}
+}
+
+void ACityGenerator::constructBuildings()
+{
+	for (TTuple<ABuildingSlot *, Rectangle> slot : slots) {
+		if (slot.Key->GetTransform().GetLocation().SizeSquared2D() > 800000000) {
+			slot.Key->build(ruin);
+		}
+		else {
+			slot.Key->build(baseHouse);
+		}
+	}
+}
+
+void ACityGenerator::placeSpawnPoints()
+{
+	FVector pos{ crossroads.Last()->posX, crossroads.Last()->posY, 2000.0f };
+	auto sPoint = GetWorld()->SpawnActor<AActor>(spawnPoint, FTransform(pos));
+	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		if (!(*Iterator)->IsLocalController() && !static_cast<ATyranController *>(&**Iterator)->isTyran && !(*Iterator)->GetPawn()) {
+			auto chara = static_cast<ATyranGameMode *>(GetWorld()->GetAuthGameMode())->defaultRebelPawn;
+			APawn * revChar = GetWorld()->SpawnActor<APawn>(chara, FTransform((sPoint)->GetActorLocation()));
+			(*Iterator)->Possess(revChar);
 		}
 	}
 }

@@ -70,8 +70,10 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 		else {
 			player->setTyran(false);
 			//player->ClientSetHUD(RevHUD);
-			ATyranCharacter * revChar = GetWorld()->SpawnActor<ATyranCharacter>(defaultRebelPawn, FTransform((*spawnPoints)->GetActorLocation()));
-			player->Possess(revChar);
+			if (spawnPoints) {
+				ATyranCharacter * revChar = GetWorld()->SpawnActor<ATyranCharacter>(defaultRebelPawn, FTransform((*spawnPoints)->GetActorLocation()));
+				player->Possess(revChar);
+			}
 		}
 	}
 }

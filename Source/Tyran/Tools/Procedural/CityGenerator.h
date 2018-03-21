@@ -160,6 +160,13 @@ public:
 	TSubclassOf<ABuildingSlot> buildSlot;
 	TSubclassOf<AActor> bunker;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ABuilding> baseHouse;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ABuilding> ruin;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> spawnPoint;
+
 protected:
 	virtual void BeginPlay() override;
 	void generateRoads();
@@ -174,6 +181,8 @@ protected:
 	bool checkSeparationLine(Rectangle& r1, Rectangle& R2, FVector2D& begin, FVector2D& end);
 	bool rectanglesOverlap(Rectangle& r1, Rectangle& r2);
 	void placeBuildingSlots();
+	void constructBuildings();
+	void placeSpawnPoints();
 
 public:	
 	virtual void Tick(float DeltaTime) override;
