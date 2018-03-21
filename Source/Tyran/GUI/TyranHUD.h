@@ -32,7 +32,8 @@ private:
 
 	// widget pour la fin du jeu
 	UUserWidget* endOfGameUIWidget;
-	TSubclassOf<UUserWidget> endOfGameUIClass;
+	TSubclassOf<UUserWidget> EndGameRevWinUIclass;
+	TSubclassOf<UUserWidget> EndGameTyranWinUIclass;
 
 	// pour les infos sur les gardes
 	TSubclassOf<UUserWidget> guardInfoUIClass;
@@ -71,6 +72,7 @@ public:
 	void modificationGuardInfoTenirPos();
 	void modificationGuardInfoFuite();
 	
+	
 	// Create Event
 	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
 		void OnVisibleGuardOrder();
@@ -90,7 +92,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
 		void OnModificationGuardInfoFuite();
 
-	void OnEndOfGame();
+
+	void EndGameTyranWin();
+	void EndGameRevWin();
 
 	void removeAllPermanently();
 };
