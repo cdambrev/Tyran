@@ -17,6 +17,7 @@ class ATyranGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
+	UPROPERTY()
 	UHeatMap * heatMap;
 
 	UPROPERTY(EditAnywhere)

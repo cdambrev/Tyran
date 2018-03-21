@@ -52,7 +52,7 @@ ATyranGameMode::ATyranGameMode()
 
 	tyranController = nullptr;
 
-	heatMap = NewObject<UHeatMap>(UHeatMap::StaticClass());
+	//heatMap = NewObject<UHeatMap>(UHeatMap::StaticClass());
 
 	PrimaryActorTick.bStartWithTickEnabled = true;
 	PrimaryActorTick.bCanEverTick = true;
@@ -95,5 +95,6 @@ void ATyranGameMode::Tick(float DeltaTime)
 
 void ATyranGameMode::BeginPlay()
 {
+	heatMap = NewObject<UHeatMap>(UHeatMap::StaticClass());
 	heatMap->init(GetWorld());
 }
