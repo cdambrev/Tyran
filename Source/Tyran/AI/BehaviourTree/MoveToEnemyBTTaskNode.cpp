@@ -3,6 +3,7 @@
 #include "MoveToEnemyBTTaskNode.h"
 #include "AI/AIGuardController.h" 
 
+
 UMoveToEnemyBTTaskNode::UMoveToEnemyBTTaskNode() { 
 	// Le nom que prendra le noeud dans le BT 
 	NodeName = "MoveToEnemy"; 

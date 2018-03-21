@@ -12,7 +12,8 @@
 				"Engine",
 				"AIModule",
 				"CustomMeshComponent",
-				"ProceduralMeshComponent"
+				"ProceduralMeshComponent",
+				"CoreUObject"
 			]
 		}
 	]

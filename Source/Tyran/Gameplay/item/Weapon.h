@@ -30,6 +30,8 @@ public:
 	TSubclassOf<class AWeaponLoot> WeaponLootClass;
 
 protected:
+	EWeaponType WeaponType;
+
 	/** Le propriétaire */ 
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_MyPawn)
 	ATyranCharacter* MyPawn;
@@ -118,6 +120,45 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float HitDamage;
 
+	FVector SpreadVector;
+
+	/* Verification d'un «hit»: déclencheur pour
+	le calcul du produit vectoriel entre la
+	direction de vision et la direction du hit */
+	UPROPERTY(EditDefaultsOnly)
+		float AllowedViewDotHitDir;
+
+	/* Verification d'un «hit»: échelle de
+	la boite de l'acteur frappé */
+	UPROPERTY(EditDefaultsOnly)
+		float ClientSideHitLeeway;
+
+	//UPROPERTY(Transient, ReplicatedUsing = OnRep_HitLocation) 
+	FVector HitOriginNotify;
+
+	/* Effet joué lorsqu'une surface est atteinte. */
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class AImpactEffect> ImpactTemplate;
+
+	UPROPERTY(EditDefaultsOnly)
+	FName TrailTargetParam;
+
+	UPROPERTY(EditDefaultsOnly)
+	UParticleSystem* TrailFX;
+
+	UPROPERTY(EditDefaultsOnly)
+	UParticleSystem* TracerFX;
+
+	/* Distance minimale pour faire apparaître les traces de balle. */
+	UPROPERTY(EditDefaultsOnly)
+	float MinimumProjectileSpawnDistance;
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 TracerRoundInterval;
+
+	/* Nous comptons les coups */
+	int32 BulletsShotCount;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -180,10 +221,15 @@ public:
 	void OnBurstFinished(); 
 	
 	virtual void HandleFiring(); // Pourra être surchargée dans les armes 
-	bool CanFire() const; 
+	virtual bool CanFire() const; 
 	
-	virtual void SimulateWeaponFire(); 
-	virtual void StopSimulatingWeaponFire(); 
+	virtual void SimulateWeaponFire();
+	virtual void StopSimulatingWeaponFire();
+	UFUNCTION(Reliable, Server, WithValidation)
+	void SimulateWeaponFireServer();
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void SpawnMuzzleEffectsMulticast();
 	
 	/* Avec PURE_VIRTUAL, nous n'avons pas à implanter la fonction ici, 
 	nous l'implanterons dans les classes dérivées */ 
@@ -208,6 +254,7 @@ public:
 	FVector GetMuzzleDirection() const;
 
 	EAmmoType GetAmmoType();
+	EWeaponType GetWeaponType();
 
 	/** Obtenir le mesh de l'arme */ 
 	UFUNCTION(BlueprintCallable, Category = "Game|Weapon") 
@@ -218,8 +265,36 @@ public:
 	UFUNCTION() 
 	void OnRep_MyPawn();
 
-	/* LOOT */
-	/*void OnBeginFocus() override;
-	void OnEndFocus() override;
-	void OnUsed(APawn* InstigatorPawn) override;*/
+	int getMagCurrent();
+
+	FVector GetAdjustedAim() const;
+	FVector GetCameraDamageStartLocation(const FVector& AimDir) const;
+
+	FHitResult WeaponTrace(const FVector& TraceFrom, const FVector& TraceTo) const;
+
+	void ProcessInstantHit(const FHitResult& Impact, const FVector& Origin, const FVector& ShootDir);
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerNotifyHit(const FHitResult Impact,/* FVector_NetQuantizeNormal Origin,*/ FVector_NetQuantizeNormal ShootDir);
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerNotifyMiss(/*FVector_NetQuantizeNormal Origin, */FVector_NetQuantizeNormal ShootDir);
+
+	void ProcessInstantHitConfirmed(const FHitResult& Impact, const FVector& Origin, const FVector& ShootDir);
+
+	bool ShouldDealDamage(AActor* TestActor) const;
+	void DealDamage(const FHitResult& Impact, const FVector& ShootDir);
+
+	void SimulateInstantHit(const FVector& Origin, const FVector & AimDir);
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void SimulateInstantHitServer(const FVector& Origin, const FVector & AimDir);
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void SpawnImpactEffectsMulticast(const FHitResult& Impact);
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void SpawnTrailEffectsMulticast(const FVector& EndPoint);
+
+protected:
+	virtual void UpdateSpreadVector();
 };

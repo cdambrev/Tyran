@@ -16,6 +16,12 @@ ATyranHUD::ATyranHUD() {
 	
 	ConstructorHelpers::FClassFinder<UUserWidget> defaultUIHelper(TEXT("/Game/UI/ManagerInterface"));
 	defaultUIClass = defaultUIHelper.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> endOfGameUIHelper(TEXT("/Game/UI/EndOfGame"));
+	endOfGameUIClass = endOfGameUIHelper.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> timerUIHelper(TEXT("/Game/UI/Timer"));
+	timerUIClass = timerUIHelper.Class;
 }
 
 void ATyranHUD::BeginPlay() {
@@ -37,6 +43,11 @@ void ATyranHUD::BeginPlay() {
 	guardOrderWidget->SetVisibility(ESlateVisibility::Hidden);
 	guardOrderWidget->AddToViewport(9999);
 	guardOrderWidget->bIsFocusable = true;
+
+
+	// default UI
+	timerUIWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), timerUIClass);
+	timerUIWidget->AddToViewport(9998);
 
 	// affichage des informations sur le garde
 	//guardInfo = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), guardInfoUIClass);
@@ -96,4 +107,31 @@ void ATyranHUD::modificationGuardInfoTenirPos() {
 }
 void ATyranHUD::modificationGuardInfoFuite() {
 	OnModificationGuardInfoFuite();
+}
+
+
+void ATyranHUD::OnEndOfGame() {
+	removeAllPermanently();
+	endOfGameUIWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), endOfGameUIClass);
+	endOfGameUIWidget->AddToViewport(9998);
+
+}
+
+void ATyranHUD::removeAllPermanently() {
+	if (defaultUIWidget)
+	{
+		defaultUIWidget->RemoveFromParent();
+	}
+	if (patrolPointsMode)
+	{
+		patrolPointsMode->RemoveFromParent();
+	}
+	if (guardOrderWidget)
+	{
+		guardOrderWidget->RemoveFromParent();
+	}
+	if (guardInfo)
+	{
+		guardInfo->RemoveFromParent();
+	}
 }

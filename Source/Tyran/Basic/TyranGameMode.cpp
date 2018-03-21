@@ -7,11 +7,15 @@
 #include "EngineUtils.h"
 #include "Runtime/Engine/Classes/GameFramework/PlayerStart.h"
 #include "ManagerPlayerState.h"
+#include "Tools/Debug/DebugTools.h"
+#include "TyranGameState.h"
+
 
 ATyranGameMode::ATyranGameMode()
 {
 
 	DefaultPawnClass = NULL;
+	GameStateClass = ATyranGameState::StaticClass();
 
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPersonCPP/Blueprints/ThirdPersonCharacter"));
@@ -39,18 +43,26 @@ ATyranGameMode::ATyranGameMode()
 		TyranHUD = HUDTyranBPClass.Class;
 	}
 	
-	//static ConstructorHelpers::FClassFinder<ATyranHUD> HUDRevBPClass(TEXT("/Game/UI/BP_RevHUD"));
-	//if (HUDRevBPClass.Class != NULL)
-	//{
-	//	RevHUD = HUDRevBPClass.Class;
-	//}
+	static ConstructorHelpers::FClassFinder<ARevHUD> HUDRevBPClass(TEXT("/Game/UI/BP_RevHUD"));
+	if (HUDRevBPClass.Class != NULL)
+	{
+		RevHUD = HUDRevBPClass.Class;
+	}
 
 
 	tyranController = nullptr;
+
+	//heatMap = NewObject<UHeatMap>(UHeatMap::StaticClass());
+
+	PrimaryActorTick.bStartWithTickEnabled = true;
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 {
+	Debugger::get().startTextLog();
+	Debugger::get().startAILog();
+
 	if (NewPlayer->IsLocalController()) {
 		//Action for server player (spectator ?)
 
@@ -69,11 +81,22 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 		}
 		else {
 			player->setTyran(false);
-			//player->ClientSetHUD(RevHUD);
+			player->ClientSetHUD(RevHUD);
 			if (spawnPoints) {
 				ATyranCharacter * revChar = GetWorld()->SpawnActor<ATyranCharacter>(defaultRebelPawn, FTransform((*spawnPoints)->GetActorLocation()));
 				player->Possess(revChar);
 			}
 		}
 	}
+}
+
+void ATyranGameMode::Tick(float DeltaTime)
+{
+	heatMap->update(DeltaTime);
+}
+
+void ATyranGameMode::BeginPlay()
+{
+	heatMap = NewObject<UHeatMap>(UHeatMap::StaticClass());
+	heatMap->init(GetWorld());
 }
