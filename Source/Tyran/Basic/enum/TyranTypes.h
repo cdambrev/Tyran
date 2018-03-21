@@ -10,7 +10,17 @@ enum class EInventorySlot : uint8 {
 	Secondary 
 };
 
+UENUM()
 enum class EAmmoType : uint8 {
+	AssaultRifle,
+	Shotgun,
+	Pistol,
+	SniperRifle
+};
+
+UENUM(BlueprintType)
+enum class EWeaponType : uint8 {
+	None,
 	AssaultRifle,
 	Shotgun,
 	Pistol,

@@ -46,8 +46,8 @@ UTexture2D * ACaptureMiniMap::GetTextureAtLocation(FVector location)
 	int tailleX = tex->GetSizeX();
 	int tailleY = tex->GetSizeY();
 
-	int texY = (-location.X * 1024.0 / 50000.0) + 512;
-	int texX = (location.Y * 1024.0 / 50000.0) + 512;
+	int texY = (-location.X * 1024.0 / 500000.0) + 512;
+	int texX = (location.Y * 1024.0 / 500000.0) + 512;
 
 	TArray<FColor> MapTexDataResize;
 	for (int y = texY - tailleY / 2; y < texY - tailleY / 2 + tailleY; ++y) {

@@ -51,6 +51,11 @@ ATyranGameMode::ATyranGameMode()
 
 
 	tyranController = nullptr;
+
+	//heatMap = NewObject<UHeatMap>(UHeatMap::StaticClass());
+
+	PrimaryActorTick.bStartWithTickEnabled = true;
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
@@ -77,8 +82,21 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 		else {
 			player->setTyran(false);
 			player->ClientSetHUD(RevHUD);
-			ATyranCharacter * revChar = GetWorld()->SpawnActor<ATyranCharacter>(defaultRebelPawn, FTransform((*spawnPoints)->GetActorLocation()));
-			player->Possess(revChar);
+			if (spawnPoints) {
+				ATyranCharacter * revChar = GetWorld()->SpawnActor<ATyranCharacter>(defaultRebelPawn, FTransform((*spawnPoints)->GetActorLocation()));
+				player->Possess(revChar);
+			}
 		}
 	}
+}
+
+void ATyranGameMode::Tick(float DeltaTime)
+{
+	heatMap->update(DeltaTime);
+}
+
+void ATyranGameMode::BeginPlay()
+{
+	heatMap = NewObject<UHeatMap>(UHeatMap::StaticClass());
+	heatMap->init(GetWorld());
 }
