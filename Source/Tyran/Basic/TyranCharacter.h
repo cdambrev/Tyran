@@ -105,12 +105,18 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
 	FName WeaponAttachPoint_Handgun;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
+	FName WeaponAttachPoint_Shotgun;
 	
 	/* Point d'attache pour les items à la ceinture. */ 
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets") 
 	FName PelvisAttachPoint; 
 	
 	/* Point d'attache pour l'arme principale */
+	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
+	FName SpineAttachPoint_Shotgun;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Sockets")
 	FName SpineAttachPoint;
 

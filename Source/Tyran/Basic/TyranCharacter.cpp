@@ -82,8 +82,10 @@ ATyranCharacter::ATyranCharacter()
 	/* Noms des points d'attache tels que spécifiés dans le squelette du personnage */ 
 	WeaponAttachPoint_Rifle = TEXT("WeaponSocket"); 
 	WeaponAttachPoint_Handgun = TEXT("WeaponSocket_Handgun");
+	WeaponAttachPoint_Shotgun = TEXT("WeaponSocket_Shotgun");
 	PelvisAttachPoint = TEXT("PelvisSocket"); 
 	SpineAttachPoint = TEXT("SpineSocket");
+	SpineAttachPoint_Shotgun = TEXT("SpineSocket_Shotgun");
 	HeadAttachPoint = TEXT("HeadSocket");
 
 	// FPS camera
@@ -108,8 +110,8 @@ ATyranCharacter::ATyranCharacter()
 
 	Ammunition.Add(EAmmoType::AssaultRifle, 1200);
 	Ammunition.Add(EAmmoType::Pistol, 120);
-	Ammunition.Add(EAmmoType::Shotgun, 0);
-	Ammunition.Add(EAmmoType::SniperRifle, 0);
+	Ammunition.Add(EAmmoType::Shotgun, 120);
+	Ammunition.Add(EAmmoType::SniperRifle, 120);
 
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -175,7 +177,7 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 
 		MulticastPlayAnim(HitAnim);
 
-		//Health -= ActualDamage;
+		Health -= ActualDamage;
 		// If the damage depletes our health set our lifespan to zero - which will destroy the actor  
 		if (Health <= 0.f)
 		{
@@ -232,7 +234,7 @@ FName ATyranCharacter::GetInventoryAttachPoint(EInventorySlot Slot, EWeaponType 
 		case EWeaponType::AssaultRifle:
 			return WeaponAttachPoint_Rifle;
 		case EWeaponType::Shotgun:
-			return WeaponAttachPoint_Rifle;
+			return WeaponAttachPoint_Shotgun;
 		case EWeaponType::Pistol:
 			return WeaponAttachPoint_Handgun;
 		case EWeaponType::SniperRifle:
@@ -242,7 +244,18 @@ FName ATyranCharacter::GetInventoryAttachPoint(EInventorySlot Slot, EWeaponType 
 			return "";
 		}
 	case EInventorySlot::Primary: 
-		return SpineAttachPoint; 
+		switch (WeaponType)
+		{
+		case EWeaponType::AssaultRifle:
+			return SpineAttachPoint;
+		case EWeaponType::Shotgun:
+			return SpineAttachPoint_Shotgun;
+		case EWeaponType::SniperRifle:
+			return SpineAttachPoint;
+		default:
+			// pas implémenté. 
+			return "";
+		}
 	case EInventorySlot::Secondary:
 		return PelvisAttachPoint;
 	default: 
@@ -432,10 +445,12 @@ void ATyranCharacter::DropWeapon()
 		AWeaponLoot* NewWeaponLoot = GetWorld()->SpawnActor<AWeaponLoot>(CurrentWeapon->WeaponLootClass, SpawnLocation, FRotator::ZeroRotator, SpawnInfo); 
 		
 		/* Lui appliquer une petite force pour que l'arme tourne un peu lorsque lachee. */ 
-		UStaticMeshComponent* MeshComp = NewWeaponLoot->GetMeshComponent();
-		if (MeshComp) { 
-			MeshComp->AddTorqueInRadians(FVector(1, 1, 1) * 4000000); 
-		} 
+		if (NewWeaponLoot) {
+			UStaticMeshComponent* MeshComp = NewWeaponLoot->GetMeshComponent();
+			if (MeshComp) {
+				//MeshComp->AddTorqueInRadians(FVector(1, 1, 1) * 4000000);
+			}
+		}
 		
 		RemoveWeapon(CurrentWeapon); 
 	}

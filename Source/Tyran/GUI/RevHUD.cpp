@@ -26,7 +26,7 @@ ARevHUD::ARevHUD() {
 
 void ARevHUD::BeginPlay() {
 	Super::BeginPlay();
-	static_cast<APlayerController*>(GetOwningPlayerController())->SetInputMode(FInputModeGameAndUI());
+	//static_cast<APlayerController*>(GetOwningPlayerController())->SetInputMode(FInputModeGameAndUI());
 	
 	// default UI
 	defaultUIWidget = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), defaultUIClass);
