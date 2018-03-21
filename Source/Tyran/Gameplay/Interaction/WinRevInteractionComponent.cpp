@@ -24,6 +24,6 @@ void UWinRevInteractionComponent::OnEndFocus()
 
 void UWinRevInteractionComponent::OnUsed(ATyranCharacter* InstigatorPawn)
 {
-	ATyranGameState* gamestate = Cast<ATyranGameState>(GetWorld()->GetGameState());
+	ATyranGameState* gamestate =GetWorld()->GetGameState<ATyranGameState>();
 	gamestate->RevWin();
 }

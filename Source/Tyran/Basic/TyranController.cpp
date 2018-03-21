@@ -65,6 +65,7 @@ void ATyranController::updateMap_Implementation() {
 }
 
 void ATyranController::EndGameTyranWin() {
+	UE_LOG(LogTemp, Warning, TEXT("Tyran Controller TyranWin"));
 	AHUD* hud = GetHUD();
 	if (hud) {
 		if (isTyran)
@@ -80,6 +81,7 @@ void ATyranController::EndGameTyranWin() {
 	}
 }
 void ATyranController::EndGameRevWin() {
+	UE_LOG(LogTemp, Warning, TEXT("Tyran Controller RevWin"));
 	AHUD* hud = GetHUD();
 	if (hud) {
 		if (isTyran)
@@ -95,3 +97,15 @@ void ATyranController::EndGameRevWin() {
 	}
 
 }
+
+
+void ATyranController::ClientRPCTyranWin_Implementation()
+{
+	EndGameTyranWin();
+}
+void ATyranController::ClientRPCRevWin_Implementation()
+{
+	EndGameRevWin();
+}
+
+

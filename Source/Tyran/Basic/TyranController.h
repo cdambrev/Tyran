@@ -39,8 +39,13 @@ public:
 	UFUNCTION(Reliable, Client)
 	void updateMap();
 
-
+protected:
 	void EndGameTyranWin();
 
 	void EndGameRevWin();
+public:
+	UFUNCTION(Reliable, client)
+	void ClientRPCRevWin();
+	UFUNCTION(Reliable, client)
+	void ClientRPCTyranWin();
 };

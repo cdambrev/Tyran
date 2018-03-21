@@ -27,6 +27,7 @@ public:
 	virtual void BeginPlay() override;
 	void TyranWin();
 	void RevWin();
+
 	//void EndGame(bool tyranWin);
 
 	UFUNCTION(BlueprintCallable)

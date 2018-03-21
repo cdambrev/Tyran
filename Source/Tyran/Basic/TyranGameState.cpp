@@ -7,7 +7,7 @@
 #include <Engine/World.h>
 
 ATyranGameState::ATyranGameState() {
-	gameDuration = FTimespan{ 0,2,0 }.GetTotalSeconds();
+	gameDuration = FTimespan{ 0,2,10 }.GetTotalSeconds();
 }
 
 void ATyranGameState::BeginPlay() {
@@ -19,7 +19,7 @@ void ATyranGameState::BeginPlay() {
 void ATyranGameState::TyranWin() {
 	GetWorldTimerManager().ClearTimer(endOfGameTimer);
 	for (TActorIterator<ATyranController> It(GetWorld()); It; ++It) {
-		It->EndGameTyranWin();
+		It->ClientRPCTyranWin();
 	}
 }
 
@@ -27,7 +27,7 @@ void ATyranGameState::RevWin() {
 	UE_LOG(LogTemp, Warning, TEXT("RevWin"));
 	GetWorldTimerManager().ClearTimer(endOfGameTimer);
 	for (TActorIterator<ATyranController> It(GetWorld()); It; ++It) {
-		It->EndGameRevWin();
+		It->ClientRPCRevWin();
 	}
 }
 
