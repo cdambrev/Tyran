@@ -18,9 +18,10 @@ private:
 	float dist;
 	bool isVisibleByGuard;
 	bool checkVisibility(UBehaviorTreeComponent & OwnerComp);
-	AAIGuardController *AIGuardController;
 
 public:
+	UPoursuiteBTTaskNodeUtility();
+
 	/* Sera appelée au démarrage de la tâche et devra retourner Succeeded, Failed ou InProgress */
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
@@ -31,5 +32,7 @@ public:
 	virtual FString GetStaticDescription() const override;
 
 	virtual void CalculUtility(UBehaviorTreeComponent & OwnerComp) override;
+
+	virtual void OnTaskFinished(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory, EBTNodeResult::Type TaskResult);
 	
 };
