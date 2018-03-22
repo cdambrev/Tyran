@@ -8,6 +8,8 @@
 
 AGuardCharacter::AGuardCharacter() {
 	alignement = EAlignement::A_TYRAN;
+	cost = 0.0f;
+	populationCost = 1;
 	//Blueprint'/Game/Blueprints/TyranViewComponent.TyranViewComponent'
 /*
 	}

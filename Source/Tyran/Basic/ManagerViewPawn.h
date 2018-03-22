@@ -107,6 +107,12 @@ protected:
 
 	void RightClickAction();
 
+	UFUNCTION(BlueprintCallable)
+	void callGuardCreation(TSubclassOf<AGuardCharacter> gClass);
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void createGuard(TSubclassOf<AGuardCharacter> gClass);
+
 	UFUNCTION(Reliable, Server, WithValidation)
 	void callBuildOnSlot(ABuildingSlot * slot, TSubclassOf<ABuilding> buildClass);
 

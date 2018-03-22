@@ -9,6 +9,8 @@
 #include "Basic/TyranCharacter.h"
 #include "Gameplay/TyranOnly/Placeable_Object/BuildingSlot.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Runtime/Engine/Classes/AI/Navigation/NavigationSystem.h"
+#include "Runtime/Engine/Classes/AI/Navigation/NavigationSystem.h"
 
 
 // Sets default values
@@ -84,6 +86,9 @@ void ACityGenerator::BeginPlay()
 	}
 	buildRoads();
 	buildCrossroads();
+	if (Role == ROLE_Authority) {
+		GetWorld()->GetNavigationSystem()->AddDirtyArea(FBox{ TArray<FVector>{FVector{-100000,-10000,0}, FVector{ 100000, 10000, 100 }} }, 3);
+	}
 }
 
 void ACityGenerator::generateRoads() {
@@ -392,7 +397,7 @@ void ACityGenerator::placeSpawnPoints()
 	{
 		if (!(*Iterator)->IsLocalController() && !static_cast<ATyranController *>(&**Iterator)->isTyran && !(*Iterator)->GetPawn()) {
 			auto chara = static_cast<ATyranGameMode *>(GetWorld()->GetAuthGameMode())->defaultRebelPawn;
-			APawn * revChar = GetWorld()->SpawnActor<APawn>(chara, FTransform((sPoint)->GetActorLocation()));
+			APawn * revChar = GetWorld()->SpawnActor<APawn>(chara, FTransform(UNavigationSystem::ProjectPointToNavigation(GetWorld(), (sPoint)->GetActorLocation())));
 			(*Iterator)->Possess(revChar);
 		}
 	}
