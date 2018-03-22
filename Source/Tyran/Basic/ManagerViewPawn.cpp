@@ -352,8 +352,9 @@ void AManagerViewPawn::leftClickAction()
 	else if (currState == SELECTPOSITION) {
 		FHitResult hitResult{};
 		mouseRaycast(hitResult, ECollisionChannel::ECC_GameTraceChannel4);
-		patrolPoints.Add(hitResult.ImpactPoint);
-
+		orderGuardPoint(focus, hitResult.ImpactPoint);
+		static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardPointMode();
+		currState = FOCUSGARDE;
 	}
 	else {
 		FHitResult resultHit{};
@@ -472,6 +473,20 @@ void AManagerViewPawn::orderPatrolPoints_Implementation(AActor* garde, const TAr
 }
 
 bool AManagerViewPawn::orderPatrolPoints_Validate(AActor* garde, const TArray<FVector>& patrolPointsPos) {
+	return true;
+}
+
+void AManagerViewPawn::orderGuardPoint_Implementation(AActor* garde, const FVector& guardPoint) {
+	AAIGuardController* aiGuardController = Cast<AAIGuardController>(garde->GetInstigatorController());
+	if (garde) {
+		AAIGuardTargetPoint* targetPoint = GetWorld()->SpawnActor<AAIGuardTargetPoint>(AAIGuardTargetPoint::StaticClass(), FTransform(guardPoint));
+		targetPoint->SetActorLocation(guardPoint);
+		targetPoint->Position = 0;
+		aiGuardController->setGuardPoint(targetPoint);
+	}
+}
+
+bool AManagerViewPawn::orderGuardPoint_Validate(AActor* garde, const FVector& guardPoint) {
 	return true;
 }
 

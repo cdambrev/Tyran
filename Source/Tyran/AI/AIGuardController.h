@@ -52,4 +52,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Fonctions custom")
 		TArray<AAIGuardTargetPoint*> getPatrolPoints();
+
+	UFUNCTION(BlueprintCallable, Category = "Fonctions custom")
+		void setGuardPoint(AAIGuardTargetPoint* guardPoint_);
 };
