@@ -24,11 +24,11 @@ EBTNodeResult::Type UPoursuiteBTTaskNodeUtility::ExecuteTask(UBehaviorTreeCompon
 #endif
 	//UE_LOG(LogTemp, Warning, TEXT("Pursue"));
 	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
-	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
-
-
+	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner()); 
+	AGuardCharacter * Guard = Cast<AGuardCharacter>(AIGuardController->GetPawn());
 	AActor* HeroCharacterActor = Cast<AActor>(AIGuardController->GetBlackboardComponent()->GetValueAsObject("TargetActorToFollow"));
-	if (!HeroCharacterActor)
+
+	if (!HeroCharacterActor || Guard->modeGuard == ModeGuard::TENIRPOSITION)
 	{
 #ifdef DEBUG_ON
 #ifdef POURSUITE_DEBUG
@@ -96,8 +96,10 @@ void UPoursuiteBTTaskNodeUtility::TickTask(UBehaviorTreeComponent & OwnerComp, u
 	//UE_LOG(LogTemp, Warning, TEXT("Pursue"));
 	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
 	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
+	AGuardCharacter * Guard = Cast<AGuardCharacter>(AIGuardController->GetPawn());
 	AActor* HeroCharacterActor = Cast<AActor>(AIGuardController->GetBlackboardComponent()->GetValueAsObject("TargetActorToFollow"));
-	if (!HeroCharacterActor)
+
+	if (!HeroCharacterActor || Guard->modeGuard == ModeGuard::TENIRPOSITION)
 	{
 #ifdef DEBUG_ON
 #ifdef POURSUITE_DEBUG
@@ -158,7 +160,7 @@ void UPoursuiteBTTaskNodeUtility::CalculUtility(UBehaviorTreeComponent & OwnerCo
 		dist = FVector::Distance(HeroCharacterActor->GetActorLocation(), AIGuardController->GetPawn()->GetActorLocation());
 		isVisibleByGuard = checkVisibility(OwnerComp);
 
-		if (guard->modeGuard == ModeGuard::TENIRPOSITION || (isVisibleByGuard&& dist < distVoulue))
+		if (guard->modeGuard == ModeGuard::TENIRPOSITION || (isVisibleByGuard && dist < distVoulue))
 			// s'il n'a pas de cible, s'il ne peut pas bouger, ou s'il est déjà bien positionné, il ne poursuit pas
 			utility = 0.f;
 		else if (!isVisibleByGuard && dist < distVoulue)
