@@ -5,6 +5,7 @@
 #include "Runtime/AIModule/Classes/BrainComponent.h" 
 #include "AI/AIGuardController.h"
 #include "Tools/Debug/DebugTools.h"
+#include "Basic/GuardCharacter.h"
 
 EBTNodeResult::Type URoutineBTTaskNode::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
@@ -15,7 +16,7 @@ EBTNodeResult::Type URoutineBTTaskNode::ExecuteTask(UBehaviorTreeComponent & Own
 	//Obtenir un pointeur sur AIGuardController
 	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
 
-
+	
 
 	//Appeler la fonction UpdateNextTargetPoint qui contient la logique pour selectionner
 	// le prochain TargePoint
@@ -25,6 +26,7 @@ EBTNodeResult::Type URoutineBTTaskNode::ExecuteTask(UBehaviorTreeComponent & Own
 	AIGuardController->MoveToLocation(AIGuardController->GetBlackboardComponent()->GetValueAsVector("TargetPointPosition"));
 	
 	NodeResult = EBTNodeResult::Succeeded;
+
 #ifdef DEBUG_ON
 	if (NodeResult != EBTNodeResult::Failed) {
 		Debugger::get().startNodeLog(OwnerComp);
@@ -34,6 +36,10 @@ EBTNodeResult::Type URoutineBTTaskNode::ExecuteTask(UBehaviorTreeComponent & Own
 	if(NodeResult == EBTNodeResult::Succeeded)
 		Debugger::get().endNodeLog(OwnerComp);
 #endif
+	if (NodeResult == EBTNodeResult::Succeeded) {
+ 		if(AIGuardController->isFighting())
+ 			AIGuardController->exitFight();
+	}
 	return NodeResult;
 }
 

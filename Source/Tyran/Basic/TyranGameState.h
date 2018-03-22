@@ -29,4 +29,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FTimespan getTimeLeft();
+
+
 };

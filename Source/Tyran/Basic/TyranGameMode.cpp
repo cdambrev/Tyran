@@ -60,7 +60,6 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 
 	if (NewPlayer->IsLocalController()) {
 		//Action for server player (spectator ?)
-
 	}
 	else {
 		ATyranController * player = static_cast<ATyranController *>(NewPlayer);

@@ -8,6 +8,7 @@
 #include "Basic/TyranController.h"
 #include "GUI/TyranHUD.h"
 #include "GUI/RevHUD.h"
+#include "AI/Squad.h"
 #include "TyranGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -37,6 +38,9 @@ public:
 	ATyranGameMode();
 	
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	UPROPERTY()
+	TArray<ASquad*> squads;
 
 };
 

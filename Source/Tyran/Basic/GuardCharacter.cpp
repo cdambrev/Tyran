@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GuardCharacter.h"
-
+#include "Tools/Debug/DebugTools.h"
 
 AGuardCharacter::AGuardCharacter() {
 	alignement = EAlignement::A_TYRAN;
@@ -13,3 +13,6 @@ void AGuardCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AGuardCharacter, modeGuard);
 	DOREPLIFETIME(AGuardCharacter, fuiteAutorise);
 }
+
+
+
