@@ -108,10 +108,7 @@ ATyranCharacter::ATyranCharacter()
 	MaxUseDistance = 600;
 	DropItemDistance = 100;
 
-	Ammunition.AddUnique(0); //AssaultRifle
-	Ammunition.AddUnique(120); //Pistol
-	Ammunition.AddUnique(120); //Shotgun
-	Ammunition.AddUnique(120); //SniperRifle
+	Ammunition = { 90, 36, 36, 0 }; //AssaultRifle, Shotgun, Pistol, SniperRifle
 
 	PrimaryActorTick.bCanEverTick = true;
 
