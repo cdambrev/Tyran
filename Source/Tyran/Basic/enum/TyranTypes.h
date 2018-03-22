@@ -6,7 +6,7 @@ enum class EInventorySlot : uint8 {
 	Hands,
 	/* Autre arme sur le dos */ 
 	Primary, 
-	/* Emplacement pour petits items comme lampe de poche */ 
+	/* Emplacement pour pistolets */ 
 	Secondary 
 };
 

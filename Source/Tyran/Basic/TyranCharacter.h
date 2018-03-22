@@ -8,6 +8,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Basic/Enum/Alignement.h"
 #include "Enum/StateRev.h"
+#include "Gameplay/item/UsableObject.h"
 #include "TyranCharacter.generated.h"
 
 /*
@@ -88,6 +89,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "PlayerCondition", Replicated)
 	float Health;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PlayerStats")
+	float maxHealth;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	bool isDead;
@@ -149,6 +152,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* HitAnim;
 
+	TArray<FUsableObject*> objectInventory;
+
 protected:
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
@@ -208,6 +213,10 @@ protected:
 public:
 
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	void regenerate(float hp);
+
+	void addObjectInInventory(TSubclassOf<FUsableObject> objectClass);
 
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

@@ -119,6 +119,9 @@ ATyranCharacter::ATyranCharacter()
 	/*Trap*/
 	isTraced = false;
 	isStun = false;
+
+	// Object Inventory
+	objectInventory.Init(nullptr, 3);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -188,7 +191,23 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 	return ActualDamage;
 }
 
+void ATyranCharacter::regenerate(float hp) {
+	Health += hp;
+	if (Health > maxHealth) {
+		Health = maxHealth;
+	}
+}
 
+void ATyranCharacter::addObjectInInventory(TSubclassOf<FUsableObject> objectClass) {
+	FUsableObject* object = *objectInventory.FindByPredicate([&objectClass](FUsableObject* object) {
+		return object->getObjectClass() == objectClass;
+	});
+	if (object) {
+		object->add();
+	} else {
+		// la
+	}
+}
 
 UInteractionComponent * ATyranCharacter::GetInteractionInView()
 {
