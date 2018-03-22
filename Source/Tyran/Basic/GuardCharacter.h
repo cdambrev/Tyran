@@ -26,6 +26,12 @@ public:
 
 	AGuardCharacter();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float cost;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int populationCost;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Utility")
 		int agression;
 	

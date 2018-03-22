@@ -7,7 +7,7 @@
 #include <Engine/World.h>
 
 ATyranGameState::ATyranGameState() {
-	gameDuration = FTimespan{ 0,5,0 }.GetTotalSeconds();
+	gameDuration = FTimespan{ 0,15,0 }.GetTotalSeconds();
 }
 
 void ATyranGameState::BeginPlay() {

@@ -20,6 +20,8 @@
 #include "TyranController.h"
 #include "GUI/RevHUD.h"
 #include "Tools/Debug/DebugTools.h"
+#include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
+#include "Gameplay/TyranOnly/GuardSpawnPoint.h"
 
 
 /***************/
@@ -403,6 +405,33 @@ void AManagerViewPawn::RightClickAction()
 			currState = FOCUSGARDE;
 		}
 	}
+}
+
+void AManagerViewPawn::callGuardCreation(TSubclassOf<AGuardCharacter> gClass)
+{
+	createGuard(gClass);
+}
+
+void AManagerViewPawn::createGuard_Implementation(TSubclassOf<AGuardCharacter> gClass)
+{
+	auto playerState = static_cast<AManagerPlayerState *>(GetController()->PlayerState);
+	auto defaultGuard = static_cast<AGuardCharacter *>(gClass->ClassDefaultObject);
+	if (playerState->population + defaultGuard->populationCost <= playerState->maxPopulation) {
+		if (playerState->spendMoney(defaultGuard->cost)) {
+			playerState->reservePopulationSpace(defaultGuard->populationCost);
+			TObjectIterator<UGuardSpawnPoint> sP{};
+			while (!sP->GetOwner() && sP->GetOwnerRole() == ROLE_Authority) {
+				++sP;
+			}
+			sP->spawnGuard(gClass);
+			Debugger::get().addTextLog("Produire : " + gClass->GetName(), "tyran");
+		}
+	}
+}
+
+bool AManagerViewPawn::createGuard_Validate(TSubclassOf<AGuardCharacter> gClass)
+{
+	return true;
 }
 
 void AManagerViewPawn::callBuildOnSlot_Implementation(ABuildingSlot * slot, TSubclassOf<ABuilding> tBuildClass)
