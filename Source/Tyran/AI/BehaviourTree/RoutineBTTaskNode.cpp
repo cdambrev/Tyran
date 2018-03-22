@@ -32,7 +32,7 @@ EBTNodeResult::Type URoutineBTTaskNode::ExecuteTask(UBehaviorTreeComponent & Own
 	if (dist < 200.0f ) {
 		AIGuardController->UpdateNextTargetPoint();
 	}
-	EPathFollowingRequestResult::Type res = AIGuardController->MoveToLocation(targetPointPos, 100.f);
+	EPathFollowingRequestResult::Type res = AIGuardController->MoveToLocation(targetPointPos);
 
 #ifdef DEBUG_ON
 	Debugger::get().addArgToNodeLog(OwnerComp, "target", targetPointPos.ToString());
