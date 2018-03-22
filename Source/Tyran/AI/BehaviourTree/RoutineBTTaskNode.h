@@ -14,6 +14,9 @@ class TYRAN_API URoutineBTTaskNode : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
+public:
+	URoutineBTTaskNode();
+
 	/* Sera appelée au démarrage de la tâche et devra retourner Succeeded, Failed ou InProgress */
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 

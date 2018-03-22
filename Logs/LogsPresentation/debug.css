@@ -38,6 +38,11 @@
 {
 	background: rgba(0,80,80,255);
 }
+
+.routine, .routineCheck
+{
+	background: rgba(80,0,80,255);
+}
 /*===================================*/
 
 

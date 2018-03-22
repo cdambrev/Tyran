@@ -17,8 +17,6 @@ EBTNodeResult::Type UCheckEnemySpottedBTTaskNode::ExecuteTask(UBehaviorTreeCompo
 	}
 	else {
 		NodeResult = EBTNodeResult::Failed;
-		// Si le garde est en poursuite, il s'arrête
-		AIGuardController->StopMovement();
 	}
 	return NodeResult;
 }
