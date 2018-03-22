@@ -68,4 +68,7 @@ private:
 
 	UPROPERTY()
 	class ASquad * squadPtr;
+
+	UPROPERTY()
+	TSubclassOf<ASquad> defaultSquad;
 };

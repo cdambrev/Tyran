@@ -9,8 +9,15 @@
 #include "GameFramework/Character.h"
 #include "Basic/TyranCharacter.h"
 #include "Basic/TyranGameMode.h"
+#include "ConstructorHelpers.h"
 
 AAIGuardController::AAIGuardController() {
+	static ConstructorHelpers::FClassFinder<ASquad> SquadBPClass(TEXT("/Game/Blueprints/AISquad/BP_Squad"));
+	if (SquadBPClass.Class != NULL)
+	{
+		defaultSquad = SquadBPClass.Class;
+	}
+
 	patrolPoints.Empty();
 }
 
@@ -162,7 +169,7 @@ void AAIGuardController::enterFight() {
 	}
 
 	if (!canJoin) {
-		ASquad * s = GetWorld()->SpawnActor<ASquad>();
+		ASquad * s = GetWorld()->SpawnActor<ASquad>(defaultSquad);
 		s->addGarde(*this);
 		squadPtr = s;
 		squads.Add(s);
