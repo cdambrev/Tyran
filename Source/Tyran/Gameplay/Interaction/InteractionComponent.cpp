@@ -3,7 +3,8 @@
 #include "InteractionComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Components/MaterialBillboardComponent.h"
-
+//#include "PaperSpriteComponent.h"
+//#include "../Plugins/2D/Paper2D/Source/Paper2D/Classes/PaperSpriteComponent.h"
 
 // Sets default values for this component's properties
 UInteractionComponent::UInteractionComponent()
@@ -12,18 +13,18 @@ UInteractionComponent::UInteractionComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	
+	//sprite2D = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("Billboard"));
 	BillboardComponent = CreateDefaultSubobject<UMaterialBillboardComponent>(TEXT("Billboard"));
 	BillboardComponent->AttachTo(this);
 
 	TextRender = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Text"));
 	TextRender->AttachTo(BillboardComponent);
-	TextRender->SetText(FText::FromString("Pickup Text"));
+	TextRender->SetText(FText::FromString("Interact"));
 	//TextRender->HorizontalAlignment = EHorizTextAligment::EHTA_Center;
 	//TextRender->VerticalAlignment = EVerticalTextAligment::EVRTA_TextCenter;
 
-	BillboardComponent->SetVisibility(true);
-	TextRender->SetVisibility(true);
+	BillboardComponent->SetHiddenInGame(true);
+	TextRender->SetHiddenInGame(true);
 
 }
 
@@ -32,27 +33,26 @@ UInteractionComponent::UInteractionComponent()
 void UInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
 	
 }
 
 void UInteractionComponent::OnBeginFocus()
 {
-	BillboardComponent->SetVisibility(true);
-	TextRender->SetVisibility(true);
+	BillboardComponent->SetHiddenInGame(false);
+	TextRender->SetHiddenInGame(false);
 }
 
 void UInteractionComponent::OnEndFocus()
 {
-	BillboardComponent->SetVisibility(false);
-	TextRender->SetVisibility(false);
+	BillboardComponent->SetHiddenInGame(true);
+	TextRender->SetHiddenInGame(true);
 }
 // Called every frame
 void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-//	FRotator billRotate = BillboardComponent->
+	FRotator billRotate = BillboardComponent->RelativeRotation;
+	TextRender->SetRelativeRotation(billRotate);
 }
 

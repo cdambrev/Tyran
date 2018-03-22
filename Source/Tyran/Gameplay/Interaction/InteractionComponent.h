@@ -9,6 +9,7 @@
 
 
 
+
 UCLASS(abstract, ClassGroup=(Custom))
 class TYRAN_API UInteractionComponent : public USceneComponent
 {
@@ -23,13 +24,14 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
+public:
 	//A UBillboardComponent to hold Icon sprite
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Billboard")
 	class UMaterialBillboardComponent* BillboardComponent;
 	//Sprite for the Billboard Component
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Billboard")
 	class UTextRenderComponent * TextRender;
+//	class UPaperSpriteComponent* sprite2D;
 
 public:
 
