@@ -10,6 +10,9 @@ ATyranHUD::ATyranHUD() {
 	
 	ConstructorHelpers::FClassFinder<UUserWidget> patrolPointsUIHelper(TEXT("/Game/UI/SetPatrouille"));
 	patrolPointsModeUIClass = patrolPointsUIHelper.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> guardPointUIHelper(TEXT("/Game/UI/SetGuardPoint"));
+	guardPointModeUIClass = guardPointUIHelper.Class;
 	
 	ConstructorHelpers::FClassFinder<UUserWidget> guardInfoUIHelper(TEXT("/Game/UI/GuardInfo"));
 	guardInfoUIClass = guardInfoUIHelper.Class;
@@ -40,6 +43,12 @@ void ATyranHUD::BeginPlay() {
 	patrolPointsMode->SetVisibility(ESlateVisibility::Hidden);
 	patrolPointsMode->AddToViewport(9999);
 	patrolPointsMode->bIsFocusable = true;
+
+	// mode placer des points de patrouille
+	guardPointMode = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), guardPointModeUIClass);
+	guardPointMode->SetVisibility(ESlateVisibility::Hidden);
+	guardPointMode->AddToViewport(9999);
+	guardPointMode->bIsFocusable = true;
 
 	// mode affichage des ordres possibles
 	guardOrderWidget = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), guardUIClass);
@@ -75,6 +84,14 @@ void ATyranHUD::displayPatrolPointsMode() {
 
 void ATyranHUD::removePatrolPointsMode() {
 	patrolPointsMode->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void ATyranHUD::displayGuardPointMode() {
+	guardPointMode->SetVisibility(ESlateVisibility::Visible);
+}
+
+void ATyranHUD::removeGuardPointMode() {
+	guardPointMode->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void ATyranHUD::displayGuardInfo() {

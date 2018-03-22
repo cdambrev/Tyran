@@ -259,7 +259,9 @@ void AManagerViewPawn::enterSetZoneSurveillanceMode() {
 }
 
 void AManagerViewPawn::enterPositionAndDirectionSelectionMode() {
-
+	currState = SELECTPOSITION;
+	static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->displayGuardPointMode();
+	static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardOrder();
 }
 
 void AManagerViewPawn::leftClickAction()
@@ -347,6 +349,12 @@ void AManagerViewPawn::leftClickAction()
 			}
 		}
 	}
+	else if (currState == SELECTPOSITION) {
+		FHitResult hitResult{};
+		mouseRaycast(hitResult, ECollisionChannel::ECC_GameTraceChannel4);
+		patrolPoints.Add(hitResult.ImpactPoint);
+
+	}
 	else {
 		FHitResult resultHit{};
 		FVector mouseLocation;
@@ -402,6 +410,10 @@ void AManagerViewPawn::RightClickAction()
 			static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removePatrolPointsMode();
 			currState = FOCUSGARDE;
 		}
+	}
+	else if (currState == SELECTPOSITION) {
+		static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardPointMode();
+		currState = FOCUSGARDE;
 	}
 }
 
