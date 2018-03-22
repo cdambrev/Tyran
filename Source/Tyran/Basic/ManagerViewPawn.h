@@ -36,13 +36,14 @@ private :
 public:
 	enum ManagerState {
 		NOTHING,
-		BUILDING,
-		PLACINGOBJECT,
-		FOCUSGARDE,
-		ORDERMENU,
-		PATROLPOINTS,
-		ZONETRACE,
-		VECTORTRACE
+		BUILDING,			// Mode 
+		PLACINGOBJECT,		// Mode 
+		FOCUSGARDE,			// On a le focus sur un garde (ces informations sont affichées)
+		ORDERMENU,			// On a accès au tableau des ordres 
+		PATROLPOINTS,		// On place les points de patrouille
+		SELECTPOSITION,		// On choisit la position du garde à placer
+		SELECTDIRECTION,	// On choisit la direction du garde à placer
+		ZONETRACE			// On indique la zone à surveiller 
 	};
 
 
@@ -120,6 +121,9 @@ protected:
 
 	UFUNCTION(Reliable, Server, WithValidation)
 	void orderPatrolPoints(AActor* garde, const TArray<FVector>& patrolPoints);
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void orderGuardPoint(AActor* garde, const FVector& guardPoint);
 
 	UFUNCTION(BlueprintCallable)
 	void terminatePatrolPoints();

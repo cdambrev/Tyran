@@ -134,6 +134,18 @@ void AAIGuardController::setPatrolPoint(TArray<AAIGuardTargetPoint*> patrolPoint
 	UpdateNextTargetPoint();
 }
 
+void AAIGuardController::setGuardPoint(AAIGuardTargetPoint* guardPoint_) {
+	if (patrolPoints.Num()) {
+		for (AAIGuardTargetPoint* targetPoint : patrolPoints) {
+			targetPoint->Destroy();
+		}
+		patrolPoints.Empty();
+	}
+	patrolPoints.Add(guardPoint_);
+	nbTargetPoint = patrolPoints.Num(); 
+	UpdateNextTargetPoint();
+}
+
 TArray<AAIGuardTargetPoint*> AAIGuardController::getPatrolPoints() {
 	return patrolPoints;
 }
