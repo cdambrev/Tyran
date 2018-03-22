@@ -12,11 +12,14 @@ EBTNodeResult::Type UCheckEnemySpottedBTTaskNode::ExecuteTask(UBehaviorTreeCompo
 	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
 	AActor* HeroCharacterActor = Cast<AActor>(AIGuardController->GetBlackboardComponent()->GetValueAsObject("TargetActorToFollow"));
 
-	if (HeroCharacterActor)
+	if (HeroCharacterActor){
 		NodeResult = EBTNodeResult::Succeeded;
-	else
+	}
+	else {
 		NodeResult = EBTNodeResult::Failed;
-
+		// Si le garde est en poursuite, il s'arrête
+		AIGuardController->StopMovement();
+	}
 	return NodeResult;
 }
 

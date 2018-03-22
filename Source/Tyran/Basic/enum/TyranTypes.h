@@ -10,6 +10,7 @@ enum class EInventorySlot : uint8 {
 	Secondary 
 };
 
+UENUM()
 enum class EAmmoType : uint8 {
 	AssaultRifle,
 	Shotgun,

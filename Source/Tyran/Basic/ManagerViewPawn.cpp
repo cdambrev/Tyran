@@ -420,7 +420,7 @@ void AManagerViewPawn::createGuard_Implementation(TSubclassOf<AGuardCharacter> g
 		if (playerState->spendMoney(defaultGuard->cost)) {
 			playerState->reservePopulationSpace(defaultGuard->populationCost);
 			TObjectIterator<UGuardSpawnPoint> sP{};
-			while (!sP->GetOwner() && sP->GetOwnerRole() == ROLE_Authority) {
+			while (!sP->GetOwner() || sP->GetOwnerRole() != ROLE_Authority) {
 				++sP;
 			}
 			sP->spawnGuard(gClass);

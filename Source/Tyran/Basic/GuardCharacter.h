@@ -47,5 +47,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Caractéristics")
 		FString nom;
 	
+	virtual void BeginPlay() override;
+
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 };

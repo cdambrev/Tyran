@@ -4,6 +4,10 @@
 
 #include <algorithm>
 #include "BTTaskNodeUtility.h"
+#include "AI/AIGuardController.h"
+#include "runtime/AIModule/Classes/BehaviorTree/BlackboardComponent.h" 
+#include "Runtime/AIModule/Classes/BrainComponent.h" 
+#include "Tools/Debug/DebugTools.h"
 
 USelectorUtility::USelectorUtility() {
 	UE_LOG(LogTemp, Warning, TEXT("Services Size : %d"), Services.Num());
@@ -18,10 +22,17 @@ void USelectorUtility::sortChildren(UBehaviorTreeComponent & OwnerComp)
 	Children.Sort([](const FBTCompositeChild& a, const FBTCompositeChild& b) {
 		return dynamic_cast<UBTTaskNodeUtility *>(a.ChildTask)->GetUtility() > dynamic_cast<UBTTaskNodeUtility *>(b.ChildTask)->GetUtility();
 	});
-	for (FBTCompositeChild c : Children) {
-		//UE_LOG(LogTemp, Error, TEXT("%s  - Utility : %f"), *(c.ChildTask->GetStaticDescription()), static_cast<UBTTaskNodeUtility *>(c.ChildTask)->GetUtility());
-	}
+#ifdef DEBUG_ON
+	Debugger::get().addTextLog("Appel du tri utility : " + Children[0].ChildTask->GetClass()->GetName(), "ia");
+#endif
+	//updateBlackboardUtilityNode(OwnerComp, Children[0].ChildTask);
 }
 
 
-
+void USelectorUtility::updateBlackboardUtilityNode(UBehaviorTreeComponent & OwnerComp, UBTTaskNode* node) {
+	FString str = node->GetClass()->GetName();
+	static_cast<AAIGuardController*>(OwnerComp.GetAIOwner())->GetBlackboardComponent()->SetValueAsString("UtilityNode", str);
+	#ifdef DEBUG_ON	
+	Debugger::get().addTextLog(FString{ "Update Blackb. UtilityNode : " } + str, "ai");
+	#endif
+}
