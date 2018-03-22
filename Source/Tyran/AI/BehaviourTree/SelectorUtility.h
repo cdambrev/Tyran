@@ -20,4 +20,5 @@ class TYRAN_API USelectorUtility : public UBTComposite_Selector
 public:
 	USelectorUtility();
 	void sortChildren(UBehaviorTreeComponent & OwnerComp);
+	void updateBlackboardUtilityNode(UBehaviorTreeComponent & OwnerComp, UBTTaskNode* node);
 };

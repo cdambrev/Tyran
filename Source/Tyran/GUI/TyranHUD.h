@@ -26,6 +26,10 @@ private:
 	UUserWidget* patrolPointsMode;
 	TSubclassOf<UUserWidget> patrolPointsModeUIClass;
 
+	// widget pour le placement des gardes
+	UUserWidget* guardPointMode;
+	TSubclassOf<UUserWidget> guardPointModeUIClass;
+
 	// widget pour le timer
 	UUserWidget* timerUIWidget;
 	TSubclassOf<UUserWidget> timerUIClass;
@@ -58,6 +62,10 @@ public:
 	void displayPatrolPointsMode();
 
 	void removePatrolPointsMode();
+
+	void displayGuardPointMode();
+
+	void removeGuardPointMode();
 
 	void displayGuardInfo();
 

@@ -117,7 +117,7 @@ EPathFollowingRequestResult::Type AAIGuardController::MoveToEnemy() {
 	AActor* HeroCharacterActor = Cast<AActor>(blackboardComponent->GetValueAsObject("TargetActorToFollow"));
 
 	// attention, il faut vérifier qu'il y ait une line of sight.
-	EPathFollowingRequestResult::Type MoveToActorResult = MoveToActor(HeroCharacterActor, acceptanceRadius);
+	EPathFollowingRequestResult::Type MoveToActorResult = MoveToActor(HeroCharacterActor, acceptanceRadius,false, true);
 
 	return MoveToActorResult;
 }
@@ -131,6 +131,18 @@ void AAIGuardController::setPatrolPoint(TArray<AAIGuardTargetPoint*> patrolPoint
 	}
 	patrolPoints = patrolPoints_;
 	nbTargetPoint = patrolPoints.Num();
+	UpdateNextTargetPoint();
+}
+
+void AAIGuardController::setGuardPoint(AAIGuardTargetPoint* guardPoint_) {
+	if (patrolPoints.Num()) {
+		for (AAIGuardTargetPoint* targetPoint : patrolPoints) {
+			targetPoint->Destroy();
+		}
+		patrolPoints.Empty();
+	}
+	patrolPoints.Add(guardPoint_);
+	nbTargetPoint = patrolPoints.Num(); 
 	UpdateNextTargetPoint();
 }
 

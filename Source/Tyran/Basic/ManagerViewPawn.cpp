@@ -20,6 +20,8 @@
 #include "TyranController.h"
 #include "GUI/RevHUD.h"
 #include "Tools/Debug/DebugTools.h"
+#include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
+#include "Gameplay/TyranOnly/GuardSpawnPoint.h"
 
 
 /***************/
@@ -259,7 +261,9 @@ void AManagerViewPawn::enterSetZoneSurveillanceMode() {
 }
 
 void AManagerViewPawn::enterPositionAndDirectionSelectionMode() {
-
+	currState = SELECTPOSITION;
+	static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->displayGuardPointMode();
+	static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardOrder();
 }
 
 void AManagerViewPawn::leftClickAction()
@@ -347,6 +351,13 @@ void AManagerViewPawn::leftClickAction()
 			}
 		}
 	}
+	else if (currState == SELECTPOSITION) {
+		FHitResult hitResult{};
+		mouseRaycast(hitResult, ECollisionChannel::ECC_GameTraceChannel4);
+		orderGuardPoint(focus, hitResult.ImpactPoint);
+		static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardPointMode();
+		currState = FOCUSGARDE;
+	}
 	else {
 		FHitResult resultHit{};
 		FVector mouseLocation;
@@ -403,6 +414,37 @@ void AManagerViewPawn::RightClickAction()
 			currState = FOCUSGARDE;
 		}
 	}
+	else if (currState == SELECTPOSITION) {
+		static_cast<ATyranHUD*>(static_cast<APlayerController*>(GetController())->GetHUD())->removeGuardPointMode();
+		currState = FOCUSGARDE;
+	}
+}
+
+void AManagerViewPawn::callGuardCreation(TSubclassOf<AGuardCharacter> gClass)
+{
+	createGuard(gClass);
+}
+
+void AManagerViewPawn::createGuard_Implementation(TSubclassOf<AGuardCharacter> gClass)
+{
+	auto playerState = static_cast<AManagerPlayerState *>(GetController()->PlayerState);
+	auto defaultGuard = static_cast<AGuardCharacter *>(gClass->ClassDefaultObject);
+	if (playerState->population + defaultGuard->populationCost <= playerState->maxPopulation) {
+		if (playerState->spendMoney(defaultGuard->cost)) {
+			playerState->reservePopulationSpace(defaultGuard->populationCost);
+			TObjectIterator<UGuardSpawnPoint> sP{};
+			while (!sP->GetOwner() || sP->GetOwnerRole() != ROLE_Authority) {
+				++sP;
+			}
+			sP->spawnGuard(gClass);
+			Debugger::get().addTextLog("Produire : " + gClass->GetName(), "tyran");
+		}
+	}
+}
+
+bool AManagerViewPawn::createGuard_Validate(TSubclassOf<AGuardCharacter> gClass)
+{
+	return true;
 }
 
 void AManagerViewPawn::callBuildOnSlot_Implementation(ABuildingSlot * slot, TSubclassOf<ABuilding> tBuildClass)
@@ -460,6 +502,20 @@ void AManagerViewPawn::orderPatrolPoints_Implementation(AActor* garde, const TAr
 }
 
 bool AManagerViewPawn::orderPatrolPoints_Validate(AActor* garde, const TArray<FVector>& patrolPointsPos) {
+	return true;
+}
+
+void AManagerViewPawn::orderGuardPoint_Implementation(AActor* garde, const FVector& guardPoint) {
+	AAIGuardController* aiGuardController = Cast<AAIGuardController>(garde->GetInstigatorController());
+	if (garde) {
+		AAIGuardTargetPoint* targetPoint = GetWorld()->SpawnActor<AAIGuardTargetPoint>(AAIGuardTargetPoint::StaticClass(), FTransform(guardPoint));
+		targetPoint->SetActorLocation(guardPoint);
+		targetPoint->Position = 0;
+		aiGuardController->setGuardPoint(targetPoint);
+	}
+}
+
+bool AManagerViewPawn::orderGuardPoint_Validate(AActor* garde, const FVector& guardPoint) {
 	return true;
 }
 

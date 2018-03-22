@@ -11,6 +11,7 @@ AproceduralRoad::AproceduralRoad()
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = false;
 	roadMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("RoadMesh"));
+	roadMesh->bNavigationRelevant = false;
 	RootComponent = roadMesh;
 	roadMesh->bUseAsyncCooking = true;
 }

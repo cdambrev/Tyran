@@ -8,6 +8,8 @@
 UTyranViewSpotLightComponent::UTyranViewSpotLightComponent() {
 	angleOfVision = 75.0f;
 	cosAoV = cos(PI*(angleOfVision * 2) / 360);
+	SetWorldLocation({ 22.455669f, 13.839756f, 70.0f });
+	
 }
 
 void UTyranViewSpotLightComponent::BeginPlay()
