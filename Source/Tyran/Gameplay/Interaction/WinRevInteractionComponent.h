@@ -13,7 +13,7 @@ UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class TYRAN_API UWinRevInteractionComponent : public UInteractionComponent
 {
 	GENERATED_BODY()
-	
+
 protected:
 	virtual void BeginPlay() override;
 public:
