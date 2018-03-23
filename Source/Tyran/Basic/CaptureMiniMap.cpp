@@ -29,8 +29,8 @@ void ACaptureMiniMap::update() {
 		FColor c = MapTexData[i];
 		FColor res = FColor(0, 0, 0);
 		float z = c.R / 255.0f + c.G / 65025.0f + c.B / 16581375.0f + c.A / 4228250625.0f; // Formule pour avoir le Z buffer à partir du RGBA
-		if (z < 0.0158f) {
-			if (z > 0.001)
+		if (z < 0.085f) {
+			if (z > 0.001f)
 				res = FColor(0, 0, 128);
 			else
 				res = FColor(0, 0, 255);
@@ -47,13 +47,13 @@ UTexture2D * ACaptureMiniMap::GetTextureAtLocation(FVector location)
 	int tailleX = tex->GetSizeX();
 	int tailleY = tex->GetSizeY();
 
-	int texY = (-location.X * 1024.0 / 500000.0) + 512;
-	int texX = (location.Y * 1024.0 / 500000.0) + 512;
+	int texY = (-location.X * 2048.0 / 150000.0) + 1024;
+	int texX = (location.Y * 2048.0 / 150000.0) + 1024;
 
 	TArray<FColor> MapTexDataResize;
 	for (int y = texY - tailleY / 2; y < texY - tailleY / 2 + tailleY; ++y) {
 		int x = texX - tailleX / 2;
-		MapTexDataResize.Append(&MapTexData[x + y * 1024], tailleY);
+		MapTexDataResize.Append(&MapTexData[x + y * 2048], tailleY);
 	}
 
 	for (int y = tailleY / 2 - 1; y <= tailleY / 2 + 1; ++y) {
