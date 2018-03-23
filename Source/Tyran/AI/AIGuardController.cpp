@@ -158,7 +158,7 @@ void AAIGuardController::enterFight() {
 		auto s = squads[i];
 		if (!s->empty()) {
 			for (AAIGuardController * garde : s->getGardes()) {
-				if (FVector::Dist2D(garde->GetPawn()->GetActorLocation(), GetPawn()->GetActorLocation()) < 500.0) {
+				if (FVector::Dist2D(garde->GetPawn()->GetActorLocation(), GetPawn()->GetActorLocation()) < 5000.0) {
 					s->addGarde(*this);
 					squadPtr = s;
 					canJoin = true;

@@ -53,8 +53,8 @@ void ARevHUD::Tick(float DeltaSeconds) {
 			lastPos = currentPos;
 		}
 	}
-
 	
+
 }
 
 void ARevHUD::updateMap() {
@@ -63,11 +63,6 @@ void ARevHUD::updateMap() {
 }
 
 void ARevHUD::moveMiniMap() {
-
-	for (ATyranCharacter *  c : GetWorld()->GetGameState<ATyranGameState>()->playersPawn) {
-		auto v1 = c;
-		auto v2 = v1;
-	}
 	UImage * img = Cast<UImage>(defaultUIWidget->GetWidgetFromName(TEXT("MiniMap")));
 	if(GetOwningPawn())
 		img->SetBrushFromTexture(captureMap->GetTextureAtLocation(GetOwningPawn()->GetActorLocation()));
