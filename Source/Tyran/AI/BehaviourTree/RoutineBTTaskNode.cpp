@@ -5,6 +5,7 @@
 #include "Runtime/AIModule/Classes/BrainComponent.h" 
 #include "AI/AIGuardController.h"
 #include "Tools/Debug/DebugTools.h"
+#include "Basic/GuardCharacter.h"
 
 URoutineBTTaskNode::URoutineBTTaskNode() {
 	bNotifyTaskFinished = true;
@@ -23,7 +24,7 @@ EBTNodeResult::Type URoutineBTTaskNode::ExecuteTask(UBehaviorTreeComponent & Own
 	//Obtenir un pointeur sur AIGuardController
 	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
 
-
+	
 
 	//Appeler la fonction UpdateNextTargetPoint qui contient la logique pour selectionner
 	// le prochain TargePoint
@@ -32,7 +33,9 @@ EBTNodeResult::Type URoutineBTTaskNode::ExecuteTask(UBehaviorTreeComponent & Own
 	if (dist < 200.0f ) {
 		AIGuardController->UpdateNextTargetPoint();
 	}
+
 	EPathFollowingRequestResult::Type res = AIGuardController->MoveToLocation(targetPointPos);
+
 
 #ifdef DEBUG_ON
 	Debugger::get().addArgToNodeLog(OwnerComp, "target", targetPointPos.ToString());
@@ -52,6 +55,7 @@ EBTNodeResult::Type URoutineBTTaskNode::ExecuteTask(UBehaviorTreeComponent & Own
 		break;
 	}
 #endif
+
 	if (res == EPathFollowingRequestResult::RequestSuccessful || res == EPathFollowingRequestResult::AlreadyAtGoal)
 		NodeResult = EBTNodeResult::Succeeded;
 	else

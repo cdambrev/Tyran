@@ -3,6 +3,7 @@
 #include "Loot.h"
 
 #include "Components/StaticMeshComponent.h"
+#include "Gameplay/Interaction/LootInteractionComponent.h"
 
 
 // Sets default values
@@ -17,6 +18,8 @@ ALoot::ALoot()
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh")); 
 	RootComponent = MeshComp;
 
+	lootInteraction = CreateDefaultSubobject<ULootInteractionComponent>(TEXT("loot"));
+	lootInteraction->SetupAttachment(RootComponent);
 	bReplicates = true; 
 	bReplicateMovement = true;
 

@@ -14,12 +14,14 @@ void ULootInteractionComponent::BeginPlay()
 
 void ULootInteractionComponent::OnBeginFocus()
 {
+	Super::OnBeginFocus();
 	// Utilisé par notre PostProcess pour le rendu d'un «surlignage» 
 	loot->MeshComp->SetRenderCustomDepth(true);
 }
 
 void ULootInteractionComponent::OnEndFocus()
 {
+	Super::OnEndFocus();
 	// Utilisé par notre PostProcess pour le rendu d'un «surlignage» 
 	loot->MeshComp->SetRenderCustomDepth(false);
 }

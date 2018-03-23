@@ -19,6 +19,8 @@ class TYRAN_API AAIGuardController : public AAIController
 private:
 	TArray<AAIGuardTargetPoint*> patrolPoints;
 
+
+
 public:
 	AAIGuardController();
 
@@ -53,6 +55,28 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Fonctions custom")
 		TArray<AAIGuardTargetPoint*> getPatrolPoints();
 
+
+	void enterFight();
+
+	void exitFight();
+
+	bool isFighting();
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	UFUNCTION(BlueprintCallable, Category = "Fonctions custom")
 		void setGuardPoint(AAIGuardTargetPoint* guardPoint_);
+
+private:
+
+	bool fighting = false;
+
+	UPROPERTY()
+	class ASquad * squadPtr;
+
+	UPROPERTY()
+	TSubclassOf<ASquad> defaultSquad;
+
+
+
 };

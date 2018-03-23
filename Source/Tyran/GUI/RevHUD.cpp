@@ -5,6 +5,10 @@
 #include <Image.h>
 #include "Tools/Debug/DebugTools.h"
 #include "Basic/TyranCharacter.h"
+#include "Basic/TyranController.h"
+#include "Basic/TyranGameState.h"
+#include "GameFramework/PlayerState.h"
+#include "EngineUtils.h"
 
 ARevHUD::ARevHUD() {
 	ConstructorHelpers::FClassFinder<UUserWidget> defaultUIHelper(TEXT("/Game/UI/RevolutionnaireInterface"));
@@ -33,9 +37,12 @@ void ARevHUD::BeginPlay() {
 	defaultUIWidget->AddToViewport(9998);
 	
 	captureMap = GetWorld()->SpawnActor<ACaptureMiniMap>(defaultCapture);
-	if (captureMap)
-		captureMap->update();
+	if (captureMap) {
+		updateMap();
+	}
+		
 
+	lastPos = GetOwningPawn()->GetActorLocation();
 	
 }
 
@@ -44,19 +51,26 @@ void ARevHUD::Tick(float DeltaSeconds) {
 		updateMap();
 		setMapUpdateState(false);
 	}
+
+	if (GetOwningPawn()) {
+		
+		FVector currentPos = GetOwningPawn()->GetActorLocation();
+		if (currentPos != lastPos) {
+			moveMiniMap();
+			lastPos = currentPos;
+		}
+	}
 	
-	moveMiniMap();
+
 }
 
 void ARevHUD::updateMap() {
 	captureMap->update();
+	moveMiniMap();
 }
 
 void ARevHUD::moveMiniMap() {
 	UImage * img = Cast<UImage>(defaultUIWidget->GetWidgetFromName(TEXT("MiniMap")));
-#ifdef DEBUG_ON
-	Debugger::get().addTextLog("Move Mini Map of " + GetOwningPlayerController()->GetDebugName(GetOwningPawn()), "hud");
-#endif
 	if(GetOwningPawn())
 		img->SetBrushFromTexture(captureMap->GetTextureAtLocation(GetOwningPawn()->GetActorLocation()));
 }

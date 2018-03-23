@@ -21,6 +21,7 @@ private:
 	TSubclassOf<UUserWidget> defaultUIClass;
 	UUserWidget* defaultUIWidget;
 	bool updateMapNextTick = true;
+	FVector lastPos;
 
 	// widget pour la fin du jeu
 	UUserWidget* endOfGameUIWidget;

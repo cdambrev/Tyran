@@ -12,12 +12,14 @@ void UWinRevInteractionComponent::BeginPlay()
 
 void UWinRevInteractionComponent::OnBeginFocus()
 {
+	Super::OnBeginFocus();
 	// Utilisé par notre PostProcess pour le rendu d'un «surlignage» 
 	mesh->SetRenderCustomDepth(true);
 }
 
 void UWinRevInteractionComponent::OnEndFocus()
 {
+	Super::OnEndFocus();
 	// Utilisé par notre PostProcess pour le rendu d'un «surlignage» 
 	mesh->SetRenderCustomDepth(false);
 }

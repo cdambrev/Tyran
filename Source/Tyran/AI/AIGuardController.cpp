@@ -8,8 +8,16 @@
 #include "Kismet/GameplayStatics.h" 
 #include "GameFramework/Character.h"
 #include "Basic/TyranCharacter.h"
+#include "Basic/TyranGameMode.h"
+#include "ConstructorHelpers.h"
 
 AAIGuardController::AAIGuardController() {
+	static ConstructorHelpers::FClassFinder<ASquad> SquadBPClass(TEXT("/Game/Blueprints/AISquad/BP_Squad"));
+	if (SquadBPClass.Class != NULL)
+	{
+		defaultSquad = SquadBPClass.Class;
+	}
+
 	patrolPoints.Empty();
 }
 
@@ -148,4 +156,56 @@ void AAIGuardController::setGuardPoint(AAIGuardTargetPoint* guardPoint_) {
 
 TArray<AAIGuardTargetPoint*> AAIGuardController::getPatrolPoints() {
 	return patrolPoints;
+}
+
+void AAIGuardController::enterFight() {
+
+	fighting = true;
+
+	//if squad nearby then enter this squad
+	//else create new squad
+	bool canJoin = false;
+	auto squads = Cast<ATyranGameMode>(GetWorld()->GetAuthGameMode())->squads;
+	for (int i = 0; i < squads.Num() && !canJoin; ++i) {
+		auto s = squads[i];
+		if (!s->empty()) {
+			for (AAIGuardController * garde : s->getGardes()) {
+				if (FVector::Dist2D(garde->GetPawn()->GetActorLocation(), GetPawn()->GetActorLocation()) < 5000.0) {
+					s->addGarde(*this);
+					squadPtr = s;
+					canJoin = true;
+					break;
+				}
+			}
+		}
+	}
+
+	if (!canJoin) {
+		ASquad * s = GetWorld()->SpawnActor<ASquad>(defaultSquad);
+		s->addGarde(*this);
+		squadPtr = s;
+		squads.Add(s);
+
+
+
+	}
+}
+
+void AAIGuardController::exitFight() {
+	fighting = false;
+
+	//exit squad
+	squadPtr->removeGarde(*this);
+	squadPtr = nullptr;
+}
+
+bool AAIGuardController::isFighting()
+{
+	return fighting;
+}
+
+void AAIGuardController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (isFighting())
+		exitFight();
 }

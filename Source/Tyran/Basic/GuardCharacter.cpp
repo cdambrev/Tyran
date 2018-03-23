@@ -32,3 +32,6 @@ void AGuardCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AGuardCharacter, modeGuard);
 	DOREPLIFETIME(AGuardCharacter, fuiteAutorise);
 }
+
+
+

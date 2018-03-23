@@ -60,13 +60,14 @@ ATyranGameMode::ATyranGameMode()
 
 void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 {
-	Debugger::get().startTextLog();
-	Debugger::get().startAILog();
 
 	if (NewPlayer->IsLocalController()) {
 		//Action for server player (spectator ?)
-
-	}
+#ifdef DEBUG_ON
+		Debugger::get().startTextLog();
+		Debugger::get().startAILog();
+#endif
+}
 	else {
 		ATyranController * player = static_cast<ATyranController *>(NewPlayer);
 		TActorIterator<APlayerStart> spawnPoints(GetWorld());
