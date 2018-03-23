@@ -161,9 +161,8 @@ public:
 	TSubclassOf<AActor> bunker;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ABuilding> baseHouse;
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<ABuilding> ruin;
+	TArray<TSubclassOf<ABuilding>> availableBuildings;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> spawnPoint;
 

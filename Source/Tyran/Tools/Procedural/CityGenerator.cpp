@@ -380,12 +380,31 @@ void ACityGenerator::placeBuildingSlots()
 void ACityGenerator::constructBuildings()
 {
 	for (TTuple<ABuildingSlot *, Rectangle> slot : slots) {
-		if (slot.Key->GetTransform().GetLocation().SizeSquared2D() > 800000000) {
-			slot.Key->build(ruin);
+		float objectiveSize = (30000 - slot.Key->GetTransform().GetLocation().Size2D()) / (30000 / 6);
+		if (objectiveSize > 0) {
+			objectiveSize = 0;
 		}
-		else {
-			slot.Key->build(baseHouse);
+		float objectiveCondition = (slot.Key->GetTransform().GetLocation().SizeSquared2D() > 1000000000 ? 0.0f : 1000.0f);
+		TArray<TTuple<float, TSubclassOf<ABuilding>>> builds;
+		float minScore = INFINITY;
+		TSubclassOf<ABuilding> bestBuild;
+		for (auto b : availableBuildings) {
+			float score = sqrtf(pow(objectiveSize - b.GetDefaultObject()->size,2) + pow(objectiveCondition - b.GetDefaultObject()->condition, 2));
+			if (score < minScore) {
+				minScore = score;
+				bestBuild = b;
+			}
+			builds.Add(TTuple<float, TSubclassOf<ABuilding>>{score, b});
 		}
+		float maxBonus = (2 * minScore) + 0.1f;
+		for (auto b : builds) {
+			b.Key -= randStream.FRandRange(0.0f, maxBonus);
+			if (b.Key < minScore) {
+				minScore = b.Key;
+				bestBuild = b.Value;
+			}
+		}
+		slot.Key->build(bestBuild);
 	}
 }
 

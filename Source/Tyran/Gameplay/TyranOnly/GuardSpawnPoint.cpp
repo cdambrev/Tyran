@@ -2,6 +2,7 @@
 
 #include "GuardSpawnPoint.h"
 #include "Runtime/Engine/Classes/AI/Navigation/NavigationSystem.h"
+#include "Runtime/Engine/Classes/AI/Navigation/NavigationTypes.h"
 
 
 // Sets default values for this component's properties
@@ -16,5 +17,7 @@ UGuardSpawnPoint::UGuardSpawnPoint()
 
 void UGuardSpawnPoint::spawnGuard(TSubclassOf<AGuardCharacter> gClass)
 {
-	auto guard = GetWorld()->SpawnActor<AGuardCharacter>(gClass, FTransform{ UNavigationSystem::ProjectPointToNavigation(GetWorld(),GetComponentToWorld().GetLocation()) });
+	FNavLocation result;
+	GetWorld()->GetNavigationSystem()->ProjectPointToNavigation(GetComponentToWorld().GetLocation(), result);
+	auto guard = GetWorld()->SpawnActor<AGuardCharacter>(gClass, FTransform{ result });
 }
