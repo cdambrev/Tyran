@@ -3,6 +3,7 @@
 #include "Loot.h"
 
 #include "Components/StaticMeshComponent.h"
+#include "Gameplay/Interaction/LootInteractionComponent.h"
 
 
 // Sets default values
@@ -17,6 +18,8 @@ ALoot::ALoot()
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh")); 
 	RootComponent = MeshComp;
 
+	lootInteraction = CreateDefaultSubobject<ULootInteractionComponent>(TEXT("loot"));
+	lootInteraction->SetupAttachment(RootComponent);
 	bReplicates = true; 
 	bReplicateMovement = true;
 
@@ -32,19 +35,6 @@ void ALoot::BeginPlay()
 	MeshComp->SetSimulatePhysics(true);
 	MeshComp->WakeRigidBody();
 }
-
-
-void ALoot::OnBeginFocus() {
-	// Utilisé par notre PostProcess pour le rendu d'un «surlignage» 
-	MeshComp->SetRenderCustomDepth(true);
-}
-
-void ALoot::OnEndFocus()
-{
-	// Utilisé par notre PostProcess pour le rendu d'un «surlignage» 
-	MeshComp->SetRenderCustomDepth(false);
-}
-
 
 // Called every frame
 void ALoot::Tick(float DeltaTime)

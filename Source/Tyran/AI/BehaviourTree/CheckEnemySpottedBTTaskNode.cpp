@@ -19,9 +19,10 @@ EBTNodeResult::Type UCheckEnemySpottedBTTaskNode::ExecuteTask(UBehaviorTreeCompo
  			AIGuardController->enterFight();
 	}
 		
-	else
+	else {
 		NodeResult = EBTNodeResult::Failed;
-
+	}
+		
 
 
 	return NodeResult;

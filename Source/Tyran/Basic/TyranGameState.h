@@ -25,7 +25,10 @@ public:
 	float gameDuration;
 
 	virtual void BeginPlay() override;
-	void OnEndOfGame();
+	void TyranWin();
+	void RevWin();
+
+	//void EndGame(bool tyranWin);
 
 	UFUNCTION(BlueprintCallable)
 	FTimespan getTimeLeft();

@@ -7,6 +7,7 @@
 #include "Gameplay/item/Loot.h"
 #include "Basic/TyranController.h"
 #include "GUI/TyranHUD.h"
+#include "AI/HeatMap.h"
 #include "GUI/RevHUD.h"
 #include "AI/Squad.h"
 #include "TyranGameMode.generated.h"
@@ -17,6 +18,9 @@ class ATyranGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
+	UPROPERTY()
+	UHeatMap * heatMap;
+
 	UPROPERTY(EditAnywhere)
 	TSet<TSubclassOf<ALoot>> availableLoot;
 
@@ -39,9 +43,19 @@ public:
 	
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
+
 	UPROPERTY()
 	TArray<ASquad*> squads;
 
+
+	virtual void Tick(float DeltaTime) override;
+
+	virtual void BeginPlay() override;
+
+	UFUNCTION(BluePrintCallable) 
+	UTexture2D * getHeatMapTex(){
+		return heatMap->getTexture();
+	}
 };
 
 

@@ -19,6 +19,7 @@
 #include "TimerManager.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Gameplay/Interaction/InteractionComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -60,17 +61,36 @@ ATyranCharacter::ATyranCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	// Create a camera boom (pulls in towards the player if there is a collision)
+	AimCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("AimCameraBoom"));
+	AimCameraBoom->SetupAttachment(RootComponent);
+	AimCameraBoom->TargetArmLength = 100.0f; // The camera follows at this distance behind the character	
+	AimCameraBoom->SocketOffset = FVector(0, 35, 0);
+	AimCameraBoom->TargetOffset = FVector(0, 0, 55);
+
+	AimCameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
+
+	// Create a follow camera
+	AimCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("AimCamera"));
+	AimCamera->SetupAttachment(AimCameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	AimCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+	AimCamera->Deactivate();
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 
 	/* Noms des points d'attache tels que spécifiés dans le squelette du personnage */ 
-	WeaponAttachPoint = TEXT("WeaponSocket"); 
+	WeaponAttachPoint_Rifle = TEXT("WeaponSocket"); 
+	WeaponAttachPoint_Handgun = TEXT("WeaponSocket_Handgun");
+	WeaponAttachPoint_Shotgun = TEXT("WeaponSocket_Shotgun");
 	PelvisAttachPoint = TEXT("PelvisSocket"); 
 	SpineAttachPoint = TEXT("SpineSocket");
+	SpineAttachPoint_Shotgun = TEXT("SpineSocket_Shotgun");
+	HeadAttachPoint = TEXT("HeadSocket");
 
 	// FPS camera
 	FPSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FPSCamera"));
-	FPSCamera->SetupAttachment(GetMesh(), WeaponAttachPoint);
+	FPSCamera->SetupAttachment(GetMesh(), WeaponAttachPoint_Rifle);
 	FPSCamera->SetRelativeLocationAndRotation(FVector{ 0,0,20 }, FQuat{ FVector{0,0,1}, PI/2.0 });
 	FPSCamera->Deactivate();
 
@@ -88,10 +108,7 @@ ATyranCharacter::ATyranCharacter()
 	MaxUseDistance = 600;
 	DropItemDistance = 100;
 
-	Ammunition.Add(EAmmoType::AssaultRifle, 1200);
-	Ammunition.Add(EAmmoType::Pistol, 0);
-	Ammunition.Add(EAmmoType::Shotgun, 0);
-	Ammunition.Add(EAmmoType::SniperRifle, 0);
+	Ammunition = { 90, 36, 36, 0 }; //AssaultRifle, Shotgun, Pistol, SniperRifle
 
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -169,7 +186,8 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 }
 
 
-ALoot * ATyranCharacter::GetLootInView()
+
+UInteractionComponent * ATyranCharacter::GetInteractionInView()
 {
 	FVector CamLoc;
 	FRotator CamRot; 
@@ -182,7 +200,7 @@ ALoot * ATyranCharacter::GetLootInView()
 	const FVector Direction = CamRot.Vector(); 
 	const FVector TraceEnd = TraceStart + (Direction * MaxUseDistance); 
 	
-	FCollisionQueryParams TraceParams(FName(TEXT("TraceLoot")), true, this); 
+	FCollisionQueryParams TraceParams(FName(TEXT("TraceInteraction")), true, this); 
 	TraceParams.bTraceAsyncScene = true; 
 	TraceParams.bReturnPhysicalMaterial = false; 
 	TraceParams.bTraceComplex = false; 
@@ -191,20 +209,50 @@ ALoot * ATyranCharacter::GetLootInView()
 	FHitResult Hit(ForceInit);
 	bool succes = GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, TraceParams);
 	
+	//
+	if (succes && Hit.GetActor()) {
+		if(UInteractionComponent* interactComponent = Hit.GetActor()->FindComponentByClass<UInteractionComponent>()){
+			return interactComponent;
+		}
+	}
 	//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f); 
-	
-	return Cast<ALoot>(Hit.GetActor());
+	return nullptr;
 }
 
 
-FName ATyranCharacter::GetInventoryAttachPoint(EInventorySlot Slot) const
+
+FName ATyranCharacter::GetInventoryAttachPoint(EInventorySlot Slot, EWeaponType WeaponType) const
 {
 	/* Retourne le nom du socket */ 
 	switch (Slot) {
-	case EInventorySlot::Hands: 
-		return WeaponAttachPoint; 
+	case EInventorySlot::Hands:
+		switch (WeaponType)
+		{
+		case EWeaponType::AssaultRifle:
+			return WeaponAttachPoint_Rifle;
+		case EWeaponType::Shotgun:
+			return WeaponAttachPoint_Shotgun;
+		case EWeaponType::Pistol:
+			return WeaponAttachPoint_Handgun;
+		case EWeaponType::SniperRifle:
+			return WeaponAttachPoint_Rifle;
+		default:
+			// pas implémenté. 
+			return "";
+		}
 	case EInventorySlot::Primary: 
-		return SpineAttachPoint; 
+		switch (WeaponType)
+		{
+		case EWeaponType::AssaultRifle:
+			return SpineAttachPoint;
+		case EWeaponType::Shotgun:
+			return SpineAttachPoint_Shotgun;
+		case EWeaponType::SniperRifle:
+			return SpineAttachPoint;
+		default:
+			// pas implémenté. 
+			return "";
+		}
 	case EInventorySlot::Secondary:
 		return PelvisAttachPoint;
 	default: 
@@ -236,6 +284,28 @@ void ATyranCharacter::EquipWeapon(AWeapon * Weapon)
 		} 
 
 	}
+}
+
+void ATyranCharacter::AddAmmo(EAmmoType AmmoType, int nbAmmo)
+{
+	if (Role == ROLE_Authority)
+	{
+		Ammunition[static_cast<int>(AmmoType)] += nbAmmo;
+	}
+	else
+	{
+		SeverAddAmmo(AmmoType, nbAmmo);
+	}
+}
+
+bool ATyranCharacter::SeverAddAmmo_Validate(EAmmoType AmmoType, int nbAmmo) {
+	return true;
+}
+
+
+void ATyranCharacter::SeverAddAmmo_Implementation(EAmmoType AmmoType, int nbAmmo)
+{
+	AddAmmo(AmmoType, nbAmmo);
 }
 
 void ATyranCharacter::PostInitializeComponents()
@@ -394,10 +464,12 @@ void ATyranCharacter::DropWeapon()
 		AWeaponLoot* NewWeaponLoot = GetWorld()->SpawnActor<AWeaponLoot>(CurrentWeapon->WeaponLootClass, SpawnLocation, FRotator::ZeroRotator, SpawnInfo); 
 		
 		/* Lui appliquer une petite force pour que l'arme tourne un peu lorsque lachee. */ 
-		UStaticMeshComponent* MeshComp = NewWeaponLoot->GetMeshComponent();
-		if (MeshComp) { 
-			MeshComp->AddTorque(FVector(1, 1, 1) * 4000000); 
-		} 
+		if (NewWeaponLoot) {
+			UStaticMeshComponent* MeshComp = NewWeaponLoot->GetMeshComponent();
+			if (MeshComp) {
+				//MeshComp->AddTorqueInRadians(FVector(1, 1, 1) * 4000000);
+			}
+		}
 		
 		RemoveWeapon(CurrentWeapon); 
 	}
@@ -517,7 +589,8 @@ void ATyranCharacter::OnStartAim()
 	if (IsLocallyControlled())
 	{
 		FollowCamera->Deactivate();
-		FPSCamera->Activate();
+		//FPSCamera->Activate();
+		AimCamera->Activate();
 	}
 	if (Role < ROLE_Authority)
 	{
@@ -542,9 +615,9 @@ void ATyranCharacter::OnStopAim()
 void ATyranCharacter::Use()
 {
 	if (Role == ROLE_Authority) {
-		ALoot* Loot = GetLootInView();
-		if (Loot) {
-			Loot->OnUsed(this);
+		UInteractionComponent* interactComponent = GetInteractionInView();
+		if (interactComponent) {
+			interactComponent->OnUsed(this);
 		}
 	}
 	else
@@ -555,7 +628,7 @@ void ATyranCharacter::Use()
 
 void ATyranCharacter::OnReload()
 {
-	if (Ammunition[CurrentWeapon->GetAmmoType()] > 0)
+	if (Ammunition[static_cast<int>(CurrentWeapon->GetAmmoType())] > 0)
 	{
 		if (Role == ROLE_Authority) {
 			CurrentWeapon->OnReload();
@@ -688,6 +761,7 @@ void ATyranCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ATyranCharacter, isVisible);
 	DOREPLIFETIME(ATyranCharacter, Inventory);
+	DOREPLIFETIME(ATyranCharacter, Ammunition);
 	DOREPLIFETIME(ATyranCharacter, CurrentWeapon);
 	DOREPLIFETIME(ATyranCharacter, Health);
 	DOREPLIFETIME(ATyranCharacter, isDead);
@@ -744,24 +818,24 @@ void ATyranCharacter::Tick(float DeltaSeconds)
 	}
 
 	if (Controller && Controller->IsLocalController()) {
-		ALoot* Loot = GetLootInView();
+		UInteractionComponent* interactionComponent = GetInteractionInView();
 		
 		// Terminer le focus sur l'objet précédent 
-		if (FocusedLoot != Loot) {
-			if (FocusedLoot) {
-				FocusedLoot->OnEndFocus();
+		if (FocusedInteraction != interactionComponent) {
+			if (FocusedInteraction) {
+				FocusedInteraction->OnEndFocus();
 			} 
 
 			bHasNewFocus = true; 
 		} 
 		
 		// Assigner le nouveau focus (peut être nul ) 
-		FocusedLoot = Loot;
+		FocusedInteraction = interactionComponent;
 		
 		// Démarrer un nouveau focus si Usable != null; 
-		if (Loot) {
+		if (interactionComponent) {
 			if (bHasNewFocus) { 
-				Loot->OnBeginFocus();
+				interactionComponent->OnBeginFocus();
 				bHasNewFocus = false; 
 				
 				// Pour débogage, vous pourrez l'oter par la suite 
@@ -801,6 +875,14 @@ void ATyranCharacter::setTemporarilyStun(float second)
 int ATyranCharacter::getMagCurrent()
 {
 	return CurrentWeapon->getMagCurrent();
+}
+
+EWeaponType ATyranCharacter::GetCurrentWeaponType()
+{
+	if (CurrentWeapon)
+		return CurrentWeapon->GetWeaponType();
+
+	return EWeaponType::None;
 }
 
 void ATyranCharacter::setTemporarilyStunDelayedImplementation()

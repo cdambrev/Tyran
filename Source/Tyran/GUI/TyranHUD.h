@@ -26,13 +26,18 @@ private:
 	UUserWidget* patrolPointsMode;
 	TSubclassOf<UUserWidget> patrolPointsModeUIClass;
 
+	// widget pour le placement des gardes
+	UUserWidget* guardPointMode;
+	TSubclassOf<UUserWidget> guardPointModeUIClass;
+
 	// widget pour le timer
 	UUserWidget* timerUIWidget;
 	TSubclassOf<UUserWidget> timerUIClass;
 
 	// widget pour la fin du jeu
 	UUserWidget* endOfGameUIWidget;
-	TSubclassOf<UUserWidget> endOfGameUIClass;
+	TSubclassOf<UUserWidget> EndGameRevWinUIclass;
+	TSubclassOf<UUserWidget> EndGameTyranWinUIclass;
 
 	// pour les infos sur les gardes
 	TSubclassOf<UUserWidget> guardInfoUIClass;
@@ -58,6 +63,10 @@ public:
 
 	void removePatrolPointsMode();
 
+	void displayGuardPointMode();
+
+	void removeGuardPointMode();
+
 	void displayGuardInfo();
 
 	void removeGuardInfo();
@@ -70,6 +79,7 @@ public:
 	void modificationGuardInfoDefensif();
 	void modificationGuardInfoTenirPos();
 	void modificationGuardInfoFuite();
+	
 	
 	// Create Event
 	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
@@ -90,7 +100,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Events")
 		void OnModificationGuardInfoFuite();
 
-	void OnEndOfGame();
+
+	void EndGameTyranWin();
+	void EndGameRevWin();
 
 	void removeAllPermanently();
 };

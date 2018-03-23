@@ -22,6 +22,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Mesh") 
 	UStaticMeshComponent* MeshComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class ULootInteractionComponent* lootInteraction;
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -30,13 +33,6 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-
-	/* Le joueur regarde l'objet */ 
-	virtual void OnBeginFocus();
-	
-	/* Le joueur arrête de regarder l'objet */ 
-	virtual void OnEndFocus();
 
 	/* Appelé quand le joueur interagit avec l'objet */ 
 	virtual void OnUsed(APawn* InstigatorPawn){}

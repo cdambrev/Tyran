@@ -14,6 +14,9 @@ class TYRAN_API UShootBTTaskNodeUtility : public UBTTaskNodeUtility
 {
 	GENERATED_BODY()
 
+private:
+	bool checkVisibility(UBehaviorTreeComponent & OwnerComp);
+public:
 	/* Sera appelée au démarrage de la tâche et devra retourner Succeeded, Failed ou InProgress */
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 

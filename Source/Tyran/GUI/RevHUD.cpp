@@ -19,6 +19,13 @@ ARevHUD::ARevHUD() {
 		defaultCapture = captureMapClass.Class;
 	}
 	updateMapNextTick = true;
+
+
+	ConstructorHelpers::FClassFinder<UUserWidget> endOfGameUIHelper(TEXT("/Game/UI/EndGame/RevEndGameRevWin"));
+	EndGameRevWinUIclass = endOfGameUIHelper.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> endOfGameUIHelper2(TEXT("/Game/UI/EndGame/RevEndGameTyranWin"));
+	EndGameTyranWinUIclass = endOfGameUIHelper2.Class;
 }
 
 void ARevHUD::BeginPlay() {
@@ -78,4 +85,26 @@ void ARevHUD::displayDefaultUI() {
 
 void ARevHUD::removeDefaultUI() {
 	defaultUIWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void ARevHUD::EndGameTyranWin()
+{
+	removeAllPermanently();
+	endOfGameUIWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), EndGameTyranWinUIclass);
+	endOfGameUIWidget->AddToViewport(9998);
+}
+
+void ARevHUD::EndGameRevWin()
+{
+	removeAllPermanently();
+	endOfGameUIWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), EndGameRevWinUIclass);
+	endOfGameUIWidget->AddToViewport(9998);
+}
+
+void ARevHUD::removeAllPermanently() {
+	if (defaultUIWidget)
+	{
+		defaultUIWidget->RemoveFromParent();
+	}
+	
 }
