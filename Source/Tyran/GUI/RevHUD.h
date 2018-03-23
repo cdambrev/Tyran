@@ -21,6 +21,10 @@ private:
 	TSubclassOf<UUserWidget> defaultUIClass;
 	UUserWidget* defaultUIWidget;
 	bool updateMapNextTick = true;
+	
+	// widget pour l'inventaire plein
+	TSubclassOf<UUserWidget> inventoryFullUIClass;
+	UUserWidget* inventoryFullUIWidget;
 
 public:
 	UPROPERTY()
@@ -43,6 +47,8 @@ public:
 	void displayDefaultUI();
 
 	void removeDefaultUI();
+
+	void drawInventoryFull();
 
 	void Tick(float DeltaSeconds) override;
 	

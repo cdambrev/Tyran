@@ -19,8 +19,8 @@ public:
 	AUsableObjectLoot();
 	
 	/* Classe à ajouter à l'inventaire lorsque l'objet sera ramassé */ 
-	//UPROPERTY(EditDefaultsOnly)
-	//TSubclassOf<FUsableObject> ObjectClass;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUsableObject> objectClass;
 	
 	virtual void OnUsed(APawn* InstigatorPawn) override;
 };

@@ -8,7 +8,6 @@
 #include "Net/UnrealNetwork.h"
 #include "Basic/Enum/Alignement.h"
 #include "Enum/StateRev.h"
-#include "Gameplay/item/UsableObject.h"
 #include "TyranCharacter.generated.h"
 
 /*
@@ -152,7 +151,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* HitAnim;
 
-	TArray<FUsableObject*> objectInventory;
+	UPROPERTY(Transient, Replicated)
+	TArray<class UUsableObject*> objectInventory;
 
 protected:
 	/** Resets HMD orientation in VR. */
@@ -216,7 +216,10 @@ public:
 
 	void regenerate(float hp);
 
-	void addObjectInInventory(TSubclassOf<FUsableObject> objectClass);
+	bool addObjectInInventory(TSubclassOf<UUsableObject> objectClass);
+	int findSpotInInventory();
+	
+	//void msgInventoryFull();
 
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

@@ -15,6 +15,9 @@ ARevHUD::ARevHUD() {
 		defaultCapture = captureMapClass.Class;
 	}
 	updateMapNextTick = true;
+	
+	ConstructorHelpers::FClassFinder<UUserWidget> inventoryFullUIHelper(TEXT("/Game/UI/InventoryFull"));
+	inventoryFullUIClass = inventoryFullUIHelper.Class;
 }
 
 void ARevHUD::BeginPlay() {
@@ -28,8 +31,6 @@ void ARevHUD::BeginPlay() {
 	captureMap = GetWorld()->SpawnActor<ACaptureMiniMap>(defaultCapture);
 	if (captureMap)
 		captureMap->update();
-
-	
 }
 
 void ARevHUD::Tick(float DeltaSeconds) {
@@ -64,4 +65,8 @@ void ARevHUD::displayDefaultUI() {
 
 void ARevHUD::removeDefaultUI() {
 	defaultUIWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void ARevHUD::drawInventoryFull() {
+	CreateWidget<UUserWidget>(GetOwningPlayerController(), inventoryFullUIClass);
 }

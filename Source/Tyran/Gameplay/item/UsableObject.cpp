@@ -3,8 +3,15 @@
 #include "UsableObject.h"
 
 // Sets default values
-FUsableObject::FUsableObject()
+UUsableObject::UUsableObject()
 {
-	stackPossible = 1;
 	currentPossess = 1;
+}
+
+TSubclassOf<UUsableObject> UUsableObject::getObjectClass() {
+	return objectClass;
+}
+
+void UUsableObject::setOwner(ATyranCharacter* currCharacter) {
+	myPawn = currCharacter;
 }

@@ -9,18 +9,18 @@
 /**
  * 
  */
-USTRUCT(BlueprintType)
-struct TYRAN_API FFirstAidKit : public FUsableObject
+UCLASS(Blueprintable, BlueprintType)
+class TYRAN_API UFirstAidKit : public UUsableObject
 {
-	GENERATED_USTRUCT_BODY()
+	GENERATED_BODY()
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float regeneratedHealth = 20;
 
 public:
-	FFirstAidKit();
+	UFirstAidKit();
 	
 	virtual void onUse() override;
-	//virtual TSubclassOf<FUsableObject> getObjectClass() override;
+	virtual bool add() override;
 };

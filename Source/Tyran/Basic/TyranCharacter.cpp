@@ -20,6 +20,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Gameplay/Interaction/InteractionComponent.h"
+#include "Gameplay//item/UsableObject.h"
+#include "GUI/RevHUD.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -198,16 +200,42 @@ void ATyranCharacter::regenerate(float hp) {
 	}
 }
 
-void ATyranCharacter::addObjectInInventory(TSubclassOf<FUsableObject> objectClass) {
-	FUsableObject* object = *objectInventory.FindByPredicate([&objectClass](FUsableObject* object) {
-		return object->getObjectClass() == objectClass;
-	});
-	if (object) {
-		object->add();
+bool ATyranCharacter::addObjectInInventory(TSubclassOf<UUsableObject> objectClass) {
+	bool found = false;
+	int i = 0;
+	UUsableObject* object = nullptr;
+	while (i < 3 && !found) {
+		if (objectInventory[i] != nullptr) {
+			found = objectInventory[i]->getObjectClass() == objectClass;
+			object = objectInventory[i];
+		}
+		++i;
+	}
+	if (object) { // objet déjà dans l'inventaire
+		return object->add();
 	} else {
-		// la
+		int spot = findSpotInInventory();
+		if (spot != -1) {
+			objectInventory[spot] = NewObject<UUsableObject>(objectClass);
+			return true;
+		}
+		return false;
 	}
 }
+
+int ATyranCharacter::findSpotInInventory() {
+	for (int i = 0; i<3; ++i) {
+		if (objectInventory[i] == nullptr) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+//void ATyranCharacter::msgInventoryFull() {
+//	AController* controller = GetController();
+//	static_cast<ARevHUD*>(static_cast<APlayerController*>(controller)->GetHUD())->drawInventoryFull();
+//}
 
 UInteractionComponent * ATyranCharacter::GetInteractionInView()
 {

@@ -11,40 +11,31 @@
  */
 class ATyranCharacter;
 
-USTRUCT(BlueprintType)
-struct TYRAN_API FUsableObject //public UObject
+UCLASS(Blueprintable, BlueprintType)
+class TYRAN_API UUsableObject : public UObject
 {
-	GENERATED_USTRUCT_BODY()
+	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, NotReplicated)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int stackPossible;
 
 	int currentPossess;
 	
-	// marche pas avec struct
-	//UPROPERTY(NotReplicated)
-	//TSubclassOf<FUsableObject> objectClass;
+	TSubclassOf<UUsableObject> objectClass;
 
-	//UPROPERTY()
-	//ATyranCharacter* myPawn;
+	UPROPERTY()
+	ATyranCharacter* myPawn;
 
 public:
-	FUsableObject();
+	UUsableObject();
 
 	// ne pas oublier de retirer un objet
 	virtual void onUse() { check(0 && "You must override this"); };
-	//virtual TSubclassOf<FUsableObject> getObjectClass() { check(0 && "You must override this"); };
+	virtual bool add() { check(0 && "You must override this"); return false; };
 
-	void setOwner(ATyranCharacter* currCharacter) {
-		//myPawn = currCharacter;
-	}
+	TSubclassOf<UUsableObject> getObjectClass();
 
-	bool add() {
-		if (currentPossess < stackPossible) {
-			currentPossess++;
-			return true;
-		}
-		return false;
-	}
+	void setOwner(ATyranCharacter* currCharacter);
+
 };
