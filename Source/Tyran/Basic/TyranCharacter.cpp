@@ -22,6 +22,7 @@
 #include "Gameplay/Interaction/InteractionComponent.h"
 #include "Gameplay//item/UsableObject.h"
 #include "GUI/RevHUD.h"
+#include "Gameplay/item/FirstAidKit.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATyranCharacter
@@ -171,6 +172,11 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ATyranCharacter::OnResetVR);
+
+	// Objects utilisation
+	PlayerInputComponent->BindAction("UseObject1", IE_Pressed, this, &ATyranCharacter::OnUseObject1);
+	PlayerInputComponent->BindAction("UseObject2", IE_Pressed, this, &ATyranCharacter::OnUseObject2);
+	PlayerInputComponent->BindAction("UseObject3", IE_Pressed, this, &ATyranCharacter::OnUseObject3);
 }
 
 float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
@@ -194,9 +200,28 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 }
 
 void ATyranCharacter::regenerate(float hp) {
+	if (GEngine) {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT(" Ancienne health : ") + FString::FromInt(Health));
+	}
 	Health += hp;
 	if (Health > maxHealth) {
 		Health = maxHealth;
+	}
+	if (GEngine) {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT(" Nouvelle health : ") + FString::FromInt(Health));
+	}
+}
+
+bool ATyranCharacter::ServerAddObjectInInventory_Validate(TSubclassOf<UUsableObject> objectClass, int spot) {
+	return true;
+}
+void ATyranCharacter::ServerAddObjectInInventory_Implementation(TSubclassOf<UUsableObject> objectClass, int spot) {
+	if (objectInventory[spot] != nullptr) {
+		objectInventory[spot]->add();
+	}
+	else {
+		objectInventory[spot] = NewObject<UUsableObject>(this, *objectClass);
+		objectInventory[spot]->setOwner(this);
 	}
 }
 
@@ -208,15 +233,22 @@ bool ATyranCharacter::addObjectInInventory(TSubclassOf<UUsableObject> objectClas
 		if (objectInventory[i] != nullptr) {
 			found = objectInventory[i]->getObjectClass() == objectClass;
 			object = objectInventory[i];
+			found = true;
 		}
-		++i;
+		else {
+			++i;
+		}
 	}
 	if (object) { // objet déjà dans l'inventaire
-		return object->add();
+		if (!object->full()) {
+			ServerAddObjectInInventory(objectClass, i);
+			return true;
+		}
+		return false;
 	} else {
 		int spot = findSpotInInventory();
 		if (spot != -1) {
-			objectInventory[spot] = NewObject<UUsableObject>(objectClass);
+			ServerAddObjectInInventory(objectClass, spot);
 			return true;
 		}
 		return false;
@@ -230,6 +262,78 @@ int ATyranCharacter::findSpotInInventory() {
 		}
 	}
 	return -1;
+}
+
+bool ATyranCharacter::ServerUseObject1_Validate() {
+	return true;
+}
+void ATyranCharacter::ServerUseObject1_Implementation() {
+	OnUseObject1();
+}
+
+bool ATyranCharacter::ServerUseObject2_Validate() {
+	return true;
+}
+void ATyranCharacter::ServerUseObject2_Implementation() {
+	OnUseObject2();
+}
+
+bool ATyranCharacter::ServerUseObject3_Validate() {
+	return true;
+}
+void ATyranCharacter::ServerUseObject3_Implementation() {
+	OnUseObject3();
+}
+
+void ATyranCharacter::OnUseObject1() {
+	if (Role == ROLE_Authority)
+	{
+		if (objectInventory[0] != nullptr) {
+			objectInventory[0]->onUse();
+			if (objectInventory[0]->getCurrentPossess() == 0)
+			{
+				delete objectInventory[0];
+				objectInventory[0] = nullptr;
+			}
+		}
+	}
+	else {
+		ServerUseObject1();
+	}
+}
+
+void ATyranCharacter::OnUseObject2() {
+	if (Role == ROLE_Authority)
+	{
+		if (objectInventory[1] != nullptr) {
+			objectInventory[1]->onUse();
+			if (objectInventory[1]->getCurrentPossess() == 0)
+			{
+				delete objectInventory[1];
+				objectInventory[1] = nullptr;
+			}
+		}
+	}
+	else {
+		ServerUseObject2();
+	}
+}
+
+void ATyranCharacter::OnUseObject3() {
+	if (Role == ROLE_Authority)
+	{
+		if (objectInventory[2] != nullptr) {
+			objectInventory[2]->onUse();
+		}
+		if (objectInventory[2]->getCurrentPossess() == 0)
+		{
+			delete objectInventory[2];
+			objectInventory[2] = nullptr;
+		}
+	}
+	else {
+		ServerUseObject3();
+	}
 }
 
 //void ATyranCharacter::msgInventoryFull() {
@@ -795,6 +899,7 @@ void ATyranCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ATyranCharacter, currState);
 	DOREPLIFETIME(ATyranCharacter, isAiming);
 	DOREPLIFETIME_CONDITION(ATyranCharacter, CrouchButtonDown, COND_SkipOwner);
+	DOREPLIFETIME(ATyranCharacter, objectInventory);
 }
 
 void ATyranCharacter::setVisible(bool b) {

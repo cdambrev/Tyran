@@ -15,3 +15,11 @@ TSubclassOf<UUsableObject> UUsableObject::getObjectClass() {
 void UUsableObject::setOwner(ATyranCharacter* currCharacter) {
 	myPawn = currCharacter;
 }
+
+bool UUsableObject::full() {
+	return stackPossible == currentPossess;
+}
+
+int UUsableObject::getCurrentPossess() {
+	return currentPossess;
+}

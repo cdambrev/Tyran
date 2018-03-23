@@ -13,17 +13,7 @@ void AUsableObjectLoot::OnUsed(APawn * InstigatorPawn) {
 	
 	if (myPawn) {
 		if (myPawn->addObjectInInventory(objectClass)) {
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("SUCCESS"));
-			}
 			Destroy();
-		}
-		else {
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("FAIL"));
-			}
 		}
 	}
 }

@@ -216,7 +216,11 @@ public:
 
 	void regenerate(float hp);
 
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerAddObjectInInventory(TSubclassOf<UUsableObject> objectClass, int spot);
+	
 	bool addObjectInInventory(TSubclassOf<UUsableObject> objectClass);
+
 	int findSpotInInventory();
 	
 	//void msgInventoryFull();
@@ -340,6 +344,21 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	EWeaponType GetCurrentWeaponType();
+
+	UFUNCTION()
+	void OnUseObject1();
+	UFUNCTION()
+	void OnUseObject2();
+	UFUNCTION()
+	void OnUseObject3();
+	
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerUseObject1();
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerUseObject2();
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerUseObject3();
+
 protected:
 	void setTemporarilyVisibleDelayedImplementation();
 

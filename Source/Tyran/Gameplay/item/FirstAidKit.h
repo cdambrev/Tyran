@@ -22,5 +22,5 @@ public:
 	UFirstAidKit();
 	
 	virtual void onUse() override;
-	virtual bool add() override;
+	virtual void add() override;
 };

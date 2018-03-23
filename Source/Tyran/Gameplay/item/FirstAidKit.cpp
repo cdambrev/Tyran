@@ -9,17 +9,15 @@ UFirstAidKit::UFirstAidKit() {
 }
 
 void UFirstAidKit::onUse() {
+	if (GEngine) {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("ca regen :)"));
+	}
 	myPawn->regenerate(regeneratedHealth);
 	currentPossess--;
 }
 
-bool UFirstAidKit::add() {
-	if (GEngine) {
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Stack possible : ") + FString::FromInt(stackPossible) + TEXT("Current possess : ") + FString::FromInt(currentPossess));
-	}
+void UFirstAidKit::add() {
 	if (currentPossess < stackPossible) {
 		currentPossess++;
-		return true;
 	}
-	return false;
 }

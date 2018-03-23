@@ -32,10 +32,13 @@ public:
 
 	// ne pas oublier de retirer un objet
 	virtual void onUse() { check(0 && "You must override this"); };
-	virtual bool add() { check(0 && "You must override this"); return false; };
+	virtual void add() { check(0 && "You must override this"); };
+	
+	bool full();
 
 	TSubclassOf<UUsableObject> getObjectClass();
 
 	void setOwner(ATyranCharacter* currCharacter);
 
+	int getCurrentPossess();
 };
