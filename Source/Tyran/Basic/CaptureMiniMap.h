@@ -17,7 +17,6 @@ class TYRAN_API ACaptureMiniMap : public ASceneCapture2D
 	GENERATED_BODY()
 		UTextureRenderTarget2D * renderTarget;
 
-	
 
 public:
 	ACaptureMiniMap();

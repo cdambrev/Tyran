@@ -21,6 +21,7 @@ private:
 	TSubclassOf<UUserWidget> defaultUIClass;
 	UUserWidget* defaultUIWidget;
 	bool updateMapNextTick = true;
+	FVector lastPos;
 
 public:
 	UPROPERTY()

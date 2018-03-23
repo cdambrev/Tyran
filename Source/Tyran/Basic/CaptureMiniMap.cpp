@@ -39,6 +39,7 @@ void ACaptureMiniMap::update() {
 		MapTexData[i] = res;
 
 	}
+
 }
 
 UTexture2D * ACaptureMiniMap::GetTextureAtLocation(FVector location)
@@ -51,12 +52,17 @@ UTexture2D * ACaptureMiniMap::GetTextureAtLocation(FVector location)
 
 	TArray<FColor> MapTexDataResize;
 	for (int y = texY - tailleY / 2; y < texY - tailleY / 2 + tailleY; ++y) {
-// 		for (int x = texX - tailleX / 2; x < texX - tailleX / 2 + tailleX; ++x) {
-// 			MapTexDataResize.Add(MapTexData[x + y * 1024]);
-// 		}
 		int x = texX - tailleX / 2;
 		MapTexDataResize.Append(&MapTexData[x + y * 1024], tailleY);
 	}
+
+	for (int y = tailleY / 2 - 1; y <= tailleY / 2 + 1; ++y) {
+		for (int x = tailleX / 2 - 1; x <= tailleX / 2 + 1; ++x) {
+			MapTexDataResize[x + y * tailleY] = FColor(0, 255, 0);
+		}
+	}
+
+	
 	FTexture2DMipMap& Mip = tex->PlatformData->Mips[0];
 	void * Data = Mip.BulkData.Lock(LOCK_READ_WRITE);
 	FMemory::Memcpy(Data, MapTexDataResize.GetData(), tailleX*tailleY*4);
