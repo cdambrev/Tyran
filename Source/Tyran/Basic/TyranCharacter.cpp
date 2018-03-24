@@ -197,15 +197,9 @@ float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent
 }
 
 void ATyranCharacter::regenerate(float hp) {
-	if (GEngine) {
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT(" Ancienne health : ") + FString::FromInt(Health));
-	}
 	Health += hp;
 	if (Health > maxHealth) {
 		Health = maxHealth;
-	}
-	if (GEngine) {
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT(" Nouvelle health : ") + FString::FromInt(Health));
 	}
 }
 

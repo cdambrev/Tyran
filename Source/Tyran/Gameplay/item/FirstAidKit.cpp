@@ -9,9 +9,6 @@ UFirstAidKit::UFirstAidKit() {
 }
 
 void UFirstAidKit::onUse() {
-	if (GEngine) {
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("ca regen :)"));
-	}
 	myPawn->regenerate(regeneratedHealth);
 	currentPossess--;
 }
