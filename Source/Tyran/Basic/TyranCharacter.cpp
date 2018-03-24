@@ -178,6 +178,8 @@ void ATyranCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 
 float ATyranCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
 {
+
+	Damage *= (1.0f-armorReduction);
 	// Call the base class - this will tell us how much damage to apply  
 	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 	if (ActualDamage > 0.f && !isDead)
@@ -1029,6 +1031,30 @@ EWeaponType ATyranCharacter::GetCurrentWeaponType()
 		return CurrentWeapon->GetWeaponType();
 
 	return EWeaponType::None;
+}
+
+void ATyranCharacter::setArmorReduction(float armor)
+{
+	if (armor > 1)
+		armor = 1;
+	else if (armor < 0)
+		armor = 0;
+	armorReduction = armor;
+}
+
+float ATyranCharacter::getArmorReduction()
+{
+	return armorReduction;
+}
+
+void ATyranCharacter::addArmorReduction(float armor)
+{	
+	setArmorReduction(armorReduction + armor);
+}
+
+void ATyranCharacter::removeArmorReduction(float armor)
+{
+	setArmorReduction(armorReduction - armor);
 }
 
 void ATyranCharacter::setTemporarilyStunDelayedImplementation()

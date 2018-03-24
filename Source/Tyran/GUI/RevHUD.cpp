@@ -45,7 +45,7 @@ void ARevHUD::BeginPlay() {
 	}
 		
 
-	lastPos = GetOwningPawn()->GetActorLocation();
+	//lastPos = GetOwningPawn()->GetActorLocation();
 }
 
 void ARevHUD::Tick(float DeltaSeconds) {

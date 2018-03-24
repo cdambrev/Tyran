@@ -2,7 +2,7 @@
 
 #include "WeaponLoot.h"
 
-AWeaponLoot::AWeaponLoot() {
+AWeaponLoot::AWeaponLoot() : Super(){
 
 }
 

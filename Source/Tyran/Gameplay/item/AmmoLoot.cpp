@@ -4,7 +4,7 @@
 #include "Basic/TyranCharacter.h"
 
 
-AAmmoLoot::AAmmoLoot()
+AAmmoLoot::AAmmoLoot() : Super()
 {
 
 }

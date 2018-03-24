@@ -71,7 +71,9 @@ public:
 
 	
 	/*Trap status*/
+	UPROPERTY(Replicated)
 	bool isTraced;
+	UPROPERTY(Replicated)
 	bool isStun;
 
 
@@ -154,6 +156,11 @@ protected:
 
 	UPROPERTY(Transient, Replicated)
 	TArray<class UUsableObject*> objectInventory;
+
+	/*Pourcentage de reduction de degats entre 0 et 1*/
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Replicated, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
+	float armorReduction;
+
 
 protected:
 	/** Resets HMD orientation in VR. */
@@ -364,6 +371,12 @@ public:
 	void ServerUseObject2();
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerUseObject3();
+
+	void setArmorReduction(float armor);
+	float getArmorReduction();
+
+	void addArmorReduction(float armor);
+	void removeArmorReduction(float armor);
 
 protected:
 	void setTemporarilyVisibleDelayedImplementation();
