@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "TyranCharacter.h"
 #include <UnrealString.h>
+#include "Basic/Enum/TyranTypes.h"
 #include "GuardCharacter.generated.h"
 
 /**
@@ -26,11 +27,20 @@ public:
 
 	AGuardCharacter();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float cost;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int populationCost;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Utility")
 		int agression;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Utility")
-		bool flee;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
+		float porteeDeTir;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
+		float vitesseDeDeplacement;
 
 	UPROPERTY(Transient, Replicated, EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
 		ModeGuard modeGuard = ModeGuard::TENIRPOSITION;
@@ -38,8 +48,13 @@ public:
 	UPROPERTY(Transient, Replicated, EditAnywhere, BlueprintReadWrite, Category = "Caracteristics")
 		bool fuiteAutorise = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Caractéristics")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Caracteristics")
 		FString nom;
+
 	
+	virtual void BeginPlay() override;
+
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+
+
 };

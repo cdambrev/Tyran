@@ -26,6 +26,12 @@ private:
 	TSubclassOf<UUserWidget> inventoryFullUIClass;
 	UUserWidget* inventoryFullUIWidget;
 
+	FVector lastPos;
+
+	// widget pour la fin du jeu
+	UUserWidget* endOfGameUIWidget;
+	TSubclassOf<UUserWidget> EndGameRevWinUIclass; 
+	TSubclassOf<UUserWidget> EndGameTyranWinUIclass;
 public:
 	UPROPERTY()
 		TSubclassOf<ACaptureMiniMap> defaultCapture;
@@ -49,6 +55,11 @@ public:
 	void removeDefaultUI();
 
 	void drawInventoryFull();
+
+	void EndGameTyranWin();
+	void EndGameRevWin();
+
+	void removeAllPermanently();
 
 	void Tick(float DeltaSeconds) override;
 	

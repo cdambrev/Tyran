@@ -6,7 +6,7 @@
 #include "CustomMeshComponent.h"
 #include "GameFramework/Actor.h"
 #include "CityGenerator.h"
-#include "ProceduralRoadMeshComponent.h"
+#include "ProceduralMeshComponent.h"
 #include "proceduralRoad.generated.h"
 
 UCLASS()
@@ -27,11 +27,14 @@ public:
 	float sideHeightRoad;
 	float sideHeightPath;
 
+	UMaterialInterface * roadMat;
+	UMaterialInterface * sizeMat;
+
 	// Sets default values for this actor's properties
 	AproceduralRoad();
-	UProceduralRoadMeshComponent * roadMesh;
+	UProceduralMeshComponent * roadMesh;
 
-	void initValues(float hSB, float hSR, float hSP, float sSB, float sSR, float sSP, float sHB, float sHR, float sHP);
+	void initValues(float hSB, float hSR, float hSP, float sSB, float sSR, float sSP, float sHB, float sHR, float sHP, UMaterialInterface * rM, UMaterialInterface * sM);
 	void buildBigRoad(float startX, float startY, float endX, float endY, float radBegin, float radEnd);
 	void buildRoad(float startX, float startY, float endX, float endY, float radBegin, float radEnd);
 	void buildPath(float startX, float startY, float endX, float endY, float radBegin, float radEnd);
@@ -39,4 +42,12 @@ public:
 
 protected:
 	void buildParametrizedRoad(float startX, float startY, float endX, float endY, float halfSize, float sideWalkSize, float sizeWalkHeight, float radBegin, float radEnd);
+
+	struct roadData {
+		TArray<FVector> points;
+		float halfSize;
+		float sideSize;
+		FVector dir;
+		FVector right;
+	};
 };

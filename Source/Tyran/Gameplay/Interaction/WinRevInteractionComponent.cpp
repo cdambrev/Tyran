@@ -2,6 +2,7 @@
 
 #include "WinRevInteractionComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Basic/TyranGameState.h"
 
 void UWinRevInteractionComponent::BeginPlay()
 {
@@ -11,17 +12,20 @@ void UWinRevInteractionComponent::BeginPlay()
 
 void UWinRevInteractionComponent::OnBeginFocus()
 {
+	Super::OnBeginFocus();
 	// Utilisé par notre PostProcess pour le rendu d'un «surlignage» 
 	mesh->SetRenderCustomDepth(true);
 }
 
 void UWinRevInteractionComponent::OnEndFocus()
 {
+	Super::OnEndFocus();
 	// Utilisé par notre PostProcess pour le rendu d'un «surlignage» 
 	mesh->SetRenderCustomDepth(false);
 }
 
 void UWinRevInteractionComponent::OnUsed(ATyranCharacter* InstigatorPawn)
 {
-	InstigatorPawn->DropWeapon();
+	ATyranGameState* gamestate =GetWorld()->GetGameState<ATyranGameState>();
+	gamestate->RevWin();
 }

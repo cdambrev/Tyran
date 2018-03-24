@@ -13,7 +13,7 @@
 #include <map>
 
 
-//#define DEBUG_ON
+#define DEBUG_ON
 
 
 struct Debugger {

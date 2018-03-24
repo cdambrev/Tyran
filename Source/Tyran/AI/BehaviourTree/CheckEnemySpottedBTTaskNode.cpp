@@ -4,6 +4,7 @@
 #include "runtime/AIModule/Classes/BehaviorTree/BlackboardComponent.h" 
 #include "Runtime/AIModule/Classes/BrainComponent.h" 
 #include "AI/AIGuardController.h"
+#include "Basic/GuardCharacter.h"
 
 EBTNodeResult::Type UCheckEnemySpottedBTTaskNode::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
@@ -12,10 +13,17 @@ EBTNodeResult::Type UCheckEnemySpottedBTTaskNode::ExecuteTask(UBehaviorTreeCompo
 	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
 	AActor* HeroCharacterActor = Cast<AActor>(AIGuardController->GetBlackboardComponent()->GetValueAsObject("TargetActorToFollow"));
 
-	if (HeroCharacterActor)
+	if (HeroCharacterActor){
 		NodeResult = EBTNodeResult::Succeeded;
-	else
+ 		if(!AIGuardController->isFighting())
+ 			AIGuardController->enterFight();
+	}
+		
+	else {
 		NodeResult = EBTNodeResult::Failed;
+	}
+		
+
 
 	return NodeResult;
 }

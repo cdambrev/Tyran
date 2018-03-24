@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Gameplay/TyranOnly/Placeable_Object/BuildingSlot.h"
+#include "Runtime/Core/Public/Math/RandomStream.h"
 #include "CityGenerator.generated.h"
 
 UCLASS()
@@ -51,6 +52,7 @@ public:
 		FVector2D p2;
 		FVector2D p3;
 		FVector2D p4;
+		Rectangle() = default;
 		Rectangle(FVector _p1, FVector _p2, FVector _p3, FVector _p4) {
 			p1.X = _p1.X;
 			p1.Y = _p1.Y;
@@ -70,6 +72,18 @@ public:
 	TArray<Crossroad *> crossroads;
 	TArray<Road *> roads;
 	TArray<TTuple<ABuildingSlot *, Rectangle>> slots;
+	Rectangle bunkerRec;
+
+	UPROPERTY(EditAnywhere)
+	int seed;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface * roadMaterial;
+
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface * sideMaterial;
+
+	FRandomStream randStream;
 
 	UPROPERTY(EditAnywhere)
 	int nbIterationsBigRoadsGeneration;
@@ -144,6 +158,13 @@ public:
 	float sideHeightPath;
 
 	TSubclassOf<ABuildingSlot> buildSlot;
+	TSubclassOf<AActor> bunker;
+
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<ABuilding>> availableBuildings;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> spawnPoint;
 
 protected:
 	virtual void BeginPlay() override;
@@ -151,13 +172,16 @@ protected:
 	void buildRoads();
 	void buildCrossroads();
 	Crossroad * getOverlappingCrossRoad(float x, float y, float squaredDistance);
-	bool checkExistingRoads(Crossroad * c1, Crossroad * c2);
+	bool checkExistingRoads(Crossroad * c1, Crossroad * c2, int level);
 	void seedFromCrossRoad(Crossroad * c, float lengthMin, float lengthMax, int amountMin, int amountMax, int roadLevel, float squaredMergeDistance);
 	void splitRoads(int roadLevel, int crossroadLevel, float squaredMergeDistance);
-	bool pointIsLeftOf(FVector2D p1, FVector2D p2, FVector2D p);
-	bool pointIsInRectangle(FVector2D p, Rectangle rec);
-	bool rectanglesOverlap(Rectangle r1, Rectangle r2);
+	bool pointIsLeftOf(FVector2D& p1, FVector2D& p2, FVector2D& p);
+	bool pointIsRightOf(FVector2D& p1, FVector2D& p2, FVector2D& p);
+	bool checkSeparationLine(Rectangle& r1, Rectangle& R2, FVector2D& begin, FVector2D& end);
+	bool rectanglesOverlap(Rectangle& r1, Rectangle& r2);
 	void placeBuildingSlots();
+	void constructBuildings();
+	void placeSpawnPoints();
 
 public:	
 	virtual void Tick(float DeltaTime) override;

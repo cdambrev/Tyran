@@ -22,6 +22,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Mesh") 
 	UStaticMeshComponent* MeshComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class ULootInteractionComponent* lootInteraction;
+
 
 protected:
 	// Called when the game starts or when spawned

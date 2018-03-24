@@ -10,6 +10,8 @@ ABuilding::ABuilding()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	basePrice = 0.0f;
+	condition = 1.0f;
+	size = 1.0f;
 /*
 	bAlwaysRelevant = true;
 	bNetLoadOnClient = true;*/

@@ -18,6 +18,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float basePrice;
 
+	UPROPERTY(EditAnywhere)
+	float size;
+
+	UPROPERTY(EditAnywhere)
+	float condition;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

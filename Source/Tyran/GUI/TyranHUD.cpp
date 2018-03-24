@@ -10,6 +10,9 @@ ATyranHUD::ATyranHUD() {
 	
 	ConstructorHelpers::FClassFinder<UUserWidget> patrolPointsUIHelper(TEXT("/Game/UI/SetPatrouille"));
 	patrolPointsModeUIClass = patrolPointsUIHelper.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> guardPointUIHelper(TEXT("/Game/UI/SetGuardPoint"));
+	guardPointModeUIClass = guardPointUIHelper.Class;
 	
 	ConstructorHelpers::FClassFinder<UUserWidget> guardInfoUIHelper(TEXT("/Game/UI/GuardInfo"));
 	guardInfoUIClass = guardInfoUIHelper.Class;
@@ -17,8 +20,11 @@ ATyranHUD::ATyranHUD() {
 	ConstructorHelpers::FClassFinder<UUserWidget> defaultUIHelper(TEXT("/Game/UI/ManagerInterface"));
 	defaultUIClass = defaultUIHelper.Class;
 
-	ConstructorHelpers::FClassFinder<UUserWidget> endOfGameUIHelper(TEXT("/Game/UI/EndOfGame"));
-	endOfGameUIClass = endOfGameUIHelper.Class;
+	ConstructorHelpers::FClassFinder<UUserWidget> endOfGameUIHelper(TEXT("/Game/UI/EndGame/TyranEndGameRevWin"));
+	EndGameRevWinUIclass = endOfGameUIHelper.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> endOfGameUIHelper2(TEXT("/Game/UI/EndGame/TyranEndGameTyranWin"));
+	EndGameTyranWinUIclass = endOfGameUIHelper2.Class;
 
 	ConstructorHelpers::FClassFinder<UUserWidget> timerUIHelper(TEXT("/Game/UI/Timer"));
 	timerUIClass = timerUIHelper.Class;
@@ -37,6 +43,12 @@ void ATyranHUD::BeginPlay() {
 	patrolPointsMode->SetVisibility(ESlateVisibility::Hidden);
 	patrolPointsMode->AddToViewport(9999);
 	patrolPointsMode->bIsFocusable = true;
+
+	// mode placer des points de patrouille
+	guardPointMode = CreateWidget<UUserWidget>(static_cast<APlayerController*>(GetOwningPlayerController()), guardPointModeUIClass);
+	guardPointMode->SetVisibility(ESlateVisibility::Hidden);
+	guardPointMode->AddToViewport(9999);
+	guardPointMode->bIsFocusable = true;
 
 	// mode affichage des ordres possibles
 	guardOrderWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), guardUIClass);
@@ -72,6 +84,14 @@ void ATyranHUD::displayPatrolPointsMode() {
 
 void ATyranHUD::removePatrolPointsMode() {
 	patrolPointsMode->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void ATyranHUD::displayGuardPointMode() {
+	guardPointMode->SetVisibility(ESlateVisibility::Visible);
+}
+
+void ATyranHUD::removeGuardPointMode() {
+	guardPointMode->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void ATyranHUD::displayGuardInfo() {
@@ -110,9 +130,16 @@ void ATyranHUD::modificationGuardInfoFuite() {
 }
 
 
-void ATyranHUD::OnEndOfGame() {
+void ATyranHUD::EndGameTyranWin() {
 	removeAllPermanently();
-	endOfGameUIWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), endOfGameUIClass);
+	endOfGameUIWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), EndGameTyranWinUIclass);
+	endOfGameUIWidget->AddToViewport(9998);
+
+}
+
+void ATyranHUD::EndGameRevWin() {
+	removeAllPermanently();
+	endOfGameUIWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), EndGameRevWinUIclass);
 	endOfGameUIWidget->AddToViewport(9998);
 
 }
@@ -135,3 +162,5 @@ void ATyranHUD::removeAllPermanently() {
 		guardInfo->RemoveFromParent();
 	}
 }
+
+

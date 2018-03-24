@@ -15,11 +15,16 @@ public:
 	// Sets default values for this actor's properties
 	ABuildingHint();
 
-	UMaterialInterface * validMaterial;
-	UMaterialInterface * invalidMaterial;
+	UPROPERTY()
+	UMaterialInterface * hintMaterial;
+	UPROPERTY()
+	UMaterialInstanceDynamic * hintMaterialDyn;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool isColliding;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool isGreen;
 
 	UPROPERTY(EditAnywhere)
 	bool groundPlaceable;

@@ -5,6 +5,10 @@
 #include <Image.h>
 #include "Tools/Debug/DebugTools.h"
 #include "Basic/TyranCharacter.h"
+#include "Basic/TyranController.h"
+#include "Basic/TyranGameState.h"
+#include "GameFramework/PlayerState.h"
+#include "EngineUtils.h"
 
 ARevHUD::ARevHUD() {
 	ConstructorHelpers::FClassFinder<UUserWidget> defaultUIHelper(TEXT("/Game/UI/RevolutionnaireInterface"));
@@ -18,6 +22,13 @@ ARevHUD::ARevHUD() {
 	
 	ConstructorHelpers::FClassFinder<UUserWidget> inventoryFullUIHelper(TEXT("/Game/UI/InventoryFull"));
 	inventoryFullUIClass = inventoryFullUIHelper.Class;
+
+
+	ConstructorHelpers::FClassFinder<UUserWidget> endOfGameUIHelper(TEXT("/Game/UI/EndGame/RevEndGameRevWin"));
+	EndGameRevWinUIclass = endOfGameUIHelper.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> endOfGameUIHelper2(TEXT("/Game/UI/EndGame/RevEndGameTyranWin"));
+	EndGameTyranWinUIclass = endOfGameUIHelper2.Class;
 }
 
 void ARevHUD::BeginPlay() {
@@ -29,8 +40,12 @@ void ARevHUD::BeginPlay() {
 	defaultUIWidget->AddToViewport(9998);
 	
 	captureMap = GetWorld()->SpawnActor<ACaptureMiniMap>(defaultCapture);
-	if (captureMap)
-		captureMap->update();
+	if (captureMap) {
+		updateMap();
+	}
+		
+
+	lastPos = GetOwningPawn()->GetActorLocation();
 }
 
 void ARevHUD::Tick(float DeltaSeconds) {
@@ -38,19 +53,26 @@ void ARevHUD::Tick(float DeltaSeconds) {
 		updateMap();
 		setMapUpdateState(false);
 	}
+
+	if (GetOwningPawn()) {
+		
+		FVector currentPos = GetOwningPawn()->GetActorLocation();
+		if (currentPos != lastPos) {
+			moveMiniMap();
+			lastPos = currentPos;
+		}
+	}
 	
-	moveMiniMap();
+
 }
 
 void ARevHUD::updateMap() {
 	captureMap->update();
+	moveMiniMap();
 }
 
 void ARevHUD::moveMiniMap() {
 	UImage * img = Cast<UImage>(defaultUIWidget->GetWidgetFromName(TEXT("MiniMap")));
-#ifdef DEBUG_ON
-	Debugger::get().addTextLog("Move Mini Map of " + GetOwningPlayerController()->GetDebugName(GetOwningPawn()), "hud");
-#endif
 	if(GetOwningPawn())
 		img->SetBrushFromTexture(captureMap->GetTextureAtLocation(GetOwningPawn()->GetActorLocation()));
 }
@@ -69,4 +91,25 @@ void ARevHUD::removeDefaultUI() {
 
 void ARevHUD::drawInventoryFull() {
 	CreateWidget<UUserWidget>(GetOwningPlayerController(), inventoryFullUIClass);
+}
+
+void ARevHUD::EndGameTyranWin()
+{
+	removeAllPermanently();
+	endOfGameUIWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), EndGameTyranWinUIclass);
+	endOfGameUIWidget->AddToViewport(9998);
+}
+
+void ARevHUD::EndGameRevWin()
+{
+	removeAllPermanently();
+	endOfGameUIWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), EndGameRevWinUIclass);
+	endOfGameUIWidget->AddToViewport(9998);
+}
+
+void ARevHUD::removeAllPermanently() {
+	if (defaultUIWidget)
+	{
+		defaultUIWidget->RemoveFromParent();
+	}
 }

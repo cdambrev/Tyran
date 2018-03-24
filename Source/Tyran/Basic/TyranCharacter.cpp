@@ -111,10 +111,7 @@ ATyranCharacter::ATyranCharacter()
 	MaxUseDistance = 600;
 	DropItemDistance = 100;
 
-	Ammunition.Add(EAmmoType::AssaultRifle, 1200);
-	Ammunition.Add(EAmmoType::Pistol, 120);
-	Ammunition.Add(EAmmoType::Shotgun, 120);
-	Ammunition.Add(EAmmoType::SniperRifle, 120);
+	Ammunition = { 90, 36, 36, 0 }; //AssaultRifle, Shotgun, Pistol, SniperRifle
 
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -440,6 +437,28 @@ void ATyranCharacter::EquipWeapon(AWeapon * Weapon)
 	}
 }
 
+void ATyranCharacter::AddAmmo(EAmmoType AmmoType, int nbAmmo)
+{
+	if (Role == ROLE_Authority)
+	{
+		Ammunition[static_cast<int>(AmmoType)] += nbAmmo;
+	}
+	else
+	{
+		SeverAddAmmo(AmmoType, nbAmmo);
+	}
+}
+
+bool ATyranCharacter::SeverAddAmmo_Validate(EAmmoType AmmoType, int nbAmmo) {
+	return true;
+}
+
+
+void ATyranCharacter::SeverAddAmmo_Implementation(EAmmoType AmmoType, int nbAmmo)
+{
+	AddAmmo(AmmoType, nbAmmo);
+}
+
 void ATyranCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents(); 
@@ -760,7 +779,7 @@ void ATyranCharacter::Use()
 
 void ATyranCharacter::OnReload()
 {
-	if (Ammunition[CurrentWeapon->GetAmmoType()] > 0)
+	if (Ammunition[static_cast<int>(CurrentWeapon->GetAmmoType())] > 0)
 	{
 		if (Role == ROLE_Authority) {
 			CurrentWeapon->OnReload();
@@ -893,6 +912,7 @@ void ATyranCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ATyranCharacter, isVisible);
 	DOREPLIFETIME(ATyranCharacter, Inventory);
+	DOREPLIFETIME(ATyranCharacter, Ammunition);
 	DOREPLIFETIME(ATyranCharacter, CurrentWeapon);
 	DOREPLIFETIME(ATyranCharacter, Health);
 	DOREPLIFETIME(ATyranCharacter, isDead);

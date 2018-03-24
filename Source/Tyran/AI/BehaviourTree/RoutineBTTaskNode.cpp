@@ -5,35 +5,62 @@
 #include "Runtime/AIModule/Classes/BrainComponent.h" 
 #include "AI/AIGuardController.h"
 #include "Tools/Debug/DebugTools.h"
+#include "Basic/GuardCharacter.h"
+
+URoutineBTTaskNode::URoutineBTTaskNode() {
+	bNotifyTaskFinished = true;
+}
 
 EBTNodeResult::Type URoutineBTTaskNode::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Routine"));
-	
+#ifdef DEBUG_ON
+	Debugger::get().startNodeLog(OwnerComp);
+	Debugger::get().addTextLog("Routine ExecuteTask", "ia");
+		
+#endif
 	EBTNodeResult::Type NodeResult = EBTNodeResult::InProgress;
 
 	//Obtenir un pointeur sur AIGuardController
 	AAIGuardController *AIGuardController = Cast<AAIGuardController>(OwnerComp.GetOwner());
 
-
+	
 
 	//Appeler la fonction UpdateNextTargetPoint qui contient la logique pour selectionner
 	// le prochain TargePoint
-	if (FVector::Distance(AIGuardController->GetPawn()->GetActorLocation(), AIGuardController->GetBlackboardComponent()->GetValueAsVector("TargetPointPosition")) < 200.0 ) {
+	FVector targetPointPos = AIGuardController->GetBlackboardComponent()->GetValueAsVector("TargetPointPosition");
+	float dist = FVector::Distance(AIGuardController->GetPawn()->GetActorLocation(), targetPointPos);
+	if (dist < 200.0f ) {
 		AIGuardController->UpdateNextTargetPoint();
 	}
-	AIGuardController->MoveToLocation(AIGuardController->GetBlackboardComponent()->GetValueAsVector("TargetPointPosition"));
-	
-	NodeResult = EBTNodeResult::Succeeded;
+
+	EPathFollowingRequestResult::Type res = AIGuardController->MoveToLocation(targetPointPos);
+
+
 #ifdef DEBUG_ON
-	if (NodeResult != EBTNodeResult::Failed) {
-		Debugger::get().startNodeLog(OwnerComp);
-		Debugger::get().addArgToNodeLog(OwnerComp, "test", "test");
+	Debugger::get().addArgToNodeLog(OwnerComp, "target", targetPointPos.ToString());
+	Debugger::get().addArgToNodeLog(OwnerComp, "distance", FString::FromInt(dist));
+	switch (res) {
+	case EPathFollowingRequestResult::RequestSuccessful:
+		Debugger::get().addArgToNodeLog(OwnerComp, "requete_mouvement", "En mouvement");
+		Debugger::get().addTextLog("En mouvement", "routine");
+		break;
+	case EPathFollowingRequestResult::AlreadyAtGoal:
+		Debugger::get().addArgToNodeLog(OwnerComp, "requete_mouvement", "Cible atteinte");
+		Debugger::get().addTextLog("Cible atteinte", "routine");
+		break;
+	case EPathFollowingRequestResult::Failed:
+		Debugger::get().addArgToNodeLog(OwnerComp, "requete_mouvement", "La requete de mouvement a echoue");
+		Debugger::get().addTextLog("La requete de mouvement a echoue", "routine");
+		break;
 	}
-		
-	if(NodeResult == EBTNodeResult::Succeeded)
-		Debugger::get().endNodeLog(OwnerComp);
 #endif
+
+	if (res == EPathFollowingRequestResult::RequestSuccessful || res == EPathFollowingRequestResult::AlreadyAtGoal)
+		NodeResult = EBTNodeResult::Succeeded;
+	else
+		NodeResult = EBTNodeResult::Failed;
+
 	return NodeResult;
 }
 

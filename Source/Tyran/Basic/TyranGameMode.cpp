@@ -60,13 +60,14 @@ ATyranGameMode::ATyranGameMode()
 
 void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 {
-	Debugger::get().startTextLog();
-	Debugger::get().startAILog();
 
 	if (NewPlayer->IsLocalController()) {
 		//Action for server player (spectator ?)
-
-	}
+#ifdef DEBUG_ON
+		Debugger::get().startTextLog();
+		Debugger::get().startAILog();
+#endif
+}
 	else {
 		ATyranController * player = static_cast<ATyranController *>(NewPlayer);
 		TActorIterator<APlayerStart> spawnPoints(GetWorld());
@@ -82,8 +83,10 @@ void ATyranGameMode::PostLogin(APlayerController * NewPlayer)
 		else {
 			player->setTyran(false);
 			player->ClientSetHUD(RevHUD);
-			ATyranCharacter * revChar = GetWorld()->SpawnActor<ATyranCharacter>(defaultRebelPawn, FTransform((*spawnPoints)->GetActorLocation()));
-			player->Possess(revChar);
+			if (spawnPoints) {
+				ATyranCharacter * revChar = GetWorld()->SpawnActor<ATyranCharacter>(defaultRebelPawn, FTransform((*spawnPoints)->GetActorLocation()));
+				player->Possess(revChar);
+			}
 		}
 	}
 }

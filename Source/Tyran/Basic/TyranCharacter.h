@@ -66,7 +66,8 @@ public:
 	TArray<class AWeapon*> Inventory;
 
 	/* Munitions */
-	TMap<EAmmoType, int> Ammunition;
+	UPROPERTY(Replicated)
+	TArray<int> Ammunition;
 
 	
 	/*Trap status*/
@@ -236,6 +237,11 @@ public:
 	void AddWeapon(class AWeapon* Weapon);
 
 	void EquipWeapon(class AWeapon* Weapon);
+
+	void AddAmmo(EAmmoType AmmoType, int nbAmmo);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void SeverAddAmmo(EAmmoType AmmoType, int nbAmmo);
 
 	virtual void PostInitializeComponents() override;
 

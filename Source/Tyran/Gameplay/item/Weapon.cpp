@@ -433,7 +433,7 @@ int AWeapon::getMagCurrent()
 
 void AWeapon::OnReload()
 {
-	if (MyPawn->Ammunition[AmmoType] > 0 && MagazineCurrent < MagazineSize && !bPendingReload)
+	if (MyPawn->Ammunition[static_cast<int>(AmmoType)] > 0 && MagazineCurrent < MagazineSize && !bPendingReload)
 	{
 		bPendingReload = true;
 
@@ -462,15 +462,15 @@ void AWeapon::OnReloadFinished()
 	bPendingReload = false;
 
 	int NbAmmoToFill = MagazineSize - MagazineCurrent;
-	if (MyPawn->Ammunition[AmmoType] > NbAmmoToFill)
+	if (MyPawn->Ammunition[static_cast<int>(AmmoType)] > NbAmmoToFill)
 	{
 		MagazineCurrent = MagazineSize;
-		MyPawn->Ammunition[AmmoType] -= NbAmmoToFill;
+		MyPawn->Ammunition[static_cast<int>(AmmoType)] -= NbAmmoToFill;
 	} 
 	else
 	{
-		MagazineCurrent += MyPawn->Ammunition[AmmoType];
-		MyPawn->Ammunition[AmmoType] = 0;
+		MagazineCurrent += MyPawn->Ammunition[static_cast<int>(AmmoType)];
+		MyPawn->Ammunition[static_cast<int>(AmmoType)] = 0;
 	}
 
 	DetermineWeaponState();

@@ -4,7 +4,7 @@
 #include "Runtime/Engine/Classes/Components/StaticMeshComponent.h"
 #include <EngineUtils.h>
 #include <ConstructorHelpers.h>
-
+#include "Runtime/Engine/Classes/Materials/MaterialInstanceDynamic.h"
 
 // Sets default values
 ABuildingHint::ABuildingHint()
@@ -12,19 +12,31 @@ ABuildingHint::ABuildingHint()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> validMatFinder(TEXT("/Game/Objects/BuildingHints/ValidPositionMaterial"));
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> invalidMatFinder(TEXT("/Game/Objects/BuildingHints/InvalidPositionMaterial"));
-	validMaterial = validMatFinder.Object;
-	invalidMaterial = invalidMatFinder.Object;
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MatFinder(TEXT("/Game/Objects/BuildingHints/HintMaterial"));
+	hintMaterial = MatFinder.Object;
 
 	isColliding = false;
+	isGreen = true;
 }
 
 // Called when the game starts or when spawned
 void ABuildingHint::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	isGreen = true;
+	hintMaterialDyn = UMaterialInstanceDynamic::Create(hintMaterial, this);
+	auto comp = GetComponents();
+	for (auto c : comp)
+	{
+		UStaticMeshComponent * pMeshComponent = static_cast<UStaticMeshComponent *>(c);
+		if (pMeshComponent)
+		{
+			for (int i = 0; i < pMeshComponent->GetNumMaterials(); ++i)
+			{
+				pMeshComponent->SetMaterial(i, hintMaterialDyn);
+			}
+		}
+	}
 }
 
 // Called every frame
@@ -36,33 +48,13 @@ void ABuildingHint::Tick(float DeltaTime)
 
 void ABuildingHint::setValidPosition(bool b)
 {
-	if (b) {
-		for (auto it = GetComponents().CreateConstIterator(); it; ++it)
-		{
-			UStaticMeshComponent * pMeshComponent = static_cast<UStaticMeshComponent *>(*it);
-
-			if (pMeshComponent)
-			{
-				for (int i = 0; i < pMeshComponent->GetNumMaterials(); ++i)
-				{
-					pMeshComponent->SetMaterial(i, validMaterial);
-				}
-			}
-		}
+	if (b && !isGreen) {
+		hintMaterialDyn->SetVectorParameterValue(FName{ "Value" }, FLinearColor(0, 1, 0, 1));
+		isGreen = true;
 	}
-	else {
-		for (auto it = GetComponents().CreateConstIterator(); it; ++it)
-		{
-			UStaticMeshComponent * pMeshComponent = static_cast<UStaticMeshComponent *>(*it);
-
-			if (pMeshComponent)
-			{
-				for (int i = 0; i < pMeshComponent->GetNumMaterials(); ++i)
-				{
-					pMeshComponent->SetMaterial(i, invalidMaterial);
-				}
-			}
-		}
+	else if(!b && isGreen){
+		hintMaterialDyn->SetVectorParameterValue(FName{ "Value" }, FLinearColor(1, 0, 0, 1));
+		isGreen = false;
 	}
 }
 

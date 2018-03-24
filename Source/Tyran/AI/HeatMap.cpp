@@ -170,11 +170,11 @@ void UHeatMap::init(UWorld * world)
 	for (int x = 0; x < dimension; ++x) {
 		for (int y = 0; y < dimension; ++y) {
 			FVector pos((x + 0.5f)*pixelSize - dimension*pixelSize / 2, (y + 0.5f)*pixelSize - dimension*pixelSize / 2, -100.0f);
-			auto navPos = UNavigationSystem::ProjectPointToNavigation(world, pos);
-			if (navPos.Z == pos.Z) { // pas projetable sur le navmesh... ProjectionPointToNavigation renvoit la position de depart
+			FNavLocation result;
+			if(!world->GetNavigationSystem()->ProjectPointToNavigation(pos, result)) { // pas projetable sur le navmesh...
 				data[((y * dimension + x))] = -1.0f;
 			}
-			else { // projetable sur le navmesh, navpos est le projete
+			else { // projetable sur le navmesh, result est le projete
 				data[((y * dimension + x))] = 0.0f;
 			}
 		}
